@@ -1,0 +1,143 @@
+// Tokea data model — v0
+// Spec: organizer creates event → guest RSVPs via magic link → organizer tracks → QR check-in at door.
+
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model User {
+  id         String   @id @default(cuid())
+  email      String   @unique
+  name       String?
+  image      String?
+  created_at DateTime @default(now())
+
+  accounts Account[]
+  sessions Session[]
+  events   Event[]
+}
+
+model Account {
+  id                String  @id @default(cuid())
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String?
+  access_token      String?
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String?
+  session_state     String?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+  @@index([userId])
+}
+
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+}
+
+model VerificationToken {
+  identifier String
+  token      String
+  expires    DateTime
+
+  @@id([identifier, token])
+}
+
+model Event {
+  id                   String    @id @default(cuid())
+  owner_id             String
+  title                String
+  description          String?
+  slug                 String    @unique
+  starts_at            DateTime
+  timezone             String
+  venue_name           String?
+  venue_address        String?
+  cover_image_url      String?
+  custom_question      String?
+  template             String    @default("image-led")
+  reminder_days_before Int?
+  reminder_sent_at     DateTime?
+  status               String    @default("draft")
+  created_at           DateTime  @default(now())
+  updated_at           DateTime  @updatedAt
+
+  owner   User    @relation(fields: [owner_id], references: [id], onDelete: Cascade)
+  guests  Guest[]
+
+  @@index([owner_id])
+  @@index([status, starts_at])
+}
+
+model Guest {
+  id         String   @id @default(cuid())
+  event_id   String
+  name       String
+  email      String
+  phone      String?
+  created_at DateTime @default(now())
+
+  event   Event     @relation(fields: [event_id], references: [id], onDelete: Cascade)
+  invite  Invite?
+  rsvp    RSVP?
+  checkin CheckIn?
+
+  @@unique([event_id, email])
+  @@index([event_id])
+}
+
+model Invite {
+  id        String    @id @default(cuid())
+  guest_id  String    @unique
+  token     String    @unique
+  sent_at   DateTime?
+  opened_at DateTime?
+
+  guest Guest @relation(fields: [guest_id], references: [id], onDelete: Cascade)
+}
+
+model RSVP {
+  id            String   @id @default(cuid())
+  guest_id      String   @unique
+  status        String
+  custom_answer String?
+  message       String?
+  responded_at  DateTime @default(now())
+
+  guest Guest @relation(fields: [guest_id], references: [id], onDelete: Cascade)
+}
+
+model CheckIn {
+  id            String   @id @default(cuid())
+  guest_id      String   @unique
+  checked_in_at DateTime @default(now())
+
+  guest Guest @relation(fields: [guest_id], references: [id], onDelete: Cascade)
+}
+
+model CronedReminder {
+  id        String   @id @default(cuid())
+  event_id  String
+  guest_id  String
+  sent_at   DateTime @default(now())
+
+  @@unique([event_id, guest_id])
+}
