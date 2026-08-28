@@ -1,27 +1,41 @@
 import { headers } from "next/headers";
 
 /**
- * The public origin cards are served from. Vercel injects
- * VERCEL_PROJECT_PRODUCTION_URL for the stable production hostname; falling
- * back to the request host keeps preview deployments and localhost generating
- * QR codes that actually resolve.
+ * The public origin cards are served from — the origin every QR code encodes.
  *
- * Set NEXT_PUBLIC_CARDS_URL once a real domain exists. The short-link
- * indirection below survives a changed path, but nothing survives a changed
- * domain, so pin this before anything goes to print.
+ * Deliberately reads no NEXT_PUBLIC_ variable. Next inlines those into the
+ * bundle at build time, so a stale one cannot be corrected by editing the
+ * environment: it takes a rebuild, and until then every generated QR code
+ * carries the old value. A deployment shipped with NEXT_PUBLIC_APP_URL still
+ * set to http://localhost:3012, and every short link pointed at the
+ * developer's laptop. An origin is a runtime fact and is resolved as one here.
+ *
+ * Order, most specific first:
+ *   CARDS_URL                     an explicit custom domain, read at runtime
+ *   VERCEL_PROJECT_PRODUCTION_URL Vercel's stable production hostname
+ *   the request host              correct by construction, covers localhost
+ *
+ * The short-link indirection survives a changed path, but nothing survives a
+ * changed domain, so set CARDS_URL before anything goes to print.
  */
 export async function getCardsOrigin(): Promise<string> {
-  const configured =
-    process.env.NEXT_PUBLIC_CARDS_URL ?? process.env.NEXT_PUBLIC_APP_URL;
-  if (configured) return configured.replace(/\/$/, "");
+  const explicit = process.env.CARDS_URL;
+  if (explicit) return normalise(explicit);
 
   const production = process.env.VERCEL_PROJECT_PRODUCTION_URL;
-  if (production) return `https://${production}`;
+  if (production) return normalise(production);
 
   const headerList = await headers();
   const host = headerList.get("host") ?? "localhost:3012";
-  const protocol = host.startsWith("localhost") ? "http" : "https";
-  return `${protocol}://${host}`;
+  return normalise(host);
+}
+
+/** Accepts a bare hostname or a full URL, and returns an origin without a trailing slash. */
+function normalise(value: string): string {
+  const trimmed = value.trim().replace(/\/+$/, "");
+  if (/^https?:\/\//.test(trimmed)) return trimmed;
+  const local = trimmed.startsWith("localhost") || trimmed.startsWith("127.0.0.1");
+  return `${local ? "http" : "https"}://${trimmed}`;
 }
 
 export const CARDS_INDEX_PATH = "/c";
