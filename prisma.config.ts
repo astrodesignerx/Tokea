@@ -6,10 +6,12 @@ import { defineConfig } from "prisma/config";
 
 loadEnv({ path: ".env.local", override: true });
 
-function buildDirectUrl(): string {
-  const u = process.env["DIRECT_URL"] ?? process.env["DATABASE_URL"];
-  if (!u) throw new Error("DATABASE_URL is not set");
-  return u
+/**
+ * Strips the pooler-only query parameters. Migrations run over a direct
+ * connection, which rejects them.
+ */
+function directUrl(raw: string): string {
+  return raw
     .replace(/[?&](pgbouncer|statement_cache_size|connection_limit)=[^&]*/g, "")
     .replace(/[?&]pgbouncer=true/g, "")
     .replace(/[?&]statement_cache_size=0/g, "")
@@ -17,12 +19,20 @@ function buildDirectUrl(): string {
     .replace(/^([^\?]+)\?$/, "$1");
 }
 
+const raw = process.env["DIRECT_URL"] ?? process.env["DATABASE_URL"];
+
+/**
+ * The datasource is declared only when a URL is present.
+ *
+ * Throwing instead broke every build without one, including `prisma generate`,
+ * which reads the schema and never opens a connection — codegen has no
+ * business depending on a runtime secret. Commands that genuinely need the
+ * database still fail on their own terms when it is missing.
+ */
 export default defineConfig({
   schema: "prisma/schema.prisma",
   migrations: {
     path: "prisma/migrations",
   },
-  datasource: {
-    url: buildDirectUrl(),
-  },
+  ...(raw ? { datasource: { url: directUrl(raw) } } : {}),
 });
