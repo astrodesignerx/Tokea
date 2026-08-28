@@ -1,0 +1,81 @@
+/*
+ * Scoped styling for the public digital card pages.
+ *
+ * Deliberately not in globals.css: these pages are client-branded and always
+ * light, so they must not inherit Tokea's shadcn palette or its dark mode.
+ * Everything here is namespaced under .cards-surface or prefixed --card-* so it
+ * cannot leak into the event side of the app.
+ */
+
+.cards-surface {
+  color-scheme: light;
+
+  /* Energy 4 Impact brand, sampled from the printed card artwork. Moves onto
+     the Organisation record as inline custom properties in phase 2. */
+  --brand-teal: #1db8af;
+  --brand-teal-soft: #87cfc8;
+  --brand-coral: #f1666b;
+  --brand-ink: #464f58;
+  --brand-ink-soft: #6b7480;
+
+  --card-surface: #f4f6f7;
+  --card-paper: #ffffff;
+  --card-border: #e4e8ea;
+  --card-radius: 1.25rem;
+
+  /* Motion tokens, so every transition on these pages moves with one voice. */
+  --card-ease-out: cubic-bezier(0.22, 1, 0.36, 1);
+  --card-duration-fast: 140ms;
+  --card-duration-base: 200ms;
+  --card-duration-slow: 320ms;
+
+  min-height: 100dvh;
+  background-color: var(--card-surface);
+  color: var(--brand-ink);
+  -webkit-font-smoothing: antialiased;
+}
+
+.cards-surface :focus-visible {
+  outline: 2px solid var(--brand-teal);
+  outline-offset: 3px;
+  border-radius: 6px;
+}
+
+/* The dashed coral rule separating the name block from the contact details on
+   the printed card. */
+.cards-surface .rule-dotted {
+  height: 1px;
+  background-image: linear-gradient(
+    to right,
+    var(--brand-coral) 0 4px,
+    transparent 4px 9px
+  );
+  background-size: 9px 1px;
+  background-repeat: repeat-x;
+}
+
+/* Entry choreography: the container settles first, contents follow. */
+@keyframes cards-rise {
+  from {
+    opacity: 0;
+    transform: translate3d(0, 12px, 0);
+  }
+  to {
+    opacity: 1;
+    transform: translate3d(0, 0, 0);
+  }
+}
+
+.cards-surface .animate-rise {
+  animation: cards-rise var(--card-duration-slow) var(--card-ease-out) both;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .cards-surface *,
+  .cards-surface *::before,
+  .cards-surface *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
