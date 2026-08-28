@@ -149,8 +149,11 @@ export function CompanyForm({
         <p className="text-xs font-medium uppercase tracking-wider text-muted-foreground">
           Preview
         </p>
+        {/* The plate is always white, so text colours must be set explicitly:
+            inheriting the dashboard's foreground renders white on white in
+            dark mode. */}
         <div
-          className="mt-3 overflow-hidden rounded-2xl border bg-white"
+          className="mt-3 max-w-sm overflow-hidden rounded-2xl border bg-white"
           style={
             {
               "--brand-primary": values.brand_primary,
@@ -180,7 +183,10 @@ export function CompanyForm({
               )}
               <span
                 className="text-xl leading-tight"
-                style={{ fontFamily: "ui-serif, Georgia, serif" }}
+                style={{
+                  fontFamily: "ui-serif, Georgia, serif",
+                  color: "#000",
+                }}
               >
                 Ada Kimani
               </span>

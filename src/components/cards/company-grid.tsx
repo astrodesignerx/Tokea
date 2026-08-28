@@ -5,6 +5,7 @@ import Link from "next/link";
 import { Search } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
+import { LogoPlate } from "@/components/cards/logo-plate";
 
 export type CompanySummary = {
   slug: string;
@@ -72,19 +73,12 @@ export function CompanyGrid({ companies }: { companies: CompanySummary[] }) {
                   }}
                 />
                 <CardContent className="p-5">
-                  <div className="flex h-8 items-center">
-                    {company.logoUrl ? (
-                      // eslint-disable-next-line @next/next/no-img-element
-                      <img
-                        src={company.logoUrl}
-                        alt=""
-                        className="h-7 w-auto max-w-[70%] object-contain object-left"
-                      />
-                    ) : (
-                      <span className="text-base font-semibold tracking-tight">
-                        {company.name}
-                      </span>
-                    )}
+                  <div className="flex h-9 items-center">
+                    <LogoPlate
+                      src={company.logoUrl}
+                      name={company.name}
+                      className="h-9 max-w-[75%]"
+                    />
                   </div>
 
                   <h2 className="mt-4 truncate font-medium">{company.name}</h2>

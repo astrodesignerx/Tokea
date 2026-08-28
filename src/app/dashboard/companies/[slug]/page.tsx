@@ -9,6 +9,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { CopyButton } from "@/components/ui/copy-button";
 import { Card, CardContent } from "@/components/ui/card";
+import { LogoPlate } from "@/components/cards/logo-plate";
 
 type PageProps = { params: Promise<{ slug: string }> };
 
@@ -44,8 +45,7 @@ export default async function CompanyPage({ params }: PageProps) {
         <div className="min-w-0">
           <div className="flex items-center gap-3">
             {org.logo_url && (
-              // eslint-disable-next-line @next/next/no-img-element
-              <img src={org.logo_url} alt="" className="h-8 w-auto object-contain" />
+              <LogoPlate src={org.logo_url} name={org.name} className="h-9" />
             )}
             <h1 className="truncate text-3xl font-semibold tracking-tight">
               {org.name}

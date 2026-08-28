@@ -10,8 +10,13 @@
  *   pnpm seed:cards you@example.com
  */
 
+// Same env loading as the other scripts: .env first, .env.local overriding.
+import "dotenv/config";
+import { config as loadEnv } from "dotenv";
+loadEnv({ path: ".env.local", override: true });
+
 import { PrismaPg } from "@prisma/adapter-pg";
-import { PrismaClient } from "../src/generated/prisma/client";
+import { PrismaClient } from "../src/generated/prisma/client.js";
 
 const ORG = {
   slug: "energy-4-impact",
