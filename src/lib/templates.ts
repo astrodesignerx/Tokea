@@ -8,4 +8,16 @@ export const TEMPLATE_OPTIONS = [
 
 export type TemplateId = (typeof TEMPLATE_OPTIONS)[number]["value"];
 
-export const TEMPLATE_IDS = TEMPLATE_OPTIONS.map((t) => t.value);
+// Single source of truth for validation — keeps the zod enum in sync with the
+// options the event form renders.
+export const TEMPLATE_IDS = TEMPLATE_OPTIONS.map((t) => t.value) as [TemplateId, ...TemplateId[]];
+
+/** Templates that actually render a cover image. The others ignore it. */
+export const TEMPLATES_WITH_COVER: readonly TemplateId[] = ["image-led", "type-led"];
+
+export const COVER_MOTION_IDS = ["none", "drift"] as const;
+export type CoverMotion = (typeof COVER_MOTION_IDS)[number];
+
+export function hasCover(template: string): boolean {
+  return TEMPLATES_WITH_COVER.includes(template as TemplateId);
+}

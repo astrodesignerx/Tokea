@@ -9,9 +9,3 @@ export async function requireUser() {
   if (!user) redirect("/login");
   return user;
 }
-
-export async function getOptionalUser() {
-  const session = await auth();
-  if (!session?.user?.id) return null;
-  return prisma.user.findUnique({ where: { id: session.user.id } });
-}

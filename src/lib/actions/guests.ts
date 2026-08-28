@@ -4,7 +4,8 @@ import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import { prisma } from "@/lib/db";
 import { requireUser } from "@/lib/require-user";
-import { ForbiddenError, NotFoundError } from "@/lib/errors";
+import { getOwnedEvent } from "@/lib/queries/events";
+import { isUniqueViolation } from "@/lib/errors";
 import { isValidEmail, importGuests, sendPendingInvites } from "@/lib/guests";
 
 const addSchema = z.object({
@@ -13,11 +14,18 @@ const addSchema = z.object({
   phone: z.string().max(50).optional().or(z.literal("")),
 });
 
+/**
+ * Any change to the guest list moves the counts on the event overview as well
+ * as the table itself, so both pages have to be refreshed.
+ */
+function revalidateGuestViews(eventId: string) {
+  revalidatePath(`/dashboard/events/${eventId}`);
+  revalidatePath(`/dashboard/events/${eventId}/guests`);
+}
+
 export async function addGuest(eventId: string, input: { name: string; email: string; phone?: string }) {
   const user = await requireUser();
-  const event = await prisma.event.findUnique({ where: { id: eventId } });
-  if (!event) throw NotFoundError("Event not found");
-  if (event.owner_id !== user.id) throw ForbiddenError("Not your event");
+  await getOwnedEvent(eventId, user.id);
 
   const parsed = addSchema.parse(input);
   const email = parsed.email.trim().toLowerCase();
@@ -33,34 +41,34 @@ export async function addGuest(eventId: string, input: { name: string; email: st
       },
     });
   } catch (err) {
-    const msg = err instanceof Error ? err.message : "Failed";
-    if (msg.includes("Unique constraint")) throw new Error("This email is already on the guest list");
+    if (isUniqueViolation(err, "email")) {
+      throw new Error("This email is already on the guest list");
+    }
     throw err;
   }
-  revalidatePath(`/dashboard/events/${eventId}/guests`);
+  revalidateGuestViews(eventId);
 }
 
 export async function deleteGuest(eventId: string, guestId: string) {
   const user = await requireUser();
-  const event = await prisma.event.findUnique({ where: { id: eventId } });
-  if (!event) throw NotFoundError("Event not found");
-  if (event.owner_id !== user.id) throw ForbiddenError("Not your event");
-  await prisma.guest.delete({ where: { id: guestId } });
-  revalidatePath(`/dashboard/events/${eventId}/guests`);
+  await getOwnedEvent(eventId, user.id);
+  // Scope by event_id so a guest id from another event can't be deleted.
+  await prisma.guest.deleteMany({ where: { id: guestId, event_id: eventId } });
+  revalidateGuestViews(eventId);
 }
 
 export async function importGuestsAction(eventId: string, rows: { name: string; email: string; phone?: string }[]) {
   const user = await requireUser();
-  const event = await prisma.event.findUnique({ where: { id: eventId } });
-  if (!event) throw NotFoundError("Event not found");
-  if (event.owner_id !== user.id) throw ForbiddenError("Not your event");
-  return importGuests(eventId, rows);
+  await getOwnedEvent(eventId, user.id);
+  const result = await importGuests(eventId, rows);
+  revalidateGuestViews(eventId);
+  return result;
 }
 
 export async function sendAllInvitesAction(eventId: string) {
   const user = await requireUser();
-  const event = await prisma.event.findUnique({ where: { id: eventId } });
-  if (!event) throw NotFoundError("Event not found");
-  if (event.owner_id !== user.id) throw ForbiddenError("Not your event");
-  return sendPendingInvites(eventId);
+  await getOwnedEvent(eventId, user.id);
+  const result = await sendPendingInvites(eventId);
+  revalidateGuestViews(eventId);
+  return result;
 }

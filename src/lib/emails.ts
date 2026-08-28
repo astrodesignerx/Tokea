@@ -58,7 +58,8 @@ export function inviteEmail(input: {
     <div style="margin:24px 0">${button(input.rsvpUrl, "RSVP now")}</div>
     <p style="color:#666;font-size:13px;margin:0">This link is unique to you. Please don't share it.</p>
   `;
-  return { subject: `You're invited to ${input.eventTitle}`, html: layout({ heading: input.eventTitle, body }).html, text: layout({ heading: input.eventTitle, body }).text };
+  const { html, text } = layout({ heading: input.eventTitle, body });
+  return { subject: `You're invited to ${input.eventTitle}`, html, text };
 }
 
 export function rsvpConfirmationEmail(input: {
@@ -83,7 +84,18 @@ export function rsvpConfirmationEmail(input: {
     </div>
     <p style="color:#666;font-size:13px;margin:0">Need to change your RSVP? <a href="${esc(input.confirmationUrl)}" style="color:#111">View your confirmation</a>.</p>
   `;
-  return { subject: `Confirmed: ${input.eventTitle}`, html: layout({ heading: `You're confirmed`, body }).html, text: layout({ heading: `You're confirmed`, body }).text };
+  const { html, text } = layout({ heading: "You're confirmed", body });
+  return { subject: `Confirmed: ${input.eventTitle}`, html, text };
+}
+
+export function magicLinkEmail(input: { url: string }): EmailTemplate {
+  const body = `
+    <p style="margin:0 0 16px">Click the button below to sign in to Tokea. No password needed.</p>
+    <div style="margin:24px 0">${button(input.url, "Sign in to Tokea")}</div>
+    <p style="color:#666;font-size:13px;margin:0">This link expires shortly and can only be used once. If you didn't request it, you can ignore this email.</p>
+  `;
+  const { html, text } = layout({ heading: "Sign in to Tokea", body });
+  return { subject: "Your Tokea sign-in link", html, text };
 }
 
 export function reminderEmail(input: {
@@ -100,5 +112,6 @@ export function reminderEmail(input: {
     ${row("Where", input.venue || null)}
     <div style="margin:24px 0">${button(input.rsvpUrl, "View invitation")}</div>
   `;
-  return { subject: `Reminder: ${input.eventTitle}`, html: layout({ heading: `Coming up: ${input.eventTitle}`, body }).html, text: layout({ heading: `Coming up: ${input.eventTitle}`, body }).text };
+  const { html, text } = layout({ heading: `Coming up: ${input.eventTitle}`, body });
+  return { subject: `Reminder: ${input.eventTitle}`, html, text };
 }

@@ -9,8 +9,10 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { formatEventDateTime } from "@/lib/format";
+import { eventPricing, formatMoney } from "@/lib/money";
 import { Users, ScanLine, ExternalLink, Trash2 } from "lucide-react";
 import { CopyButton } from "@/components/ui/copy-button";
+import { HoldToConfirm } from "@/components/ui/hold-to-confirm";
 
 type Params = { eventId: string };
 
@@ -22,6 +24,7 @@ export default async function EventDetailPage({ params }: { params: Promise<Para
   if (event.owner_id !== user.id) redirect("/dashboard");
 
   const counts = await getEventCounts(eventId);
+  const pricing = eventPricing(event);
   const publicUrl = `${process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3012"}/e/${event.slug}`;
 
   return (
@@ -33,6 +36,20 @@ export default async function EventDetailPage({ params }: { params: Promise<Para
             <Badge variant={event.status === "published" ? "success" : "muted"}>{event.status}</Badge>
           </div>
           <p className="text-sm text-muted-foreground">{formatEventDateTime(event.starts_at, event.timezone)}</p>
+          {pricing && (
+            <p className="text-sm text-muted-foreground mt-1">
+              <span className="text-foreground font-medium">
+                {formatMoney(pricing.price, pricing.currency)}
+              </span>
+              {pricing.deposit != null && (
+                <>
+                  {" · "}
+                  {formatMoney(pricing.deposit, pricing.currency)} deposit,{" "}
+                  {formatMoney(pricing.balanceAfterDeposit ?? 0, pricing.currency)} at the door
+                </>
+              )}
+            </p>
+          )}
         </div>
         <div className="flex items-center gap-2">
           <Button asChild variant="outline" size="sm">
@@ -109,21 +126,33 @@ export default async function EventDetailPage({ params }: { params: Promise<Para
               </Link>
             </Button>
             <Separator />
-            <form
-              action={async () => {
-                "use server";
-                await deleteEvent(event.id);
-              }}
-            >
-              <Button type="submit" variant="ghost" size="sm" className="w-full justify-start text-destructive hover:text-destructive">
-                <Trash2 className="size-4" /> Delete event
-              </Button>
-            </form>
+            <div className="space-y-1.5">
+              <HoldToConfirm
+                label="Hold to delete event"
+                icon={<Trash2 className="size-4" />}
+                onConfirm={async () => {
+                  "use server";
+                  await deleteEvent(event.id);
+                }}
+              />
+              <p className="px-3 text-xs text-muted-foreground">{deleteWarning(counts.total)}</p>
+            </div>
           </CardContent>
         </Card>
       </div>
     </div>
   );
+}
+
+/**
+ * Deleting an event cascades to its guests, invites, RSVPs and check-ins. The
+ * button names the event so it can't be misread as deleting the guest list;
+ * this line spells out what goes with it.
+ */
+function deleteWarning(guestCount: number): string {
+  if (guestCount === 0) return "This can't be undone.";
+  const guests = guestCount === 1 ? "1 guest" : `${guestCount} guests`;
+  return `Also removes ${guests} and their RSVPs. This can't be undone.`;
 }
 
 function Stat({ label, value }: { label: string; value: number }) {

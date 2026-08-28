@@ -2,17 +2,7 @@ import { prisma } from "@/lib/db";
 import { mintToken } from "@/lib/tokens";
 import { sendEmail } from "@/lib/email";
 import { inviteEmail } from "@/lib/emails";
-
-export async function ensureInviteForGuest(guestId: string) {
-  const existing = await prisma.invite.findUnique({ where: { guest_id: guestId } });
-  if (existing) return existing;
-  return prisma.invite.create({
-    data: {
-      guest_id: guestId,
-      token: mintToken({ kind: "invite", guestId, eventId: "" }),
-    },
-  });
-}
+import { isUniqueViolation } from "@/lib/errors";
 
 function normalizeEmail(email: string): string {
   return email.trim().toLowerCase();
@@ -63,13 +53,15 @@ export async function importGuests(eventId: string, rows: { name: string; email:
       });
       result.added++;
     } catch (err) {
-      const msg = err instanceof Error ? err.message : "Database error";
-      if (msg.includes("Unique constraint")) {
+      if (isUniqueViolation(err, "email")) {
         result.duplicates++;
         result.errors.push({ row: i + 1, reason: `Already on guest list: ${email}` });
       } else {
         result.invalid++;
-        result.errors.push({ row: i + 1, reason: msg });
+        result.errors.push({
+          row: i + 1,
+          reason: err instanceof Error ? err.message : "Database error",
+        });
       }
     }
   }

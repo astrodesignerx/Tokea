@@ -1,7 +1,16 @@
 @import "tailwindcss";
 
+/*
+  Tailwind v4's `dark:` variant follows prefers-color-scheme by default. The
+  theme here is an explicit user choice held on <html class="dark">, so point
+  the variant at that class instead — otherwise a dark: utility would ignore
+  the toggle and follow the OS.
+*/
+@custom-variant dark (&:where(.dark, .dark *));
+
 @layer base {
   :root {
+    color-scheme: light;
     --background: 0 0% 100%;
     --foreground: 240 10% 3.9%;
     --card: 0 0% 100%;
@@ -25,6 +34,7 @@
   }
 
   .dark {
+    color-scheme: dark;
     --background: 240 10% 3.9%;
     --foreground: 0 0% 98%;
     --card: 240 10% 3.9%;
@@ -82,5 +92,134 @@
     background-color: hsl(var(--background));
     color: hsl(var(--foreground));
     font-feature-settings: "rlig" 1, "calt" 1;
+  }
+}
+
+/* ---------------------------------------------------------------------------
+   Cover image motion (image-led and type-led templates)
+
+   `cover-plate` is the always-on entrance: the cover eases down from slightly
+   oversized so the page assembles rather than appears. `cover-drift` is the
+   opt-in ambient loop, stored per event as cover_motion = "drift".
+
+   Both animate transform/opacity only, so they composite on the GPU. Drift is
+   delayed until the entrance finishes and starts at scale(1) — exactly where
+   settle lands — so the handover between the two is invisible.
+--------------------------------------------------------------------------- */
+
+@keyframes cover-settle {
+  from { transform: scale(1.055); opacity: 0; }
+  to   { transform: scale(1);     opacity: 1; }
+}
+
+@keyframes cover-drift {
+  from { transform: scale(1)    translate3d(0, 0, 0); }
+  to   { transform: scale(1.08) translate3d(-1.5%, -1.2%, 0); }
+}
+
+@keyframes cover-rise {
+  from { transform: translate3d(0, 14px, 0); opacity: 0; }
+  to   { transform: translate3d(0, 0, 0);    opacity: 1; }
+}
+
+.cover-plate {
+  transform-origin: center;
+  will-change: transform, opacity;
+  animation: cover-settle 1000ms cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+.cover-plate.cover-drift {
+  animation:
+    cover-settle 1000ms cubic-bezier(0.16, 1, 0.3, 1) both,
+    cover-drift 30s cubic-bezier(0.37, 0, 0.63, 1) 1000ms infinite alternate;
+}
+
+/* Choreography: the cover lands first, then the text rises in behind it. */
+.cover-caption > * {
+  animation: cover-rise 620ms cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+.cover-caption > *:nth-child(1) { animation-delay: 300ms; }
+.cover-caption > *:nth-child(2) { animation-delay: 390ms; }
+.cover-caption > *:nth-child(3) { animation-delay: 480ms; }
+.cover-caption > *:nth-child(4) { animation-delay: 570ms; }
+.cover-caption > *:nth-child(n + 5) { animation-delay: 660ms; }
+
+@media (prefers-reduced-motion: reduce) {
+  .cover-plate,
+  .cover-plate.cover-drift,
+  .cover-caption > * {
+    animation: none;
+  }
+}
+
+/* ---------------------------------------------------------------------------
+   Hold-to-confirm (components/ui/hold-to-confirm.tsx)
+
+   A black mass slides in from the left with a bulging leading edge, the way a
+   liquid front is held by surface tension. The ellipse is a pseudo-element
+   riding the front, so the whole effect is one composited transform.
+
+   The fill tracks the theme rather than being literally black: on a dark
+   surface a black fill would be invisible.
+--------------------------------------------------------------------------- */
+
+.htc-fill {
+  position: absolute;
+  inset: 0;
+  background: hsl(var(--foreground));
+  transform: translateX(-104%);
+  will-change: transform;
+}
+
+/* the meniscus */
+.htc-fill::after {
+  content: "";
+  position: absolute;
+  right: -13px;
+  top: -14%;
+  width: 26px;
+  height: 128%;
+  border-radius: 50%;
+  background: inherit;
+}
+
+/* the copy of the label that reads against the liquid */
+.htc-reveal {
+  color: hsl(var(--background));
+  clip-path: inset(0 100% 0 0);
+  will-change: clip-path;
+}
+
+/*
+  The fill itself stays: it is the only feedback that a timed hold is
+  progressing, so removing it would break the control rather than calm it.
+  The decorative meniscus goes.
+*/
+@media (prefers-reduced-motion: reduce) {
+  .htc-fill::after {
+    display: none;
+  }
+}
+
+/* ---------------------------------------------------------------------------
+   Check-in scan result
+
+   Each scan replaces the panel above the counters. A short rise marks that a
+   new result has arrived, so a second scan of the same guest still reads as a
+   fresh event rather than an unchanged screen.
+--------------------------------------------------------------------------- */
+
+@keyframes scan-result-in {
+  from { transform: translate3d(0, -6px, 0); opacity: 0; }
+  to   { transform: translate3d(0, 0, 0);    opacity: 1; }
+}
+
+.scan-result {
+  animation: scan-result-in 220ms cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .scan-result {
+    animation: none;
   }
 }

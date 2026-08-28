@@ -8,15 +8,6 @@ export async function getOwnedEvent(eventId: string, userId: string) {
   return event;
 }
 
-export async function getEventBySlug(slug: string) {
-  const event = await prisma.event.findUnique({
-    where: { slug },
-    include: { owner: { select: { name: true, email: true } } },
-  });
-  if (!event || event.status !== "published") return null;
-  return event;
-}
-
 export type EventCounts = {
   total: number;
   yes: number;

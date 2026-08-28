@@ -31,7 +31,12 @@ export default async function EditEventPage({ params }: { params: Promise<Params
             cover_image_url: event.cover_image_url,
             custom_question: event.custom_question,
             template: event.template,
+            cover_motion: event.cover_motion,
             reminder_days_before: event.reminder_days_before,
+            payment_mode: event.payment_mode,
+            currency: event.currency,
+            price_amount: event.price_amount,
+            deposit_amount: event.deposit_amount,
           }}
         />
       </div>

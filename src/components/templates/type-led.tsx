@@ -1,6 +1,5 @@
-import Image from "next/image";
 import type { EventTemplateProps } from "./shared";
-import { formatDateLine, RsvpButton } from "./shared";
+import { CoverImage, formatDateLine, RsvpButton } from "./shared";
 
 export function TypeLed(props: EventTemplateProps) {
   const { primary, secondary } = formatDateLine(props);
@@ -28,16 +27,9 @@ export function TypeLed(props: EventTemplateProps) {
           </div>
         </div>
       </div>
-      <div className="relative min-h-[300px] md:min-h-screen order-1 md:order-2 bg-muted">
+      <div className="relative min-h-[300px] md:min-h-screen order-1 md:order-2 bg-muted overflow-hidden">
         {props.coverImageUrl ? (
-          <Image
-            src={props.coverImageUrl}
-            alt=""
-            fill
-            priority
-            className="object-cover"
-            unoptimized
-          />
+          <CoverImage url={props.coverImageUrl} motion={props.coverMotion} />
         ) : (
           <div className="absolute inset-0 bg-gradient-to-br from-zinc-200 to-zinc-400" />
         )}

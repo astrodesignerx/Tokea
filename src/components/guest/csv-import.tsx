@@ -76,7 +76,15 @@ export function CsvImport({ eventId }: Props) {
       <div className="space-y-2">
         <Label htmlFor="csv">CSV file</Label>
         <p className="text-xs text-muted-foreground">
-          Header row required: <code>name,email,phone</code>. Phone is optional.
+          Header row required: <code>name,email,phone</code>. Phone is optional.{" "}
+          <a
+            href="/guest-list-template.csv"
+            download
+            className="underline underline-offset-2 hover:text-foreground"
+          >
+            Download a template
+          </a>
+          .
         </p>
       </div>
       <input

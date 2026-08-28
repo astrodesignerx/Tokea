@@ -13,7 +13,8 @@ import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent } from "@/components/ui/card";
 import { CoverUpload } from "@/components/event/cover-upload";
 import { createEvent, updateEvent } from "@/lib/actions/events";
-import { TEMPLATE_OPTIONS } from "@/lib/templates";
+import { TEMPLATE_OPTIONS, hasCover } from "@/lib/templates";
+import { DEFAULT_CURRENCY, formatMoney, toMajorUnitsInput, toMinorUnits } from "@/lib/money";
 
 const schema = z.object({
   title: z.string().min(1, "Title is required").max(200),
@@ -25,10 +26,20 @@ const schema = z.object({
   cover_image_url: z.string().optional().or(z.literal("")),
   custom_question: z.string().max(500).optional().or(z.literal("")),
   template: z.enum(["image-led", "type-led", "minimal", "birthday", "conference"]),
+  animate_cover: z.boolean().optional(),
   reminder_days_before: z.string().optional(),
+  // Money is typed in shillings and converted once on submit.
+  payment_mode: z.enum(["free", "paid"]),
+  price_input: z.string().optional(),
+  deposit_input: z.string().optional(),
 });
 
 export type EventFormValues = z.infer<typeof schema>;
+
+const PAYMENT_CHOICES = [
+  { value: "free" as const, label: "Free event", hint: "Guests RSVP without paying anything." },
+  { value: "paid" as const, label: "Paid event", hint: "Guests pay to secure their spot." },
+];
 
 type EventFormProps = {
   initial?: {
@@ -42,7 +53,12 @@ type EventFormProps = {
     cover_image_url: string | null;
     custom_question: string | null;
     template: string;
+    cover_motion: string;
     reminder_days_before: number | null;
+    payment_mode: string;
+    currency: string;
+    price_amount: number | null;
+    deposit_amount: number | null;
   };
 };
 
@@ -90,20 +106,69 @@ export function EventForm({ initial }: EventFormProps) {
       cover_image_url: initial?.cover_image_url ?? "",
       custom_question: initial?.custom_question ?? "",
       template: (initial?.template as EventFormValues["template"]) ?? "image-led",
+      animate_cover: initial?.cover_motion === "drift",
       reminder_days_before:
         initial?.reminder_days_before != null ? String(initial.reminder_days_before) : "",
+      payment_mode: initial?.payment_mode === "paid" ? "paid" : "free",
+      price_input: initial?.price_amount != null ? toMajorUnitsInput(initial.price_amount) : "",
+      deposit_input:
+        initial?.deposit_amount != null ? toMajorUnitsInput(initial.deposit_amount) : "",
     },
   });
 
   // eslint-disable-next-line react-hooks/incompatible-library
   const selectedTemplate = watch("template");
   const coverValue = watch("cover_image_url");
+  const paymentMode = watch("payment_mode");
+  const priceInput = watch("price_input");
+  const depositInput = watch("deposit_input");
+  const currency = initial?.currency ?? DEFAULT_CURRENCY;
+
+  // Spells out the consequence of a deposit while the organiser is typing it,
+  // so the number they owe at the door is never a surprise.
+  const balanceHint = (() => {
+    if (paymentMode !== "paid") return null;
+    const price = toMinorUnits(priceInput ?? "");
+    const deposit = toMinorUnits(depositInput ?? "");
+    if (price == null || deposit == null) return null;
+    if (deposit >= price) return "The deposit has to be less than the full price.";
+    return `Guests paying the deposit will owe ${formatMoney(price - deposit, currency)} at the door.`;
+  })();
 
   function onSubmit(values: EventFormValues) {
     const reminder = values.reminder_days_before && values.reminder_days_before !== ""
       ? Number(values.reminder_days_before)
       : null;
-    const payload = { ...values, reminder_days_before: reminder };
+    const isPaid = values.payment_mode === "paid";
+    const priceText = values.price_input?.trim() ?? "";
+    const depositText = values.deposit_input?.trim() ?? "";
+    const price = isPaid ? toMinorUnits(priceText) : null;
+    const deposit = isPaid && depositText !== "" ? toMinorUnits(depositText) : null;
+
+    if (isPaid) {
+      if (price == null) {
+        toast.error("Enter a ticket price, or set the event to free");
+        return;
+      }
+      if (depositText !== "" && deposit == null) {
+        toast.error("That deposit amount isn't a valid figure");
+        return;
+      }
+      if (deposit != null && deposit >= price) {
+        toast.error("The deposit has to be less than the full price");
+        return;
+      }
+    }
+
+    const payload = {
+      ...values,
+      reminder_days_before: reminder,
+      cover_motion: values.animate_cover ? ("drift" as const) : ("none" as const),
+      payment_mode: values.payment_mode,
+      currency,
+      price_amount: price,
+      deposit_amount: deposit,
+    };
     startTransition(async () => {
       try {
         if (initial) {
@@ -197,6 +262,26 @@ export function EventForm({ initial }: EventFormProps) {
           {coverValue && (
             <p className="text-xs text-muted-foreground break-all">{coverValue}</p>
           )}
+
+          {hasCover(selectedTemplate) && (
+            <div className="pt-2 border-t">
+              <label htmlFor="animate_cover" className="flex items-start gap-3 cursor-pointer pt-4">
+                <input
+                  id="animate_cover"
+                  type="checkbox"
+                  {...register("animate_cover")}
+                  className="mt-0.5 size-4 shrink-0 accent-foreground cursor-pointer"
+                />
+                <span className="space-y-1">
+                  <span className="block text-sm font-medium">Animate cover image</span>
+                  <span className="block text-xs text-muted-foreground">
+                    A slow drift across the photo that loops while guests read the page. Guests who
+                    prefer reduced motion always see a still image.
+                  </span>
+                </span>
+              </label>
+            </div>
+          )}
         </CardContent>
       </Card>
 
@@ -224,6 +309,64 @@ export function EventForm({ initial }: EventFormProps) {
             </div>
             <input type="hidden" {...register("template")} />
           </div>
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardContent className="p-6 space-y-4">
+          <h2 className="font-medium">Tickets</h2>
+          <div className="grid gap-3 sm:grid-cols-2">
+            {PAYMENT_CHOICES.map((option) => (
+              <button
+                key={option.value}
+                type="button"
+                onClick={() => setValue("payment_mode", option.value, { shouldValidate: true })}
+                aria-pressed={paymentMode === option.value}
+                className={`text-left rounded-md border p-3 transition-colors ${
+                  paymentMode === option.value
+                    ? "border-foreground bg-accent"
+                    : "hover:border-foreground/50"
+                }`}
+              >
+                <div className="font-medium text-sm">{option.label}</div>
+                <div className="text-xs text-muted-foreground mt-1">{option.hint}</div>
+              </button>
+            ))}
+          </div>
+          <input type="hidden" {...register("payment_mode")} />
+
+          {paymentMode === "paid" && (
+            <div className="space-y-4 pt-4 border-t">
+              <div className="grid gap-4 sm:grid-cols-2">
+                <div className="space-y-2">
+                  <Label htmlFor="price_input">Ticket price ({currency})</Label>
+                  <Input
+                    id="price_input"
+                    inputMode="decimal"
+                    placeholder="3000"
+                    {...register("price_input")}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="deposit_input">Deposit ({currency}, optional)</Label>
+                  <Input
+                    id="deposit_input"
+                    inputMode="decimal"
+                    placeholder="1000"
+                    {...register("deposit_input")}
+                  />
+                </div>
+              </div>
+              <p className="text-xs text-muted-foreground">
+                {balanceHint ??
+                  "Add a deposit to let guests secure a spot with part of the price. They settle the rest at the door."}
+              </p>
+              <p className="text-xs text-muted-foreground">
+                Card and M-Pesa payments aren&apos;t collected in the app yet. For now the price is
+                shown to guests and you collect it yourself.
+              </p>
+            </div>
+          )}
         </CardContent>
       </Card>
 

@@ -1,7 +1,8 @@
-import { prisma } from "@/lib/db";
-import { mintToken, verifyToken } from "@/lib/tokens";
-import { sendEmail } from "@/lib/email";
-import { rsvpConfirmationEmail } from "@/lib/emails";
+﻿import { prisma } from "@/lib/db";
+import { verifyToken } from "@/lib/tokens";
+import { eventPricing } from "@/lib/money";
+import { guestPaymentState } from "@/lib/payments";
+import { sendConfirmationEmail } from "@/lib/confirmation-email";
 
 export type ResolvedInvite = {
   ok: true;
@@ -16,6 +17,10 @@ export type ResolvedInvite = {
     venue_address: string | null;
     custom_question: string | null;
     status: string;
+    payment_mode: string;
+    currency: string;
+    price_amount: number | null;
+    deposit_amount: number | null;
   };
   token: string;
   rsvpStatus: string | null;
@@ -49,6 +54,10 @@ export async function resolveInvite(token: string): Promise<ResolvedInvite | { o
       venue_address: guest.event.venue_address,
       custom_question: guest.event.custom_question,
       status: guest.event.status,
+      payment_mode: guest.event.payment_mode,
+      currency: guest.event.currency,
+      price_amount: guest.event.price_amount,
+      deposit_amount: guest.event.deposit_amount,
     },
     rsvpStatus: guest.rsvp?.status ?? null,
   };
@@ -67,6 +76,16 @@ export async function submitRsvp(input: {
     include: { event: true },
   });
   if (!guest) throw new Error("Guest not found");
+
+  // On a paid event a spot is secured by paying, not by answering. Without
+  // this a guest could confirm through the free path and be emailed a working
+  // door pass without ever being charged. Settlement sets "yes" itself.
+  if (input.status === "yes" && eventPricing(guest.event)) {
+    const paid = await guestPaymentState(guest.id);
+    if (!paid.hasPaid) {
+      throw new Error("This event needs payment to confirm your spot.");
+    }
+  }
 
   await prisma.rSVP.upsert({
     where: { guest_id: guest.id },
@@ -89,42 +108,4 @@ export async function submitRsvp(input: {
   }
 
   return { guestId: guest.id, eventId: guest.event.id };
-}
-
-export async function sendConfirmationEmail(guestId: string, eventId: string) {
-  const [guest, event] = await Promise.all([
-    prisma.guest.findUnique({ where: { id: guestId } }),
-    prisma.event.findUnique({ where: { id: eventId } }),
-  ]);
-  if (!guest || !event) return;
-
-  const checkinToken = mintToken({ kind: "checkin", guestId, eventId });
-  const { generateQrDataUrl } = await import("@/lib/qr");
-  const qrDataUrl = await generateQrDataUrl(checkinToken);
-
-  const baseUrl = process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3012";
-  const confirmationUrl = `${baseUrl}/invite/${(await prisma.invite.findUnique({ where: { guest_id: guestId } }))?.token}/confirmation`;
-  const addToCalendarUrl = `${baseUrl}/api/invite/${(await prisma.invite.findUnique({ where: { guest_id: guestId } }))?.token}/ics`;
-  const icsUrl = addToCalendarUrl;
-
-  const tpl = rsvpConfirmationEmail({
-    guestName: guest.name,
-    eventTitle: event.title,
-    eventDate: new Intl.DateTimeFormat("en-US", {
-      timeZone: event.timezone,
-      weekday: "long",
-      month: "long",
-      day: "numeric",
-      year: "numeric",
-      hour: "numeric",
-      minute: "2-digit",
-    }).format(event.starts_at),
-    venue: [event.venue_name, event.venue_address].filter(Boolean).join(" · "),
-    confirmationUrl,
-    qrDataUrl,
-    addToCalendarUrl,
-    icsUrl,
-  });
-
-  await sendEmail({ to: guest.email, subject: tpl.subject, html: tpl.html, text: tpl.text });
 }

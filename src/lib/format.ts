@@ -19,7 +19,3 @@ export function formatLocalTimezoneOffset(input: Date, eventTimezone: string): s
   const localZoned = toZonedTime(input, local);
   return format(localZoned, "h:mm a zzz");
 }
-
-export function shortDateTime(input: Date): string {
-  return format(input, "MMM d, yyyy h:mm a");
-}

@@ -1,13 +1,18 @@
 "use client";
 
 import { Toaster as Sonner } from "sonner";
+import { useTheme } from "@/components/theme/theme-provider";
 
 type ToasterProps = React.ComponentProps<typeof Sonner>;
 
 export function Toaster(props: ToasterProps) {
+  // Sonner's own "system" setting reads prefers-color-scheme, which would
+  // ignore the in-app toggle. Feed it the resolved theme instead.
+  const { resolvedTheme } = useTheme();
+
   return (
     <Sonner
-      theme="light"
+      theme={resolvedTheme}
       className="toaster group"
       toastOptions={{
         classNames: {

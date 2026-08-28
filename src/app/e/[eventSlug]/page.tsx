@@ -19,6 +19,7 @@ async function loadEvent(slug: string) {
       venue_name: true,
       venue_address: true,
       cover_image_url: true,
+      cover_motion: true,
       template: true,
     },
   });
@@ -60,6 +61,7 @@ export default async function PublicEventPage({ params }: { params: Promise<Para
     venueName: event.venue_name,
     venueAddress: event.venue_address,
     coverImageUrl: event.cover_image_url,
+    coverMotion: event.cover_motion === "drift" ? "drift" : "none",
     rsvpHref: null,
     isPreview: true,
   });

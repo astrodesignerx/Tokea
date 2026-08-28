@@ -1,4 +1,4 @@
-import { S3Client, PutObjectCommand, DeleteObjectCommand } from "@aws-sdk/client-s3";
+import { S3Client, PutObjectCommand } from "@aws-sdk/client-s3";
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 import { randomUUID } from "node:crypto";
 
@@ -68,13 +68,4 @@ export async function presignCoverUpload(input: {
     key,
     headers: { "Content-Type": input.contentType },
   };
-}
-
-export async function deleteObject(key: string): Promise<void> {
-  const client = getClient();
-  await client.send(new DeleteObjectCommand({ Bucket: BUCKET(), Key: key }));
-}
-
-export function publicUrlForKey(key: string): string {
-  return `${PUBLIC_URL()}/${key}`;
 }

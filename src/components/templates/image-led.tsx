@@ -1,27 +1,19 @@
-import Image from "next/image";
 import type { EventTemplateProps } from "./shared";
-import { formatDateLine, RsvpButton } from "./shared";
+import { CoverImage, formatDateLine, RsvpButton } from "./shared";
 
 export function ImageLed(props: EventTemplateProps) {
   const { primary, secondary } = formatDateLine(props);
   return (
     <div className="min-h-screen relative flex flex-col">
       {props.coverImageUrl && (
-        <div className="absolute inset-0 z-0">
-          <Image
-            src={props.coverImageUrl}
-            alt=""
-            fill
-            priority
-            className="object-cover"
-            unoptimized
-          />
+        <div className="absolute inset-0 z-0 overflow-hidden">
+          <CoverImage url={props.coverImageUrl} motion={props.coverMotion} />
           <div className="absolute inset-0 bg-black/40" />
         </div>
       )}
       {!props.coverImageUrl && <div className="absolute inset-0 z-0 bg-gradient-to-br from-zinc-900 to-zinc-700" />}
       <div className="relative z-10 flex-1 flex flex-col items-center justify-center text-center text-white px-6 py-20">
-        <div className="max-w-2xl space-y-6">
+        <div className="max-w-2xl space-y-6 cover-caption">
           <h1 className="text-5xl sm:text-7xl font-semibold tracking-tight">{props.title}</h1>
           <div className="space-y-1">
             <p className="text-lg sm:text-xl">{primary}</p>
