@@ -1,16 +1,11 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { ContactCard } from "@/components/cards/contact-card";
-import { findCardBySlug, fullName, listCards } from "@/lib/cards/data";
+import { findCardBySlug, fullName } from "@/lib/cards/data";
 import { cardQrDataUrl } from "@/lib/cards/qr";
 import { shortUrl } from "@/lib/cards/links";
 
 type PageProps = { params: Promise<{ slug: string }> };
-
-export async function generateStaticParams() {
-  const cards = await listCards();
-  return cards.map((card) => ({ slug: card.slug }));
-}
 
 export async function generateMetadata({
   params,
@@ -38,7 +33,7 @@ export default async function CardPage({ params }: PageProps) {
 
   // The QR and everything shareable encode the short link, never the slug, so
   // a printed card survives a rename.
-  const permanentUrl = await shortUrl(card.shortCode);
+  const permanentUrl = await shortUrl(card.short_code);
   const qr = await cardQrDataUrl(permanentUrl);
 
   return (

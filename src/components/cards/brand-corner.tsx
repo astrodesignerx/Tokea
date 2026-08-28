@@ -15,9 +15,9 @@ export function BrandCorner({ className }: { className?: string }) {
       focusable="false"
       className={cn("select-none", className)}
     >
-      <path d="M0 155 L96.87 155 L0 81.04 Z" fill="var(--brand-teal-soft)" />
-      <path d="M0 0 L0 128.5 L98.8 0 Z" fill="var(--brand-teal)" />
-      <path d="M0 155 L68.25 155 L0 102.89 Z" fill="var(--brand-coral)" />
+      <path d="M0 155 L96.87 155 L0 81.04 Z" fill="var(--brand-secondary)" />
+      <path d="M0 0 L0 128.5 L98.8 0 Z" fill="var(--brand-primary)" />
+      <path d="M0 155 L68.25 155 L0 102.89 Z" fill="var(--brand-accent)" />
     </svg>
   );
 }

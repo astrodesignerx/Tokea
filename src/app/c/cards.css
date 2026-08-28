@@ -12,9 +12,9 @@
 
   /* Energy 4 Impact brand, sampled from the printed card artwork. Moves onto
      the Organisation record as inline custom properties in phase 2. */
-  --brand-teal: #1db8af;
-  --brand-teal-soft: #87cfc8;
-  --brand-coral: #f1666b;
+  --brand-primary: #1db8af;
+  --brand-secondary: #87cfc8;
+  --brand-accent: #f1666b;
   --brand-ink: #464f58;
   --brand-ink-soft: #6b7480;
 
@@ -36,7 +36,7 @@
 }
 
 .cards-surface :focus-visible {
-  outline: 2px solid var(--brand-teal);
+  outline: 2px solid var(--brand-primary);
   outline-offset: 3px;
   border-radius: 6px;
 }
@@ -47,7 +47,7 @@
   height: 1px;
   background-image: linear-gradient(
     to right,
-    var(--brand-coral) 0 4px,
+    var(--brand-accent) 0 4px,
     transparent 4px 9px
   );
   background-size: 9px 1px;

@@ -11,15 +11,22 @@ datasource db {
 }
 
 model User {
-  id         String   @id @default(cuid())
-  email      String   @unique
-  name       String?
-  image      String?
-  created_at DateTime @default(now())
+  id            String    @id @default(cuid())
+  email         String    @unique
+  name          String?
+  image         String?
+  // Required by @auth/prisma-adapter: set when a magic link is confirmed.
+  emailVerified DateTime?
+  created_at    DateTime  @default(now())
 
-  accounts Account[]
-  sessions Session[]
-  events   Event[]
+  // Paystack subaccount (ACCT_xxx) that ticket money is split to. Null until
+  // the organiser connects payout details; payments then go unsplit.
+  paystack_subaccount String?
+
+  accounts      Account[]
+  sessions      Session[]
+  events        Event[]
+  organisations Organisation[]
 }
 
 model Account {
@@ -72,6 +79,22 @@ model Event {
   venue_name           String?
   venue_address        String?
   cover_image_url      String?
+  // "none" | "drift" — ambient motion on the cover. Only the image-led and
+  // type-led templates render a cover, so it has no effect on the others.
+  cover_motion         String    @default("none")
+
+  // "free" | "paid". The organiser chooses per event; this field is the
+  // authority. Prices are kept when switching back to free so the setting
+  // survives a change of mind, which is why nothing may read the amounts
+  // without checking the mode first.
+  payment_mode         String    @default("free")
+  currency             String    @default("KES")
+  // Minor units (KES cents). Integers only — never store money as a float.
+  price_amount         Int?
+  // Optional part-payment that secures a spot; the balance is settled at the
+  // door. Null means the organiser is not offering a deposit.
+  deposit_amount       Int?
+
   custom_question      String?
   template             String    @default("image-led")
   reminder_days_before Int?
@@ -80,8 +103,9 @@ model Event {
   created_at           DateTime  @default(now())
   updated_at           DateTime  @updatedAt
 
-  owner   User    @relation(fields: [owner_id], references: [id], onDelete: Cascade)
-  guests  Guest[]
+  owner    User      @relation(fields: [owner_id], references: [id], onDelete: Cascade)
+  guests   Guest[]
+  payments Payment[]
 
   @@index([owner_id])
   @@index([status, starts_at])
@@ -95,10 +119,11 @@ model Guest {
   phone      String?
   created_at DateTime @default(now())
 
-  event   Event     @relation(fields: [event_id], references: [id], onDelete: Cascade)
-  invite  Invite?
-  rsvp    RSVP?
-  checkin CheckIn?
+  event    Event     @relation(fields: [event_id], references: [id], onDelete: Cascade)
+  invite   Invite?
+  rsvp     RSVP?
+  checkin  CheckIn?
+  payments Payment[]
 
   @@unique([event_id, email])
   @@index([event_id])
@@ -133,11 +158,133 @@ model CheckIn {
   guest Guest @relation(fields: [guest_id], references: [id], onDelete: Cascade)
 }
 
+/// One attempt to pay for a spot. A guest may have several — an abandoned
+/// M-Pesa prompt is routine — but only ever one with status "success".
+model Payment {
+  id       String @id @default(cuid())
+  /// Our own idempotency key, sent to Paystack as its reference.
+  reference String @unique
+  guest_id String
+  event_id String
+
+  /// "deposit" | "full"
+  kind     String
+  /// What we asked for, in minor units. Never taken from the client.
+  amount   Int
+  /// What Paystack confirmed was actually collected.
+  amount_paid Int?
+  currency String
+
+  /// "pending" | "success" | "failed" | "abandoned" | "refunded"
+  status          String    @default("pending")
+  /// card, mobile_money, …
+  channel         String?
+  provider_txn_id String?
+  paid_at         DateTime?
+
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+
+  guest Guest @relation(fields: [guest_id], references: [id], onDelete: Cascade)
+  event Event @relation(fields: [event_id], references: [id], onDelete: Cascade)
+
+  @@index([event_id, status])
+  @@index([guest_id])
+}
+
 model CronedReminder {
-  id        String   @id @default(cuid())
-  event_id  String
-  guest_id  String
-  sent_at   DateTime @default(now())
+  id       String   @id @default(cuid())
+  event_id String
+  guest_id String
+  sent_at  DateTime @default(now())
 
   @@unique([event_id, guest_id])
+}
+
+// ---------------------------------------------------------------------------
+// Digital business cards
+//
+// An Organisation is a client company; a ContactCard is one person at it.
+// Branding lives on the Organisation so a card inherits it rather than
+// repeating it, which is the whole value of the feature for an agency.
+// ---------------------------------------------------------------------------
+
+model Organisation {
+  id       String @id @default(cuid())
+  owner_id String
+  slug     String @unique
+  name     String
+  // Written into the vCard ORG field, which is often the fuller legal name.
+  legal_name    String
+  website       String?
+  website_label String?
+  logo_url      String?
+  tagline       String?
+
+  // Brand palette as hex, applied to every card in the organisation. Defaults
+  // are the neutral shell colours, overridden per client.
+  brand_primary   String @default("#1DB8AF")
+  brand_secondary String @default("#87CFC8")
+  brand_accent    String @default("#F1666B")
+  brand_ink       String @default("#464F58")
+
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+
+  owner User          @relation(fields: [owner_id], references: [id], onDelete: Cascade)
+  cards ContactCard[]
+
+  @@index([owner_id])
+}
+
+model ContactCard {
+  id              String @id @default(cuid())
+  organisation_id String
+
+  // Readable address for the card page. Free to change.
+  slug String @unique
+
+  // Immutable public identifier that printed QR codes and NFC tags encode.
+  // NEVER change or recycle one: every card already in the wild resolves
+  // through it. The slug above can change as often as needed, this cannot.
+  short_code String @unique
+
+  // Where short_code currently sends people. Stored rather than derived from
+  // the slug, so a code can be repointed — to a renamed card, a successor, or
+  // an external URL — without reprinting anything.
+  destination String
+
+  first_name   String
+  last_name    String
+  title        String
+  email        String
+  phone_mobile String?
+  phone_work   String?
+  photo_url    String?
+
+  // "active" | "archived". Archiving retires a card without freeing its slug
+  // or short code, so a leaver's printed card degrades politely.
+  status String @default("active")
+
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+
+  organisation Organisation @relation(fields: [organisation_id], references: [id], onDelete: Cascade)
+  scans        CardScan[]
+
+  @@index([organisation_id])
+  @@index([status])
+}
+
+model CardScan {
+  id         String   @id @default(cuid())
+  card_id    String
+  scanned_at DateTime @default(now())
+  referrer   String?
+  user_agent String?
+  country    String?
+
+  card ContactCard @relation(fields: [card_id], references: [id], onDelete: Cascade)
+
+  @@index([card_id, scanned_at])
 }

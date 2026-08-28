@@ -15,7 +15,7 @@ const OUTLINE_BUTTON = cn(
   "flex items-center justify-center gap-2 rounded-xl border border-[var(--card-border)]",
   "px-4 py-3 text-sm font-medium text-[var(--brand-ink)]",
   "transition-[background-color,border-color,transform] duration-[var(--card-duration-fast)] ease-[var(--card-ease-out)]",
-  "hover:border-[var(--brand-teal)] hover:bg-[color-mix(in_srgb,var(--brand-teal)_6%,transparent)]",
+  "hover:border-[var(--brand-primary)] hover:bg-[color-mix(in_srgb,var(--brand-primary)_6%,transparent)]",
   "active:scale-[0.98]"
 );
 
@@ -78,7 +78,7 @@ export function ShareActions({ url, name, title }: ShareActionsProps) {
           />
           <Check
             className={cn(
-              "absolute h-4 w-4 text-[var(--brand-teal)] transition-[opacity,transform] duration-[var(--card-duration-base)] ease-[var(--card-ease-out)]",
+              "absolute h-4 w-4 text-[var(--brand-primary)] transition-[opacity,transform] duration-[var(--card-duration-base)] ease-[var(--card-ease-out)]",
               copied ? "scale-100 opacity-100" : "scale-75 opacity-0"
             )}
           />

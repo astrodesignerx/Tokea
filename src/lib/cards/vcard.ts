@@ -8,16 +8,29 @@ export function buildVCard(
   card: CardWithOrganisation,
   shortUrl?: string
 ): string {
+  const org = card.organisation;
+
   const lines = [
     "BEGIN:VCARD",
     "VERSION:3.0",
-    `N:${escapeValue(card.lastName)};${escapeValue(card.firstName)};;;`,
+    `N:${escapeValue(card.last_name)};${escapeValue(card.first_name)};;;`,
     `FN:${escapeValue(fullName(card))}`,
-    `ORG:${escapeValue(card.organisation.legalName)}`,
+    `ORG:${escapeValue(org.legal_name)}`,
     `TITLE:${escapeValue(card.title)}`,
     `EMAIL;type=INTERNET;type=WORK:${escapeValue(card.email)}`,
-    `URL:${escapeValue(card.organisation.website)}`,
   ];
+
+  if (card.phone_mobile) {
+    lines.push(`TEL;type=CELL;type=VOICE:${escapeValue(card.phone_mobile)}`);
+  }
+
+  if (card.phone_work) {
+    lines.push(`TEL;type=WORK;type=VOICE:${escapeValue(card.phone_work)}`);
+  }
+
+  if (org.website) {
+    lines.push(`URL:${escapeValue(org.website)}`);
+  }
 
   // The saved contact points at the short link, not the card page, so it keeps
   // resolving if the person's slug ever changes.

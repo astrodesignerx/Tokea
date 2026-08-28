@@ -25,7 +25,7 @@ export async function GET(request: Request, { params }: RouteContext) {
     ? Math.min(Math.max(requested, MIN_SIZE), MAX_SIZE)
     : DEFAULT_SIZE;
 
-  const png = await cardQrPng(await shortUrl(card.shortCode), size);
+  const png = await cardQrPng(await shortUrl(card.short_code), size);
 
   return new Response(new Uint8Array(png), {
     headers: {

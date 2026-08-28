@@ -12,7 +12,7 @@ export async function GET(_request: Request, { params }: RouteContext) {
     return new Response("Not found", { status: 404 });
   }
 
-  const body = buildVCard(card, await shortUrl(card.shortCode));
+  const body = buildVCard(card, await shortUrl(card.short_code));
 
   return new Response(body, {
     headers: {
