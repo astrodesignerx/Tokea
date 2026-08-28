@@ -15,7 +15,7 @@ const sourceSerif = Source_Serif_4({
 });
 
 /**
- * Public card pages sit outside Tokea's chrome entirely: no nav, no theme
+ * Public card pages sit outside the app's chrome entirely: no nav, no theme
  * toggle, no dark mode. They are client-branded surfaces that happen to be
  * served by this app, so they get their own fonts and their own palette.
  */

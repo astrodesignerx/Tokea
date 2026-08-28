@@ -53,7 +53,7 @@ export default async function CompanyPage({ params }: PageProps) {
           </div>
           <p className="mt-1 text-sm text-muted-foreground">
             {org.cards.length} card{org.cards.length === 1 ? "" : "s"}
-            {org.website && ` · ${org.website_label ?? org.website}`}
+            {org.website && `, ${org.website_label ?? org.website}`}
           </p>
         </div>
 

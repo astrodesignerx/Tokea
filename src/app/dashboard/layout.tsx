@@ -12,7 +12,7 @@ export default async function DashboardLayout({ children }: { children: React.Re
         <div className="mx-auto max-w-5xl px-6 h-14 flex items-center justify-between">
           <div className="flex items-center gap-6">
             <Link href="/dashboard" className="font-semibold tracking-tight">
-              Tokea
+              NikoForm
             </Link>
             <nav className="flex items-center gap-4 text-sm">
               <Link

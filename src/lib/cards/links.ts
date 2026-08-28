@@ -1,7 +1,7 @@
 import { headers } from "next/headers";
 
 /**
- * The public origin cards are served from — the origin every QR code encodes.
+ * The public origin cards are served from: the origin every QR code encodes.
  *
  * Deliberately reads no NEXT_PUBLIC_ variable. Next inlines those into the
  * bundle at build time, so a stale one cannot be corrected by editing the

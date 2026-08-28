@@ -17,10 +17,10 @@ const geistMono = Geist_Mono({
 
 export const metadata: Metadata = {
   title: {
-    default: "Tokea - RSVP & event check-in",
-    template: "%s | Tokea",
+    default: "NikoForm - Digital cards and event RSVPs, in one place",
+    template: "%s | NikoForm",
   },
-  description: "Beautiful event pages, simple RSVPs, QR check-in at the door.",
+  description: "Shareable pages with QR codes: digital business cards, and event invitations with RSVPs and check-in.",
   metadataBase: new URL(process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3012"),
 };
 

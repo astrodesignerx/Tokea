@@ -27,11 +27,11 @@ const COPY: Record<
 > = {
   signin: {
     heading: "Welcome back",
-    sub: "Sign in with the email you used for Tokea.",
+    sub: "Sign in with the email you used for NikoForm.",
     emailCta: "Send sign-in link",
     emailPending: "Sending…",
     sentTitle: "Check your inbox",
-    altPrompt: "New to Tokea?",
+    altPrompt: "New to NikoForm?",
     altCta: "Create an account",
     altHref: "/signup",
   },

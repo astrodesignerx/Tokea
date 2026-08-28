@@ -5,7 +5,7 @@
  * issued before the database existed, and any QR code already generated or
  * printed resolves through them. Everything else here is safe to change.
  *
- * Idempotent — upserts on slug, so running it twice is harmless.
+ * Idempotent: upserts on slug, so running it twice is harmless.
  *
  *   pnpm seed:cards you@example.com
  */

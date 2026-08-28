@@ -25,7 +25,7 @@ const raw = process.env["DIRECT_URL"] ?? process.env["DATABASE_URL"];
  * The datasource is declared only when a URL is present.
  *
  * Throwing instead broke every build without one, including `prisma generate`,
- * which reads the schema and never opens a connection — codegen has no
+ * which reads the schema and never opens a connection. Codegen has no
  * business depending on a runtime secret. Commands that genuinely need the
  * database still fail on their own terms when it is missing.
  */

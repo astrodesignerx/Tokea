@@ -19,10 +19,10 @@ function layout({ heading, body }: { heading: string; body: string }): EmailTemp
       <h1 style="margin:0 0 16px;font-size:24px;font-weight:600;letter-spacing:-0.02em">${esc(heading)}</h1>
       ${body}
     </div>
-    <p style="color:#888;font-size:12px;text-align:center;margin:16px 0 0">Sent by Tokea</p>
+    <p style="color:#888;font-size:12px;text-align:center;margin:16px 0 0">Sent by NikoForm</p>
   </div>
 </body></html>`;
-  const text = `${heading}\n\n${stripHtml(body)}\n\n— Sent by Tokea`;
+  const text = `${heading}\n\n${stripHtml(body)}\n\n— Sent by NikoForm`;
   return { subject: "", html, text };
 }
 
@@ -90,12 +90,12 @@ export function rsvpConfirmationEmail(input: {
 
 export function magicLinkEmail(input: { url: string }): EmailTemplate {
   const body = `
-    <p style="margin:0 0 16px">Click the button below to sign in to Tokea. No password needed.</p>
-    <div style="margin:24px 0">${button(input.url, "Sign in to Tokea")}</div>
+    <p style="margin:0 0 16px">Click the button below to sign in to NikoForm. No password needed.</p>
+    <div style="margin:24px 0">${button(input.url, "Sign in to NikoForm")}</div>
     <p style="color:#666;font-size:13px;margin:0">This link expires shortly and can only be used once. If you didn't request it, you can ignore this email.</p>
   `;
-  const { html, text } = layout({ heading: "Sign in to Tokea", body });
-  return { subject: "Your Tokea sign-in link", html, text };
+  const { html, text } = layout({ heading: "Sign in to NikoForm", body });
+  return { subject: "Your NikoForm sign-in link", html, text };
 }
 
 export function reminderEmail(input: {

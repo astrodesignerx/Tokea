@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
-  // absolute, so Tokea's "%s | Tokea" template does not brand a client page.
+  // absolute, so the "%s | NikoForm" template does not brand a client page.
   title: { absolute: "Card not available" },
   robots: { index: false },
 };

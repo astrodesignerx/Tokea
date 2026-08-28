@@ -1,0 +1,52 @@
+/*
+ * Entry motion for the marketing page.
+ *
+ * Scoped under .landing so nothing here reaches the app. Only transform and
+ * opacity animate, so every frame composites on the GPU.
+ */
+
+.landing {
+  --landing-ease: cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+@keyframes landing-rise {
+  from {
+    opacity: 0;
+    transform: translate3d(0, 14px, 0);
+  }
+  to {
+    opacity: 1;
+    transform: translate3d(0, 0, 0);
+  }
+}
+
+/* Applied with an inline animation-delay to stagger a group. */
+.landing .rise {
+  animation: landing-rise 460ms var(--landing-ease) both;
+}
+
+/* The sample card leads the hero, so it settles a beat later and travels further. */
+@keyframes landing-card {
+  from {
+    opacity: 0;
+    transform: translate3d(0, 24px, 0) scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: translate3d(0, 0, 0) scale(1);
+  }
+}
+
+.landing .rise-card {
+  animation: landing-card 620ms var(--landing-ease) both;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .landing *,
+  .landing *::before,
+  .landing *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}

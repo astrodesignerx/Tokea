@@ -17,7 +17,7 @@ export default function NotFound() {
       />
 
       <div className="nf-brand">
-        <span className="nf-wordmark">Tokea</span>
+        <span className="nf-wordmark">NikoForm</span>
       </div>
 
       <div className="nf-content">

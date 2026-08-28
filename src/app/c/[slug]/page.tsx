@@ -18,7 +18,7 @@ export async function generateMetadata({
   const description = `${card.title}, ${card.organisation.name}.`;
 
   return {
-    // absolute, so Tokea's "%s | Tokea" template does not brand a page that
+    // absolute, so the "%s | NikoForm" template does not brand a page that
     // belongs to the client.
     title: { absolute: `${name} - ${card.organisation.name}` },
     description,

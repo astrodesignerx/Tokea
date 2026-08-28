@@ -3,7 +3,7 @@
  *
  *   pnpm check:env
  *
- * Prints names and presence only — never a value, so it is safe in a public
+ * Prints names and presence only, never a value, so it is safe in a public
  * build log. Missing variables are reported rather than thrown on: a build can
  * legitimately proceed without the runtime-only ones, and a clear list beats
  * discovering them one failure at a time.

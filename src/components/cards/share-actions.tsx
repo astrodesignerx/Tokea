@@ -21,7 +21,7 @@ const OUTLINE_BUTTON = cn(
 
 /**
  * Copy and native share. Both need the browser, so this is the only part of the
- * card that ships JavaScript — Save to Contacts is a plain download link.
+ * card that ships JavaScript. Save to Contacts is a plain download link.
  */
 /** navigator.share is a fixed capability, so it never needs to notify a change. */
 const subscribeNever = () => () => {};

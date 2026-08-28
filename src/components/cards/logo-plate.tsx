@@ -3,7 +3,7 @@ import { cn } from "@/lib/utils";
 /**
  * Client logos on a fixed white plate.
  *
- * Logos arrive as arbitrary uploads — most are dark artwork on transparency,
+ * Logos arrive as arbitrary uploads, and most are dark artwork on transparency,
  * which disappears against the dashboard's dark theme. A plate is the only
  * treatment that holds for every logo, since we cannot know in advance whether
  * a given one is light or dark. Public card pages are always light and do not

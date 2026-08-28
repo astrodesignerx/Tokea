@@ -13,7 +13,7 @@ export default async function LoginPage() {
         <div className="space-y-2 text-center">
           <h1 className="text-2xl font-semibold tracking-tight">Welcome back</h1>
           <p className="text-sm text-muted-foreground">
-            Sign in with the email you used for Tokea.
+            Sign in with the email you used for NikoForm.
           </p>
         </div>
         <AuthForm mode="signin" />
