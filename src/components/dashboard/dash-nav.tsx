@@ -9,14 +9,16 @@ import { cn } from "@/lib/utils";
  *
  * The underline sits on the link rather than being a single sliding element:
  * a shared indicator would need to measure positions on every route change,
- * and this reads the same for two or three tabs.
+ * and this reads the same for a handful of tabs.
  *
- * Cards live under /dashboard/companies, so the events tab has to test for an
- * exact match. Testing a prefix would light both tabs on the cards routes.
+ * Every other route lives beneath /dashboard, so the hub tab must test for an
+ * exact match. A prefix test would leave it lit on every page.
  */
 const TABS = [
-  { href: "/dashboard", label: "Events", exact: true },
+  { href: "/dashboard", label: "Services", exact: true },
   { href: "/dashboard/companies", label: "Cards", exact: false },
+  { href: "/dashboard/events", label: "Events", exact: false },
+  { href: "/dashboard/analytics", label: "Analytics", exact: false },
 ];
 
 export function DashNav() {

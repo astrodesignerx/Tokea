@@ -12,7 +12,7 @@ export default async function EditEventPage({ params }: { params: Promise<Params
   const user = await requireUser();
   const event = await prisma.event.findUnique({ where: { id: eventId } });
   if (!event) notFound();
-  if (event.owner_id !== user.id) redirect("/dashboard");
+  if (event.owner_id !== user.id) redirect("/dashboard/events");
 
   return (
     <div className="mx-auto max-w-3xl px-6 py-10">

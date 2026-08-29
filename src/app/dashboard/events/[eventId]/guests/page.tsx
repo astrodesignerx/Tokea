@@ -19,7 +19,7 @@ export default async function GuestsPage({ params }: { params: Promise<Params> }
   const user = await requireUser();
   const event = await prisma.event.findUnique({ where: { id: eventId } });
   if (!event) notFound();
-  if (event.owner_id !== user.id) redirect("/dashboard");
+  if (event.owner_id !== user.id) redirect("/dashboard/events");
 
   const guests = await prisma.guest.findMany({
     where: { event_id: eventId },

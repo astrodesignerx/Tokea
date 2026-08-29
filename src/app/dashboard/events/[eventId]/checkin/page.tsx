@@ -16,7 +16,7 @@ export default async function CheckinPage({ params }: { params: Promise<Params> 
   const user = await requireUser();
   const event = await prisma.event.findUnique({ where: { id: eventId } });
   if (!event) notFound();
-  if (event.owner_id !== user.id) redirect("/dashboard");
+  if (event.owner_id !== user.id) redirect("/dashboard/events");
 
   const counts = await getEventCounts(eventId);
 

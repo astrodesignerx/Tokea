@@ -48,7 +48,7 @@ const FEATURES = [
       "Scan phones at the door to check people in",
       "Optional paid tickets and deposits",
     ],
-    href: "/dashboard",
+    href: "/dashboard/events",
   },
 ];
 
