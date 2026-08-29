@@ -1,9 +1,14 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import QRCode from "qrcode";
 import { ArrowRight, CalendarCheck, IdCard, Lock } from "lucide-react";
 import { auth } from "@/lib/auth";
 import { Button } from "@/components/ui/button";
+import { Wordmark } from "@/components/marketing/wordmark";
+import { TiltCard } from "@/components/marketing/tilt-card";
+import { DotField } from "@/components/marketing/dot-field";
 import { PRODUCT, TAGLINE } from "@/lib/brand";
+import { getCardsOrigin } from "@/lib/cards/links";
 import "./landing.css";
 
 export const metadata: Metadata = {
@@ -13,10 +18,10 @@ export const metadata: Metadata = {
 };
 
 /**
- * Features are described in full to anyone, signed in or not. Setting one up
- * needs an account, so the call to action changes rather than the content:
- * hiding what the product does from the people deciding whether to sign up
- * helps nobody.
+ * Features are described in full to signed-out visitors. Only the call to
+ * action changes, from "Open" to "Sign in to set up": hiding what the product
+ * does from the people deciding whether to sign up helps nobody. The dashboard
+ * routes are behind the auth guard, so nothing is reachable without an account.
  */
 const FEATURES = [
   {
@@ -47,120 +52,198 @@ const FEATURES = [
   },
 ];
 
+const STEPS = [
+  ["Add a company", "Its logo, colours and tagline. Every card underneath inherits them."],
+  ["Add the people", "Each one gets a page, a saveable contact and a permanent QR code."],
+  ["Share or print", "Send the link, put the QR on a card, or write it to an NFC tag."],
+];
+
 export default async function HomePage() {
   const session = await auth();
   const signedIn = Boolean(session?.user);
 
+  // A real QR for the site itself, rendered on the card's reverse. Generated
+  // here rather than shipped as a fixed asset so it follows the origin.
+  const origin = await getCardsOrigin();
+  const originHost = origin.replace(/^https?:\/\//, "");
+  const qrDataUrl = await QRCode.toDataURL(origin, {
+    width: 320,
+    margin: 1,
+    errorCorrectionLevel: "M",
+    color: { dark: "#EDEFEE", light: "#00000000" },
+  });
+
   return (
     <div className="landing flex-1">
-      <main>
-        <section className="mx-auto max-w-4xl px-6 py-20 text-center sm:py-28">
-          <p className="rise text-sm font-medium text-muted-foreground">
-            {PRODUCT}
-          </p>
-          <h1
-            className="rise mx-auto mt-4 max-w-3xl text-4xl font-semibold tracking-tight sm:text-5xl lg:text-6xl"
-            style={{ animationDelay: "60ms" }}
-          >
-            Shareable pages, with a QR code on the front.
-          </h1>
-          <p
-            className="rise mx-auto mt-6 max-w-2xl text-lg leading-relaxed text-muted-foreground"
-            style={{ animationDelay: "120ms" }}
-          >
-            {PRODUCT} is where your organisation keeps the things it hands to
-            people. Right now that means digital business cards and event
-            invitations. More is coming.
-          </p>
-
-          <div
-            className="rise mt-10 flex flex-wrap items-center justify-center gap-3"
-            style={{ animationDelay: "180ms" }}
-          >
+      <header className="sticky top-0 z-40 border-b border-border/70 bg-background/80 backdrop-blur">
+        <div className="mx-auto flex h-14 max-w-6xl items-center justify-between px-6">
+          <Link href="/" aria-label={PRODUCT}>
+            <Wordmark />
+          </Link>
+          <div className="flex items-center gap-2">
             {signedIn ? (
-              <Button asChild size="lg">
-                <Link href="/dashboard">
-                  Go to dashboard <ArrowRight className="size-4" />
-                </Link>
+              <Button asChild size="sm">
+                <Link href="/dashboard">Dashboard</Link>
               </Button>
             ) : (
               <>
-                <Button asChild size="lg">
-                  <Link href="/signup">
-                    Get started <ArrowRight className="size-4" />
-                  </Link>
+                <Button asChild size="sm" variant="ghost">
+                  <Link href="/login">Sign in</Link>
                 </Button>
-                <Button asChild size="lg" variant="outline">
-                  <Link href="/login">I have an account</Link>
+                <Button asChild size="sm">
+                  <Link href="/signup">Get started</Link>
                 </Button>
               </>
             )}
           </div>
+        </div>
+      </header>
+
+      <main>
+        {/* Hero */}
+        <section className="relative overflow-hidden border-b">
+          <div className="grid-backdrop absolute inset-0" aria-hidden="true" />
+          <DotField />
+
+          <div className="relative mx-auto grid max-w-6xl items-center gap-14 px-6 py-20 sm:py-28 lg:grid-cols-[1.1fr_1fr]">
+            <div>
+              <p className="rise eyebrow">Cards, invites and everything after</p>
+              <h1
+                className="rise mt-5 font-display text-4xl font-medium leading-[1.05] tracking-tight sm:text-5xl lg:text-6xl"
+                style={{ animationDelay: "60ms" }}
+              >
+                Shareable pages.
+                <br />
+                <span className="text-brand">A QR code on the front.</span>
+              </h1>
+              <p
+                className="rise mt-6 max-w-lg text-base leading-relaxed text-muted-foreground"
+                style={{ animationDelay: "120ms" }}
+              >
+                {PRODUCT} is where your organisation keeps the things it hands
+                to people. Right now that means digital business cards and event
+                invitations. More is coming.
+              </p>
+
+              <div
+                className="rise mt-9 flex flex-wrap items-center gap-3"
+                style={{ animationDelay: "180ms" }}
+              >
+                {signedIn ? (
+                  <Button asChild size="lg">
+                    <Link href="/dashboard">
+                      Go to dashboard <ArrowRight className="size-4" />
+                    </Link>
+                  </Button>
+                ) : (
+                  <>
+                    <Button asChild size="lg">
+                      <Link href="/signup">
+                        Start building <ArrowRight className="size-4" />
+                      </Link>
+                    </Button>
+                    <Button asChild size="lg" variant="outline">
+                      <Link href="/login">Sign in</Link>
+                    </Button>
+                  </>
+                )}
+              </div>
+            </div>
+
+            {/* The card lands last, so the sentence is read before the object. */}
+            <div className="rise" style={{ animationDelay: "260ms" }}>
+              <TiltCard qrDataUrl={qrDataUrl} qrLabel={originHost} />
+            </div>
+          </div>
         </section>
 
-        <section className="border-t bg-muted/30">
-          <div className="mx-auto max-w-5xl px-6 py-20 sm:py-24">
-            <div className="grid gap-8 sm:grid-cols-2">
-              {FEATURES.map(({ icon: Icon, name, summary, points, href }, i) => (
-                <div
-                  key={name}
-                  className="rise flex flex-col rounded-2xl border bg-background p-7 transition-shadow duration-200 ease-[cubic-bezier(0.22,1,0.36,1)] hover:shadow-md"
-                  style={{ animationDelay: `${i * 80}ms` }}
-                >
-                  <Icon className="size-5" />
-                  <h2 className="mt-4 text-lg font-medium">{name}</h2>
+        {/* Features */}
+        <section className="border-b">
+          <div className="mx-auto max-w-6xl px-6 py-20 sm:py-24">
+            <p className="eyebrow">Features</p>
+            <h2 className="mt-4 max-w-2xl font-display text-2xl font-medium tracking-tight sm:text-3xl">
+              Two of them today. The shape holds for the rest.
+            </h2>
+
+            <div className="mt-12 grid gap-5 sm:grid-cols-2">
+              {FEATURES.map(({ icon: Icon, name, summary, points, href }) => (
+                <div key={name} className="panel flex flex-col p-7">
+                  <Icon className="size-5 text-brand" />
+                  <h3 className="mt-4 font-display text-lg font-medium">{name}</h3>
                   <p className="mt-2 text-sm leading-relaxed text-muted-foreground">
                     {summary}
                   </p>
 
-                  <ul className="mt-5 space-y-2 text-sm text-muted-foreground">
+                  <ul className="mt-5 space-y-2.5 text-sm text-muted-foreground">
                     {points.map((point) => (
-                      <li key={point} className="flex gap-2.5">
+                      <li key={point} className="flex gap-3">
                         <span
                           aria-hidden="true"
-                          className="mt-2 size-1 shrink-0 rounded-full bg-muted-foreground/60"
+                          className="mt-[0.4rem] size-1 shrink-0 rounded-full bg-brand"
                         />
                         {point}
                       </li>
                     ))}
                   </ul>
 
-                  {/* mt-auto, so both cards' buttons sit on the same line
-                      however much their descriptions differ in length. */}
+                  {/* mt-auto, so both cards' buttons sit on the same line. */}
                   <div className="mt-auto pt-7">
-                    {signedIn ? (
-                      <Button asChild variant="outline" size="sm">
-                        <Link href={href}>
-                          Open <ArrowRight className="size-3.5" />
-                        </Link>
-                      </Button>
-                    ) : (
-                      <Button asChild variant="outline" size="sm">
-                        <Link href="/login">
-                          <Lock className="size-3.5" /> Sign in to set up
-                        </Link>
-                      </Button>
-                    )}
+                    <Button asChild variant="outline" size="sm">
+                      <Link href={signedIn ? href : "/login"}>
+                        {signedIn ? (
+                          <>
+                            Open <ArrowRight className="size-3.5" />
+                          </>
+                        ) : (
+                          <>
+                            <Lock className="size-3.5" /> Sign in to set up
+                          </>
+                        )}
+                      </Link>
+                    </Button>
                   </div>
                 </div>
               ))}
             </div>
 
-            <p className="mt-10 text-center text-sm text-muted-foreground">
+            <p className="mt-8 text-sm text-muted-foreground">
               Anyone can read about a feature. Setting one up needs an account.
             </p>
           </div>
         </section>
 
-        <section className="border-t">
-          <div className="mx-auto max-w-5xl px-6 py-20 text-center sm:py-24">
-            <h2 className="text-2xl font-semibold tracking-tight sm:text-3xl">
+        {/* How it works */}
+        <section className="border-b">
+          <div className="mx-auto max-w-6xl px-6 py-20 sm:py-24">
+            <p className="eyebrow">How it works</p>
+            <ol className="mt-10 grid gap-8 sm:grid-cols-3">
+              {STEPS.map(([title, body], index) => (
+                <li key={title}>
+                  <span className="font-mono text-xs text-brand">
+                    0{index + 1}
+                  </span>
+                  <h3 className="mt-3 font-display text-base font-medium">
+                    {title}
+                  </h3>
+                  <p className="mt-2 text-sm leading-relaxed text-muted-foreground">
+                    {body}
+                  </p>
+                </li>
+              ))}
+            </ol>
+          </div>
+        </section>
+
+        {/* Close */}
+        <section>
+          <div className="mx-auto max-w-6xl px-6 py-20 text-center sm:py-24">
+            <h2 className="font-display text-2xl font-medium tracking-tight sm:text-3xl">
               Start with one feature. Add the rest when you need them.
             </h2>
             <div className="mt-8 flex justify-center">
               <Button asChild size="lg">
                 <Link href={signedIn ? "/dashboard" : "/signup"}>
-                  {signedIn ? "Go to dashboard" : "Get started"}
+                  {signedIn ? "Go to dashboard" : "Start building"}
                   <ArrowRight className="size-4" />
                 </Link>
               </Button>
@@ -170,8 +253,9 @@ export default async function HomePage() {
       </main>
 
       <footer className="border-t">
-        <div className="mx-auto max-w-5xl px-6 py-8 text-sm text-muted-foreground">
-          {PRODUCT}, Nairobi
+        <div className="mx-auto flex max-w-6xl items-center justify-between px-6 py-8 text-sm text-muted-foreground">
+          <Wordmark className="opacity-70" />
+          <span>Nairobi</span>
         </div>
       </footer>
     </div>

@@ -1,0 +1,22 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" width="32" height="32">
+  <title>NikoForm</title>
+  <!--
+    NF monogram. The N's right stem is also the F's spine, so the two letters
+    share a stroke rather than sitting side by side. At 16px the letterforms
+    stop being readable and it resolves into a mark, which is what a favicon
+    has to survive.
+
+    Drawn on a 32 unit grid with a 3 unit stroke throughout, so every edge
+    lands on a whole pixel at 16px and 32px.
+  -->
+  <rect width="32" height="32" rx="7" fill="#3ECF8E"/>
+  <g fill="#131413">
+    <!-- N: left stem, diagonal, shared spine -->
+    <rect x="7" y="9" width="3" height="14"/>
+    <path d="M7 9 L10 9 L18 23 L15 23 Z"/>
+    <rect x="15" y="9" width="3" height="14"/>
+    <!-- F: two arms off the shared spine -->
+    <rect x="18" y="9" width="7" height="3"/>
+    <rect x="18" y="14.5" width="5" height="3"/>
+  </g>
+</svg>
