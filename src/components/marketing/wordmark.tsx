@@ -1,5 +1,5 @@
 import { cn } from "@/lib/utils";
-import { PRODUCT } from "@/lib/brand";
+import { PRODUCT, WORDMARK } from "@/lib/brand";
 
 /**
  * The NF mark, drawn as inline SVG so it inherits currentColor and stays
@@ -24,13 +24,31 @@ export function NFMark({ className }: { className?: string }) {
   );
 }
 
-/** Mark plus wordmark. The site always spells the name out; only the favicon is the mark alone. */
+/**
+ * Mark plus logotype. Set in Manrope at its heaviest weight, uppercase and
+ * tightly tracked, so it reads as a logo rather than as a heading that happens
+ * to be the name.
+ *
+ * The exclamation mark carries the accent while the letters stay in text
+ * colour. Colouring the whole word would put the wordmark in competition with
+ * every other green thing on the page; one glyph is enough to make it a mark.
+ *
+ * aria-label restores the ordinary spelling, so a screen reader says
+ * "NikoForm" rather than shouting an acronym.
+ */
 export function Wordmark({ className }: { className?: string }) {
   return (
-    <span className={cn("inline-flex items-center gap-2", className)}>
+    <span
+      aria-label={PRODUCT}
+      className={cn("inline-flex items-center gap-2", className)}
+    >
       <NFMark className="size-5 text-brand" />
-      <span className="font-display text-[0.9375rem] font-semibold tracking-tight">
-        {PRODUCT}
+      <span
+        aria-hidden="true"
+        className="font-display text-[0.9375rem] font-extrabold tracking-[-0.01em]"
+      >
+        {WORDMARK}
+        <span className="text-brand">!</span>
       </span>
     </span>
   );

@@ -7,4 +7,10 @@
  */
 
 export const PRODUCT = "NikoForm";
+
+/**
+ * The logotype, which is not the same string as the product name. Page titles,
+ * emails and running prose stay sentence case; only the mark shouts.
+ */
+export const WORDMARK = "NIKOFORM";
 export const TAGLINE = "Digital cards and event RSVPs, in one place";
