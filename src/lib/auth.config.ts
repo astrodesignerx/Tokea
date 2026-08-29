@@ -6,7 +6,7 @@ import { magicLinkEmail } from "@/lib/emails";
 import { rememberDevSignInLink } from "@/lib/dev-sign-in-links";
 import { SIGN_IN_LINK_MAX_AGE_SECONDS } from "@/lib/sign-in-link";
 
-const EMAIL_FROM = process.env.EMAIL_FROM ?? "hello@tokea.app";
+const EMAIL_FROM = process.env.EMAIL_FROM ?? "NikoForm <hello@nikoform.co.ke>";
 const isProduction = process.env.NODE_ENV === "production";
 
 const providers: NextAuthConfig["providers"] = [];

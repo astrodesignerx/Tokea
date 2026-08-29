@@ -1,7 +1,7 @@
 import { Resend } from "resend";
 
 const apiKey = process.env.RESEND_API_KEY;
-const from = process.env.EMAIL_FROM ?? "hello@tokea.app";
+const from = process.env.EMAIL_FROM ?? "NikoForm <hello@nikoform.co.ke>";
 
 const resend = apiKey && !apiKey.startsWith("re_dev_placeholder") ? new Resend(apiKey) : null;
 
