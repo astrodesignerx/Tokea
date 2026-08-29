@@ -99,7 +99,7 @@ export function AuthForm({ mode }: { mode: Mode }) {
         {devLink && (
           <div className="rounded-md border border-dashed border-amber-500/60 bg-amber-500/5 p-4 text-sm space-y-2">
             <p className="font-medium text-amber-700 dark:text-amber-500">
-              Development only — the email could not be sent
+              Development only: the email could not be sent
             </p>
             <p className="text-muted-foreground text-xs">
               Your email provider rejected the message, so the link is shown here instead. This

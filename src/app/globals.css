@@ -3,7 +3,7 @@
 /*
   Tailwind v4's `dark:` variant follows prefers-color-scheme by default. The
   theme here is an explicit user choice held on <html class="dark">, so point
-  the variant at that class instead — otherwise a dark: utility would ignore
+  the variant at that class instead. Otherwise a dark: utility would ignore
   the toggle and follow the OS.
 */
 @custom-variant dark (&:where(.dark, .dark *));
@@ -103,8 +103,8 @@
    opt-in ambient loop, stored per event as cover_motion = "drift".
 
    Both animate transform/opacity only, so they composite on the GPU. Drift is
-   delayed until the entrance finishes and starts at scale(1) — exactly where
-   settle lands — so the handover between the two is invisible.
+   delayed until the entrance finishes and starts at scale(1), exactly where
+   settle lands, so the handover between the two is invisible.
 --------------------------------------------------------------------------- */
 
 @keyframes cover-settle {

@@ -105,7 +105,7 @@ export function CsvImport({ eventId }: Props) {
             {preview.slice(0, 8).map((r, i) => (
               <li key={i}>
                 {r.name} &lt;{r.email}&gt;
-                {r.phone ? ` · ${r.phone}` : ""}
+                {r.phone ? `, ${r.phone}` : ""}
               </li>
             ))}
             {preview.length > 8 && <li>…and {preview.length - 8} more</li>}

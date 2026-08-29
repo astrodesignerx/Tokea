@@ -5,7 +5,7 @@
  * Nothing here may ever run in production, so every entry point checks
  * NODE_ENV, the value is handed out at most once, and it expires on its own.
  *
- * Server-side only — never import this from a client component.
+ * Server-side only. Never import this from a client component.
  */
 const links = new Map<string, { url: string; storedAt: number }>();
 

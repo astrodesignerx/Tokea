@@ -21,7 +21,7 @@ export type EventTemplateProps = {
  * The cover photo, with its entrance and optional ambient drift.
  *
  * The scale in both animations means the image overflows its box mid-motion,
- * so the parent must clip it — otherwise the page gains a horizontal scrollbar.
+ * so the parent must clip it, otherwise the page gains a horizontal scrollbar.
  */
 export function CoverImage({
   url,

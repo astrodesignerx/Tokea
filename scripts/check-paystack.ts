@@ -45,7 +45,7 @@ async function main() {
 
   console.log("1. Configuration");
   if (!SECRET) {
-    warn("PAYSTACK_SECRET_KEY is not set — live API checks skipped.");
+    warn("PAYSTACK_SECRET_KEY is not set, so live API checks are skipped.");
     warn("The webhook checks below still run and still prove signature handling.");
   } else if (!SECRET.startsWith("sk_")) {
     fail("PAYSTACK_SECRET_KEY does not look like a secret key (expected sk_test_ or sk_live_).");
@@ -75,7 +75,7 @@ async function main() {
 
   const unsigned = await postWebhook(body, null).catch(() => null);
   if (!unsigned) {
-    fail(`Could not reach ${BASE}/api/webhooks/paystack — is the dev server running?`);
+    fail(`Could not reach ${BASE}/api/webhooks/paystack. Is the dev server running?`);
     console.log("\nStopping: the webhook checks need the app running.");
     process.exitCode = 1;
     return;
@@ -90,7 +90,7 @@ async function main() {
   if (SECRET) {
     const good = await postWebhook(body, sign(body, SECRET));
     if (good.status === 401) {
-      fail("Correctly signed request was rejected — signature logic is broken");
+      fail("Correctly signed request was rejected, so the signature logic is broken");
     } else {
       pass(`Correctly signed request accepted (HTTP ${good.status})`);
     }
@@ -99,7 +99,7 @@ async function main() {
     if (tampered.status === 401) pass("Tampered body rejected");
     else fail(`Tampered body returned ${tampered.status}, expected 401`);
   } else {
-    warn("Skipped positive signature check — needs the real secret.");
+    warn("Skipped positive signature check, which needs the real secret.");
   }
 
   console.log(

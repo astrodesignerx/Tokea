@@ -41,7 +41,7 @@ export async function sendConfirmationEmail(guestId: string, eventId: string) {
       hour: "numeric",
       minute: "2-digit",
     }).format(event.starts_at),
-    venue: [event.venue_name, event.venue_address].filter(Boolean).join(" · "),
+    venue: [event.venue_name, event.venue_address].filter(Boolean).join(", "),
     confirmationUrl,
     qrDataUrl,
     addToCalendarUrl: icsUrl,

@@ -9,7 +9,7 @@ import { settlePayment } from "@/lib/payments";
  * to the browser, so a charge is confirmed here or not at all.
  *
  * Paystack retries every 3 minutes (4 times), then hourly for 72 hours, until
- * it receives a 200 — so this answers 200 for anything it has understood, and
+ * it receives a 200, so this answers 200 for anything it has understood, and
  * `settlePayment` is built to run repeatedly without repeating its effects.
  */
 export async function POST(req: Request) {

@@ -7,7 +7,7 @@ import { settlePayment } from "@/lib/payments";
  *
  * An M-Pesa prompt can sit unanswered on a phone for a minute or more, and the
  * webhook may arrive before, during or after the guest returns. This polls,
- * and — because it calls `settlePayment` too — doubles as a second settlement
+ * and, because it calls `settlePayment` too, doubles as a second settlement
  * path when the webhook is slow or blocked. Safe to hammer: settlement has an
  * effect only once.
  *

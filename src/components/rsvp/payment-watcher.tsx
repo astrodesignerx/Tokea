@@ -5,7 +5,7 @@ import * as React from "react";
 /**
  * Follows a pending payment until it resolves, then reloads the page.
  *
- * M-Pesa charges settle out of band — the prompt can sit on a phone long after
+ * M-Pesa charges settle out of band, and the prompt can sit on a phone long after
  * the guest is returned to this page. Each poll also nudges the server to
  * verify with Paystack, so a slow or blocked webhook does not strand anyone.
  */
@@ -32,7 +32,7 @@ export function PaymentWatcher({ reference }: { reference: string }) {
           }
         }
       } catch {
-        // Offline or a blip — just try again.
+        // Offline or a blip, so just try again.
       }
       if (!cancelled) window.setTimeout(poll, 3000);
     }

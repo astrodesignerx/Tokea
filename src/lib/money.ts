@@ -2,7 +2,7 @@
  * Money handling for Tokea.
  *
  * Amounts are stored and passed around as integers in the currency's minor
- * unit (KES cents), never as floats — 0.1 * 100 is 10.000000000000002, and
+ * unit (KES cents), never as floats. 0.1 * 100 is 10.000000000000002, and
  * that class of error is unacceptable anywhere near a price.
  *
  * Organisers think in shillings, so conversion happens once at the form edge:
@@ -18,7 +18,7 @@ export const DEFAULT_CURRENCY = "KES";
  * Guards against a typo turning into a life-changing ticket price.
  *
  * Kept well under the hard limit: `price_amount` is a Prisma `Int`, which is a
- * Postgres int4 and overflows above 2,147,483,647 minor units — KES 21,474,836.
+ * Postgres int4 and overflows above 2,147,483,647 minor units, or KES 21,474,836.
  * Anything approaching that needs a BigInt column, not a bigger constant.
  */
 const MAX_MINOR_UNITS = 1_000_000_000; // KES 10,000,000.00
@@ -71,7 +71,7 @@ export type EventPricing = {
 /**
  * The single place anything is allowed to decide an event costs money.
  *
- * Amounts survive a switch back to free, so `payment_mode` is checked first —
+ * Amounts survive a switch back to free, so `payment_mode` is checked first,
  * reading `price_amount` directly would charge for a free event.
  */
 export function eventPricing(event: {

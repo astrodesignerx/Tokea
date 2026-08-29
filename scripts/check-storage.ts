@@ -49,7 +49,7 @@ function checkEnv(): boolean {
     }
   }
   if (process.env["STORAGE_REGION"] !== "auto") {
-    warn(`STORAGE_REGION is "${process.env["STORAGE_REGION"]}" — R2 expects "auto"`);
+    warn(`STORAGE_REGION is "${process.env["STORAGE_REGION"]}" , but R2 expects "auto"`);
   }
   return ok;
 }
@@ -78,7 +78,7 @@ async function checkCors(client: S3Client, bucket: string, uploadUrl: string) {
 
   if (!allowOrigin) {
     fail(`Preflight from ${origin} was refused (HTTP ${res.status}).`);
-    fail("Browser uploads will be blocked. Add a CORS policy in the bucket's Settings —");
+    fail("Browser uploads will be blocked. Add a CORS policy in the bucket's Settings:");
     fail("see the Storage section of README.md for the exact JSON.");
     process.exitCode = 1;
     return;
@@ -96,7 +96,7 @@ async function checkCors(client: S3Client, bucket: string, uploadUrl: string) {
     pass("Content-Type header is allowed");
   } else {
     fail(`Content-Type is not an allowed header (got "${allowHeaders}").`);
-    fail('Add "Content-Type" to AllowedHeaders — uploads send it and will be rejected without it.');
+    fail('Add "Content-Type" to AllowedHeaders. Uploads send it and will be rejected without it.');
     process.exitCode = 1;
   }
 
@@ -176,7 +176,7 @@ async function main() {
 
   console.log(
     process.exitCode === 1
-      ? "\nSome checks failed — see above.\n"
+      ? "\nSome checks failed. See above.\n"
       : "\nStorage is configured correctly. Cover uploads will work.\n",
   );
 }

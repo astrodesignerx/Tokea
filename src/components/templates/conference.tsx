@@ -14,7 +14,7 @@ export function Conference(props: EventTemplateProps) {
           {props.venueName && (
             <p className="text-sm text-slate-600">
               {props.venueName}
-              {props.venueAddress ? ` · ${props.venueAddress}` : ""}
+              {props.venueAddress ? `, ${props.venueAddress}` : ""}
             </p>
           )}
         </div>

@@ -100,7 +100,7 @@ export function GuestTable({ eventId, guests }: Props) {
                     {g.invited ? <Badge variant="success">sent</Badge> : <Badge variant="muted">draft</Badge>}
                   </td>
                   <td className="px-4 py-3">
-                    {g.checkedIn ? <Badge variant="success">checked in</Badge> : <Badge variant="muted">—</Badge>}
+                    {g.checkedIn ? <Badge variant="success">checked in</Badge> : <Badge variant="muted">not yet</Badge>}
                   </td>
                   <td className="px-4 py-3 text-right">
                     <Button

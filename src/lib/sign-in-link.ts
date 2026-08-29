@@ -5,7 +5,7 @@
  * a bearer credential sitting in an inbox. 15 minutes matches the intent the
  * original UI copy described and is comfortably longer than delivery takes.
  *
- * Safe to import from client components — no server-only dependencies. The
+ * Safe to import from client components, with no server-only dependencies. The
  * sign-in UI derives its wording from the same constant the provider is
  * configured with, so the two cannot disagree.
  */

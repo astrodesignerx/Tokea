@@ -43,7 +43,7 @@ export default async function EventDetailPage({ params }: { params: Promise<Para
               </span>
               {pricing.deposit != null && (
                 <>
-                  {" · "}
+                  {", "}
                   {formatMoney(pricing.deposit, pricing.currency)} deposit,{" "}
                   {formatMoney(pricing.balanceAfterDeposit ?? 0, pricing.currency)} at the door
                 </>

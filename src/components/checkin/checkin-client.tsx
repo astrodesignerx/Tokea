@@ -86,7 +86,7 @@ export function CheckinClient({ eventId, initial }: Props) {
 
         const owed =
           result.balanceDue > 0 && result.currency
-            ? ` — collect ${formatMoney(result.balanceDue, result.currency)}`
+            ? `, collect ${formatMoney(result.balanceDue, result.currency)}`
             : "";
 
         if (result.firstTime) {
@@ -184,7 +184,7 @@ export function CheckinClient({ eventId, initial }: Props) {
  * The most recent scan, sized for someone standing at a door.
  *
  * Whoever is scanning is looking at a phone at arm's length with a queue
- * behind them, so the amount to collect is the largest thing here — reading it
+ * behind them, so the amount to collect is the largest thing here, since reading it
  * off a toast or a list row is too easy to miss.
  */
 function LastScan({ item }: { item: FeedItem }) {
@@ -229,7 +229,7 @@ function LastScan({ item }: { item: FeedItem }) {
       <div className="min-w-0">
         <div className="text-sm font-medium truncate">{guestName}</div>
         <div className="text-xs text-green-50">
-          {firstTime ? "Checked in · nothing to collect" : "Already checked in"}
+          {firstTime ? "Checked in, nothing to collect" : "Already checked in"}
         </div>
       </div>
       <Check className="size-5 shrink-0" />

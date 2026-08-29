@@ -8,7 +8,7 @@ export const TEMPLATE_OPTIONS = [
 
 export type TemplateId = (typeof TEMPLATE_OPTIONS)[number]["value"];
 
-// Single source of truth for validation — keeps the zod enum in sync with the
+// Single source of truth for validation, keeping the zod enum in sync with the
 // options the event form renders.
 export const TEMPLATE_IDS = TEMPLATE_OPTIONS.map((t) => t.value) as [TemplateId, ...TemplateId[]];
 

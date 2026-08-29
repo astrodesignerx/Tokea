@@ -50,7 +50,7 @@ export default async function GuestsPage({ params }: { params: Promise<Params> }
         <div>
           <h1 className="text-3xl font-semibold tracking-tight">Guests</h1>
           <p className="text-sm text-muted-foreground mt-1">
-            {event.title} · {guests.length} total
+            {event.title}, {guests.length} total
           </p>
         </div>
         <div className="flex items-center gap-2">

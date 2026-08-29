@@ -27,14 +27,14 @@ const eventFields = z.object({
   template: z.enum(TEMPLATE_IDS),
   cover_motion: z.enum(COVER_MOTION_IDS).default("none"),
   // "No reminder" arrives as null from the form. z.null() has to be matched
-  // before the coercing branch — z.coerce.number() turns null into 0, which
+  // before the coercing branch, because z.coerce.number() turns null into 0, which
   // reads downstream as "remind on the day of the event".
   reminder_days_before: z
     .union([z.literal(""), z.null(), z.coerce.number().int().min(0).max(30)])
     .optional()
     .transform((v) => (v === "" || v == null ? null : v)),
 
-  // Amounts arrive already in minor units — the form converts once, at the
+  // Amounts arrive already in minor units. The form converts once, at the
   // input edge. Trusting the client is fine here because these are the
   // organiser's own prices for their own event. What a *guest* is charged is
   // read back off this row, never sent by a browser.
@@ -95,7 +95,7 @@ export async function createEvent(input: EventFormInput) {
   };
 
   // Insert and let the unique index on `slug` arbitrate. Checking for a free
-  // slug before inserting can't be made correct — another request can claim it
+  // slug before inserting can't be made correct, because another request can claim it
   // between the read and the write.
   let event;
   for (let attempt = 1; ; attempt++) {

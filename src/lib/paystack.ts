@@ -22,7 +22,7 @@ export function isPaystackConfigured(): boolean {
 /**
  * Paystack accepts alphanumerics plus `-`, `.` and `=` in a reference, so a
  * prefixed UUID is safe. Generating it ourselves is what makes the whole flow
- * idempotent — it is the key both the webhook and the browser settle against.
+ * idempotent: it is the key both the webhook and the browser settle against.
  */
 export function newReference(): string {
   return `tokea-${randomUUID()}`;
@@ -106,7 +106,7 @@ export async function verifyTransaction(
  * Verifies the `x-paystack-signature` header: HMAC SHA512 of the raw request
  * body, signed with the secret key.
  *
- * Must be given the exact bytes received — re-serialising the parsed JSON
+ * Must be given the exact bytes received. Re-serialising the parsed JSON
  * changes key order and whitespace, and the digest will never match.
  */
 export function verifyWebhookSignature(rawBody: string, signature: string | null): boolean {

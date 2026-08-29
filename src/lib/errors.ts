@@ -20,7 +20,7 @@ function tokenize(constraintName: string): string[] {
  *
  * Prisma reports this differently depending on how it reaches the database.
  * With a driver adapter (this project uses @prisma/adapter-pg) there is no
- * `meta.target` at all — the constraint arrives nested under the adapter error.
+ * `meta.target` at all. The constraint arrives nested under the adapter error.
  * The classic query engine sets `meta.target` instead, as either a field array
  * or a constraint name. All four shapes are handled because getting this wrong
  * fails silently: a duplicate is simply misreported rather than throwing.
@@ -48,7 +48,7 @@ function uniqueViolationFields(err: Prisma.PrismaClientKnownRequestError): strin
 /**
  * True when `err` is a unique-constraint violation (Prisma P2002).
  *
- * Pass `field` to narrow to one column — without it, a handler meant for a
+ * Pass `field` to narrow to one column. Without it, a handler meant for a
  * duplicate email would also swallow a duplicate slug.
  */
 export function isUniqueViolation(err: unknown, field?: string): boolean {

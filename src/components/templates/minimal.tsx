@@ -14,7 +14,7 @@ export function Minimal(props: EventTemplateProps) {
           {props.venueName && (
             <p className="text-sm text-stone-600">
               {props.venueName}
-              {props.venueAddress ? ` — ${props.venueAddress}` : ""}
+              {props.venueAddress ? `, ${props.venueAddress}` : ""}
             </p>
           )}
         </div>

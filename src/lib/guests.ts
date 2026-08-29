@@ -92,7 +92,7 @@ export async function sendPendingInvites(eventId: string) {
       guestName: guest.name,
       eventTitle: event.title,
       eventDate: formatForEmail(event.starts_at, event.timezone),
-      venue: [event.venue_name, event.venue_address].filter(Boolean).join(" · "),
+      venue: [event.venue_name, event.venue_address].filter(Boolean).join(", "),
       rsvpUrl,
     });
     const result = await sendEmail({ to: guest.email, subject: tpl.subject, html: tpl.html, text: tpl.text });

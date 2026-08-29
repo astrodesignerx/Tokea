@@ -6,7 +6,7 @@ import { isTheme, THEME_STORAGE_KEY, type ResolvedTheme, type Theme } from "@/li
 type ThemeContextValue = {
   /** What the user chose, including "system". */
   theme: Theme;
-  /** What "system" currently resolves to — what is actually on screen. */
+  /** What "system" currently resolves to, meaning what is actually on screen. */
   resolvedTheme: ResolvedTheme;
   setTheme: (next: Theme) => void;
 };
@@ -17,7 +17,7 @@ const DARK_QUERY = "(prefers-color-scheme: dark)";
 
 /*
   The preference lives in localStorage and the system setting lives in
-  matchMedia — both are external stores, so they are read through
+  matchMedia. Both are external stores, so they are read through
   useSyncExternalStore rather than mirrored into state inside an effect.
 */
 
@@ -94,7 +94,7 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
     try {
       localStorage.setItem(THEME_STORAGE_KEY, next);
     } catch {
-      // Storage blocked (private browsing) — the choice just won't persist.
+      // Storage blocked (private browsing), so the choice just won't persist.
     }
     notifyPreferenceChanged();
   }, []);

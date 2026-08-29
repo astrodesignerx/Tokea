@@ -1,4 +1,4 @@
-// Tokea data model — v0
+// Tokea data model, v0
 // Spec: organizer creates event → guest RSVPs via magic link → organizer tracks → QR check-in at door.
 
 generator client {
@@ -79,7 +79,7 @@ model Event {
   venue_name           String?
   venue_address        String?
   cover_image_url      String?
-  // "none" | "drift" — ambient motion on the cover. Only the image-led and
+  // "none" | "drift": ambient motion on the cover. Only the image-led and
   // type-led templates render a cover, so it has no effect on the others.
   cover_motion         String    @default("none")
 
@@ -89,7 +89,7 @@ model Event {
   // without checking the mode first.
   payment_mode         String    @default("free")
   currency             String    @default("KES")
-  // Minor units (KES cents). Integers only — never store money as a float.
+  // Minor units (KES cents). Integers only, never floats.
   price_amount         Int?
   // Optional part-payment that secures a spot; the balance is settled at the
   // door. Null means the organiser is not offering a deposit.
@@ -158,8 +158,8 @@ model CheckIn {
   guest Guest @relation(fields: [guest_id], references: [id], onDelete: Cascade)
 }
 
-/// One attempt to pay for a spot. A guest may have several — an abandoned
-/// M-Pesa prompt is routine — but only ever one with status "success".
+/// One attempt to pay for a spot. A guest may have several, since an
+/// abandoned M-Pesa prompt is routine, but only ever one with status "success".
 model Payment {
   id       String @id @default(cuid())
   /// Our own idempotency key, sent to Paystack as its reference.
@@ -250,8 +250,8 @@ model ContactCard {
   short_code String @unique
 
   // Where short_code currently sends people. Stored rather than derived from
-  // the slug, so a code can be repointed — to a renamed card, a successor, or
-  // an external URL — without reprinting anything.
+  // the slug, so a code can be repointed (to a renamed card, a successor, or
+  // an external URL) without reprinting anything.
   destination String
 
   first_name   String

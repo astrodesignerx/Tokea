@@ -22,7 +22,7 @@ export function ImageLed(props: EventTemplateProps) {
           {props.venueName && (
             <p className="text-base text-white/80">
               {props.venueName}
-              {props.venueAddress ? ` · ${props.venueAddress}` : ""}
+              {props.venueAddress ? `, ${props.venueAddress}` : ""}
             </p>
           )}
           {props.description && <p className="text-base text-white/85 max-w-xl mx-auto whitespace-pre-line">{props.description}</p>}

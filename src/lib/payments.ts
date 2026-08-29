@@ -40,7 +40,7 @@ export async function guestPaymentState(guestId: string) {
 /**
  * Creates a pending payment and hands back a Paystack checkout URL.
  *
- * The amount is read from the event, never from the caller — the browser only
+ * The amount is read from the event, never from the caller. The browser only
  * gets to say "deposit" or "full".
  */
 export async function startPayment(input: {
@@ -126,8 +126,8 @@ export type SettleOutcome =
  *
  * The single-transition guarantee is the `status: "pending"` filter on the
  * update: whichever caller wins flips the row and gets count 1, everyone else
- * gets 0 and does nothing. The confirmation email — which contains a working
- * door pass — is sent only by the winner.
+ * gets 0 and does nothing. The confirmation email (which contains a working
+ * door pass) is sent only by the winner.
  */
 export async function settlePayment(reference: string): Promise<SettleOutcome> {
   const payment = await prisma.payment.findUnique({ where: { reference } });
@@ -139,7 +139,7 @@ export async function settlePayment(reference: string): Promise<SettleOutcome> {
 
   const verified = await verifyTransaction(reference);
   if (!verified.ok) {
-    // Could not reach Paystack — leave it pending so a retry can settle it.
+    // Could not reach Paystack, so leave it pending for a retry to settle.
     return { status: "pending" };
   }
 
@@ -153,7 +153,7 @@ export async function settlePayment(reference: string): Promise<SettleOutcome> {
       });
       return { status: "failed", reason: txn.status };
     }
-    // ongoing / pending — an M-Pesa prompt still sitting on someone's phone
+    // ongoing / pending, an M-Pesa prompt still sitting on someone's phone
     return { status: "pending" };
   }
 

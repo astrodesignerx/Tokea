@@ -9,8 +9,8 @@ const REWIND_RATE = 2.2;
 
 type Props = {
   /**
-   * Action text. Name the thing being acted on — "Hold to delete event", not
-   * "Hold to delete" — so the label reads unambiguously on its own.
+   * Action text. Name the thing being acted on: "Hold to delete event", not
+   * "Hold to delete", so the label reads unambiguously on its own.
    */
   label: string;
   icon?: React.ReactNode;

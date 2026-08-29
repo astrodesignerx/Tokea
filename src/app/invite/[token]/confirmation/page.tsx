@@ -88,7 +88,7 @@ export default async function ConfirmationPage({
               {resolved.event.venue_name && (
                 <p className="text-sm text-muted-foreground">
                   {resolved.event.venue_name}
-                  {resolved.event.venue_address ? ` · ${resolved.event.venue_address}` : ""}
+                  {resolved.event.venue_address ? `, ${resolved.event.venue_address}` : ""}
                 </p>
               )}
             </div>

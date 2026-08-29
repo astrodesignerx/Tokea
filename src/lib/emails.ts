@@ -22,7 +22,7 @@ function layout({ heading, body }: { heading: string; body: string }): EmailTemp
     <p style="color:#888;font-size:12px;text-align:center;margin:16px 0 0">Sent by NikoForm</p>
   </div>
 </body></html>`;
-  const text = `${heading}\n\n${stripHtml(body)}\n\n— Sent by NikoForm`;
+  const text = `${heading}\n\n${stripHtml(body)}\n\nSent by NikoForm`;
   return { subject: "", html, text };
 }
 
@@ -73,7 +73,7 @@ export function rsvpConfirmationEmail(input: {
   icsUrl: string;
 }): EmailTemplate {
   const body = `
-    <p style="margin:0 0 16px">Thanks, ${esc(input.guestName)} — your RSVP is confirmed.</p>
+    <p style="margin:0 0 16px">Thanks, ${esc(input.guestName)}. Your RSVP is confirmed.</p>
     <p style="margin:0 0 16px">Show this QR code at the door for fast check-in.</p>
     <div style="text-align:center;margin:24px 0"><img src="${esc(input.qrDataUrl)}" alt="Your QR code" width="200" height="200" style="display:inline-block;border:1px solid #eee;padding:8px;border-radius:8px" /></div>
     ${row("When", input.eventDate)}
@@ -107,7 +107,7 @@ export function reminderEmail(input: {
 }): EmailTemplate {
   const body = `
     <p style="margin:0 0 16px">Hi ${esc(input.guestName)},</p>
-    <p style="margin:0 0 16px">Quick reminder — <strong>${esc(input.eventTitle)}</strong> is coming up.</p>
+    <p style="margin:0 0 16px">Quick reminder: <strong>${esc(input.eventTitle)}</strong> is coming up.</p>
     ${row("When", input.eventDate)}
     ${row("Where", input.venue || null)}
     <div style="margin:24px 0">${button(input.rsvpUrl, "View invitation")}</div>

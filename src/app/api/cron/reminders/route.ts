@@ -64,7 +64,7 @@ export async function GET(req: Request) {
         guestName: guest.name,
         eventTitle: event.title,
         eventDate,
-        venue: [event.venue_name, event.venue_address].filter(Boolean).join(" · "),
+        venue: [event.venue_name, event.venue_address].filter(Boolean).join(", "),
         rsvpUrl: `${baseUrl}/invite/${token}`,
       });
       const result = await sendEmail({ to: guest.email, subject: tpl.subject, html: tpl.html, text: tpl.text });
