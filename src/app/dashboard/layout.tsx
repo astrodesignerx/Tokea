@@ -3,34 +3,36 @@ import { requireUser } from "@/lib/require-user";
 import { signOutAction } from "@/lib/actions/auth";
 import { ThemeToggle } from "@/components/theme/theme-toggle";
 import { Button } from "@/components/ui/button";
+import { Wordmark } from "@/components/marketing/wordmark";
+import { DashNav } from "@/components/dashboard/dash-nav";
+import { PRODUCT } from "@/lib/brand";
 
-export default async function DashboardLayout({ children }: { children: React.ReactNode }) {
+export default async function DashboardLayout({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
   const user = await requireUser();
+
   return (
-    <div className="min-h-full flex flex-col">
-      <header className="border-b">
-        <div className="mx-auto max-w-5xl px-6 h-14 flex items-center justify-between">
-          <div className="flex items-center gap-6">
-            <Link href="/dashboard" className="font-semibold tracking-tight">
-              NikoForm
+    <div className="flex min-h-full flex-col">
+      {/*
+        Sticky and translucent, matching the marketing header, so moving
+        between the two does not feel like crossing into a different product.
+      */}
+      <header className="sticky top-0 z-40 border-b bg-background/80 backdrop-blur">
+        <div className="mx-auto flex h-14 max-w-6xl items-center justify-between px-6">
+          <div className="flex items-center gap-7">
+            <Link href="/" aria-label={PRODUCT}>
+              <Wordmark />
             </Link>
-            <nav className="flex items-center gap-4 text-sm">
-              <Link
-                href="/dashboard"
-                className="text-muted-foreground transition-colors hover:text-foreground"
-              >
-                Events
-              </Link>
-              <Link
-                href="/dashboard/companies"
-                className="text-muted-foreground transition-colors hover:text-foreground"
-              >
-                Cards
-              </Link>
-            </nav>
+            <DashNav />
           </div>
-          <div className="flex items-center gap-3 text-sm">
-            <span className="text-muted-foreground hidden sm:inline">{user.email}</span>
+
+          <div className="flex items-center gap-2 text-sm">
+            <span className="hidden text-muted-foreground sm:inline">
+              {user.email}
+            </span>
             <ThemeToggle />
             <form action={signOutAction}>
               <Button type="submit" variant="ghost" size="sm">
@@ -40,6 +42,7 @@ export default async function DashboardLayout({ children }: { children: React.Re
           </div>
         </div>
       </header>
+
       <main className="flex-1">{children}</main>
     </div>
   );

@@ -6,9 +6,6 @@
  */
 
 .landing {
-  --ease: cubic-bezier(0, 0, 0.2, 1);
-  --fast: 200ms;
-
   /*
    * Read by the canvas in components/marketing/dot-field.tsx. The unlit tone
    * differs per theme: a mid grey that reads as texture on near-black is
@@ -129,35 +126,6 @@
   border-color: hsl(var(--brand) / 0.5);
 }
 
-/* --- panels --------------------------------------------------------------- */
-
-/*
- * Cards lift very slightly and their border warms towards the accent. The
- * translate is the whole movement: no shadow animation, which would force
- * repaints.
- */
-.landing .panel {
-  border-radius: var(--radius-panel);
-  border: 1px solid hsl(var(--border));
-  background: hsl(var(--card));
-  transition:
-    transform var(--fast) var(--ease),
-    border-color var(--fast) var(--ease);
-}
-
-.landing .panel:hover {
-  transform: translateY(-2px);
-  border-color: hsl(var(--brand) / 0.35);
-}
-
-/* The thin rule that runs above a section heading. */
-.landing .eyebrow {
-  font-family: var(--font-mono), ui-monospace, monospace;
-  font-size: 0.6875rem;
-  letter-spacing: 0.14em;
-  text-transform: uppercase;
-  color: hsl(var(--brand));
-}
 
 @media (prefers-reduced-motion: reduce) {
   .landing *,

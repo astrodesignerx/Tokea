@@ -33,7 +33,10 @@ export default async function CompaniesPage() {
     <div className="mx-auto max-w-5xl px-6 py-10">
       <div className="flex items-center justify-between gap-4">
         <div>
-          <h1 className="text-3xl font-semibold tracking-tight">Companies</h1>
+          <p className="nf-eyebrow">Digital business cards</p>
+          <h1 className="mt-3 font-display text-3xl font-medium tracking-tight">
+            Companies
+          </h1>
           <p className="mt-1 text-sm text-muted-foreground">
             {companies.length === 0
               ? "Add a company to start building its digital cards."
@@ -48,10 +51,10 @@ export default async function CompaniesPage() {
       </div>
 
       {companies.length === 0 ? (
-        <Card className="mt-12 border-dashed">
+        <Card className="mt-12 border-dashed bg-transparent">
           <CardContent className="p-12 text-center">
-            <IdCard className="mx-auto size-8 text-muted-foreground" />
-            <h2 className="mt-4 text-lg font-medium">No companies yet</h2>
+            <IdCard className="mx-auto size-8 text-brand" />
+            <h2 className="mt-4 font-display text-lg font-medium">No companies yet</h2>
             <p className="mt-1 text-sm text-muted-foreground">
               Each company holds its own branding and its team&rsquo;s cards.
             </p>

@@ -28,7 +28,10 @@ export default async function NewCardPage({ params }: PageProps) {
         <ArrowLeft className="size-4" /> {org.name}
       </Link>
 
-      <h1 className="mt-4 text-3xl font-semibold tracking-tight">New card</h1>
+      <p className="nf-eyebrow mt-6">Digital business cards</p>
+      <h1 className="mt-3 font-display text-3xl font-medium tracking-tight">
+        New card
+      </h1>
       <p className="mt-1 text-sm text-muted-foreground">
         A page, a saveable contact and a permanent QR code are created together.
       </p>

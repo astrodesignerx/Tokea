@@ -63,7 +63,7 @@ export function CompanyGrid({ companies }: { companies: CompanySummary[] }) {
               /* Stagger so the grid arrives in sequence rather than all at once. */
               style={{ animationDelay: `${Math.min(index, 8) * 40}ms` }}
             >
-              <Card className="h-full overflow-hidden transition-[transform,box-shadow] duration-200 ease-[cubic-bezier(0.22,1,0.36,1)] group-hover:-translate-y-0.5 group-hover:shadow-md">
+              <Card className="nf-panel nf-panel-interactive h-full overflow-hidden">
                 {/* A sliver of the company's own palette, so the grid is
                     scannable by brand rather than by reading every name. */}
                 <div
@@ -81,7 +81,7 @@ export function CompanyGrid({ companies }: { companies: CompanySummary[] }) {
                     />
                   </div>
 
-                  <h2 className="mt-4 truncate font-medium">{company.name}</h2>
+                  <h2 className="mt-4 truncate font-display font-medium">{company.name}</h2>
                   {company.tagline && (
                     <p className="mt-1 line-clamp-2 text-sm text-muted-foreground">
                       {company.tagline}

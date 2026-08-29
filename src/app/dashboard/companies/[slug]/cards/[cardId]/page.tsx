@@ -35,7 +35,7 @@ export default async function EditCardPage({ params }: PageProps) {
         <ArrowLeft className="size-4" /> {card.organisation.name}
       </Link>
 
-      <h1 className="mt-4 text-3xl font-semibold tracking-tight">
+      <h1 className="mt-4 font-display text-3xl font-medium tracking-tight">
         {fullName(card)}
       </h1>
 
@@ -58,7 +58,7 @@ export default async function EditCardPage({ params }: PageProps) {
       />
 
       <section className="mt-12 max-w-xl">
-        <h2 className="text-sm font-medium">Recent scans</h2>
+        <h2 className="nf-eyebrow">Recent scans</h2>
         {scans.length === 0 ? (
           <p className="mt-2 text-sm text-muted-foreground">
             No scans yet. They appear here as soon as someone opens the QR code.

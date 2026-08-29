@@ -17,7 +17,10 @@ export default async function DashboardPage() {
     <div className="mx-auto max-w-5xl px-6 py-10">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-semibold tracking-tight">Your events</h1>
+          <p className="nf-eyebrow">Invitations and RSVPs</p>
+          <h1 className="mt-3 font-display text-3xl font-medium tracking-tight">
+            Your events
+          </h1>
           <p className="text-sm text-muted-foreground mt-1">
             {events.length === 0
               ? "Create your first event to get started."
@@ -33,7 +36,7 @@ export default async function DashboardPage() {
 
       {events.length === 0 ? (
         <div className="mt-12 rounded-lg border border-dashed p-12 text-center">
-          <h2 className="text-lg font-medium">No events yet</h2>
+          <h2 className="font-display text-lg font-medium">No events yet</h2>
           <p className="text-sm text-muted-foreground mt-1">Create one and you can invite guests in minutes.</p>
           <Button asChild className="mt-6">
             <Link href="/dashboard/events/new">Create your first event</Link>
@@ -43,7 +46,7 @@ export default async function DashboardPage() {
         <div className="mt-8 grid gap-4 sm:grid-cols-2">
           {events.map((event) => (
             <Link key={event.id} href={`/dashboard/events/${event.id}`}>
-              <Card className="overflow-hidden hover:shadow-md transition-shadow h-full">
+              <Card className="nf-panel nf-panel-interactive h-full overflow-hidden">
                 {event.cover_image_url && (
                   <div
                     className="h-32 bg-cover bg-center"

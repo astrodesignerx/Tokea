@@ -47,7 +47,7 @@ export default async function CompanyPage({ params }: PageProps) {
             {org.logo_url && (
               <LogoPlate src={org.logo_url} name={org.name} className="h-9" />
             )}
-            <h1 className="truncate text-3xl font-semibold tracking-tight">
+            <h1 className="truncate font-display text-3xl font-medium tracking-tight">
               {org.name}
             </h1>
           </div>
@@ -72,9 +72,9 @@ export default async function CompanyPage({ params }: PageProps) {
       </div>
 
       {org.cards.length === 0 ? (
-        <Card className="mt-10 border-dashed">
+        <Card className="mt-10 border-dashed bg-transparent">
           <CardContent className="p-12 text-center">
-            <h2 className="text-lg font-medium">No cards yet</h2>
+            <h2 className="font-display text-lg font-medium">No cards yet</h2>
             <p className="mt-1 text-sm text-muted-foreground">
               Add someone and they get a page, a vCard and a permanent QR code.
             </p>
@@ -90,11 +90,11 @@ export default async function CompanyPage({ params }: PageProps) {
           {org.cards.map((card) => {
             const permanent = `${origin}${shortPath(card.short_code)}`;
             return (
-              <Card key={card.id} className="overflow-hidden">
+              <div key={card.id} className="nf-panel nf-panel-interactive overflow-hidden">
                 <CardContent className="p-5">
                   <div className="flex items-start justify-between gap-3">
                     <div className="min-w-0">
-                      <h2 className="truncate font-medium">{fullName(card)}</h2>
+                      <h2 className="truncate font-display font-medium">{fullName(card)}</h2>
                       <p className="mt-0.5 truncate text-sm text-muted-foreground">
                         {card.title}
                       </p>
@@ -109,7 +109,7 @@ export default async function CompanyPage({ params }: PageProps) {
                   </p>
 
                   <div className="mt-4 flex items-center justify-between gap-2 border-t pt-3">
-                    <span className="font-mono text-xs text-muted-foreground">
+                    <span className="font-mono text-xs text-brand">
                       /s/{card.short_code}
                     </span>
                     <span className="text-xs text-muted-foreground">
@@ -144,7 +144,7 @@ export default async function CompanyPage({ params }: PageProps) {
                     </span>
                   </div>
                 </CardContent>
-              </Card>
+              </div>
             );
           })}
         </div>

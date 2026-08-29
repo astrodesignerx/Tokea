@@ -114,6 +114,51 @@
     color: hsl(var(--foreground));
     font-feature-settings: "rlig" 1, "calt" 1;
   }
+  :root {
+    /* One motion voice for the whole app. */
+    --ease: cubic-bezier(0, 0, 0.2, 1);
+    --fast: 200ms;
+  }
+}
+
+/* ---------------------------------------------------------------------------
+   Shared surface treatments
+
+   Used by both the marketing page and the dashboard, so they live here rather
+   than in either one. A panel lifts very slightly on hover and warms its
+   border towards the accent; the translate is the whole movement, with no
+   shadow animation, which would force a repaint every frame.
+--------------------------------------------------------------------------- */
+
+.nf-panel {
+  border-radius: var(--radius-panel, 0.75rem);
+  border: 1px solid hsl(var(--border));
+  background-color: hsl(var(--card));
+  transition:
+    transform var(--fast) var(--ease),
+    border-color var(--fast) var(--ease);
+}
+
+.nf-panel-interactive:hover {
+  transform: translateY(-2px);
+  border-color: hsl(var(--brand) / 0.35);
+}
+
+/* Small mono label that sits above a heading. */
+.nf-eyebrow {
+  font-family: var(--font-mono), ui-monospace, monospace;
+  font-size: 0.6875rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: hsl(var(--brand));
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .nf-panel,
+  .nf-panel-interactive:hover {
+    transition-duration: 0.01ms;
+    transform: none;
+  }
 }
 
 /* ---------------------------------------------------------------------------

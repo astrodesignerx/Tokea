@@ -107,7 +107,7 @@ export default async function HomePage() {
 
           <div className="relative mx-auto grid max-w-6xl items-center gap-14 px-6 py-20 sm:py-28 lg:grid-cols-[1.1fr_1fr]">
             <div>
-              <p className="rise eyebrow">Cards, invites and everything after</p>
+              <p className="rise nf-eyebrow">Cards, invites and everything after</p>
               <h1
                 className="rise mt-5 font-display text-4xl font-medium leading-[1.05] tracking-tight sm:text-5xl lg:text-6xl"
                 style={{ animationDelay: "60ms" }}
@@ -160,14 +160,14 @@ export default async function HomePage() {
         {/* Features */}
         <section className="border-b">
           <div className="mx-auto max-w-6xl px-6 py-20 sm:py-24">
-            <p className="eyebrow">Features</p>
+            <p className="nf-eyebrow">Features</p>
             <h2 className="mt-4 max-w-2xl font-display text-2xl font-medium tracking-tight sm:text-3xl">
               Two of them today. The shape holds for the rest.
             </h2>
 
             <div className="mt-12 grid gap-5 sm:grid-cols-2">
               {FEATURES.map(({ icon: Icon, name, summary, points, href }) => (
-                <div key={name} className="panel flex flex-col p-7">
+                <div key={name} className="nf-panel nf-panel-interactive flex flex-col p-7">
                   <Icon className="size-5 text-brand" />
                   <h3 className="mt-4 font-display text-lg font-medium">{name}</h3>
                   <p className="mt-2 text-sm leading-relaxed text-muted-foreground">
@@ -215,7 +215,7 @@ export default async function HomePage() {
         {/* How it works */}
         <section className="border-b">
           <div className="mx-auto max-w-6xl px-6 py-20 sm:py-24">
-            <p className="eyebrow">How it works</p>
+            <p className="nf-eyebrow">How it works</p>
             <ol className="mt-10 grid gap-8 sm:grid-cols-3">
               {STEPS.map(([title, body], index) => (
                 <li key={title}>
