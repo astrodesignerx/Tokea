@@ -8,14 +8,17 @@ type QrDialogProps = {
   /** Pre-rendered on the server so opening the dialog costs no network round trip. */
   dataUrl: string;
   name: string;
+  /** The same QR tinted with a scannable brand colour, when the org has one. */
+  brandDataUrl?: string;
 };
 
 /**
  * Shown as an overlay rather than an inline expander: an overlay animates on
  * opacity and transform alone, where an inline panel would push the page around.
  */
-export function QrDialog({ dataUrl, name }: QrDialogProps) {
+export function QrDialog({ dataUrl, name, brandDataUrl }: QrDialogProps) {
   const [open, setOpen] = useState(false);
+  const [variant, setVariant] = useState<"neutral" | "brand">("neutral");
 
   useEffect(() => {
     if (!open) return;
@@ -91,13 +94,34 @@ export function QrDialog({ dataUrl, name }: QrDialogProps) {
 
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img
-            src={dataUrl}
+            src={variant === "brand" && brandDataUrl ? brandDataUrl : dataUrl}
             alt={`QR code linking to the digital card for ${name}`}
             className="mx-auto h-auto w-full max-w-[220px] rounded-xl"
           />
           <p className="mt-3 text-sm text-[var(--brand-ink-soft)]">
             Scan to open this card
           </p>
+
+          {brandDataUrl && brandDataUrl !== dataUrl && (
+            <div className="mt-4 flex gap-1 rounded-lg border border-[var(--card-border)] p-1">
+              {(["neutral", "brand"] as const).map((v) => (
+                <button
+                  key={v}
+                  type="button"
+                  onClick={() => setVariant(v)}
+                  aria-pressed={variant === v}
+                  className={cn(
+                    "flex-1 rounded-md px-3 py-1.5 text-xs font-medium transition-colors duration-[var(--card-duration-fast)]",
+                    variant === v
+                      ? "bg-[var(--brand-primary)] text-white"
+                      : "text-[var(--brand-ink)] hover:bg-[color-mix(in_srgb,var(--brand-primary)_8%,transparent)]"
+                  )}
+                >
+                  {v === "neutral" ? "Neutral" : "Brand"}
+                </button>
+              ))}
+            </div>
+          )}
         </div>
       </div>
     </>

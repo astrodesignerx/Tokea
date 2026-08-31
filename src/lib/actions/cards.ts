@@ -7,6 +7,11 @@ import { requireUser } from "@/lib/require-user";
 import { slugify, withCollisionSuffix } from "@/lib/slug";
 import { generateShortCode } from "@/lib/cards/short-code";
 import { cardPath } from "@/lib/cards/links";
+import {
+  CARD_TEMPLATE_IDS,
+  DEFAULT_CARD_TEMPLATE,
+  type CardTemplateId,
+} from "@/lib/card-templates";
 
 /**
  * Write side of the digital cards feature.
@@ -84,6 +89,7 @@ export async function createOrganisationAction(form: FormData) {
       website: optional(form, "website"),
       website_label: optional(form, "website_label"),
       logo_url: optional(form, "logo_url"),
+      cover_image_url: optional(form, "cover_image_url"),
       tagline: optional(form, "tagline"),
       ...brandFields(form),
     },
@@ -106,6 +112,7 @@ export async function updateOrganisationAction(form: FormData) {
       website: optional(form, "website"),
       website_label: optional(form, "website_label"),
       logo_url: optional(form, "logo_url"),
+      cover_image_url: optional(form, "cover_image_url"),
       tagline: optional(form, "tagline"),
       ...brandFields(form),
     },
@@ -139,6 +146,9 @@ export async function createCardAction(form: FormData) {
       phone_mobile: optional(form, "phone_mobile"),
       phone_work: optional(form, "phone_work"),
       photo_url: optional(form, "photo_url"),
+      card_front_url: optional(form, "card_front_url"),
+      card_back_url: optional(form, "card_back_url"),
+      template: cardTemplate(form),
     },
   });
 
@@ -181,7 +191,10 @@ export async function updateCardAction(form: FormData) {
       phone_mobile: optional(form, "phone_mobile"),
       phone_work: optional(form, "phone_work"),
       photo_url: optional(form, "photo_url"),
+      card_front_url: optional(form, "card_front_url"),
+      card_back_url: optional(form, "card_back_url"),
       status: text(form, "status") === "archived" ? "archived" : "active",
+      template: cardTemplate(form),
     },
   });
 
@@ -222,4 +235,12 @@ function brandFields(form: FormData) {
 function hex(form: FormData, key: string, fallback: string): string {
   const value = text(form, key);
   return /^#[0-9a-fA-F]{6}$/.test(value) ? value : fallback;
+}
+
+/** Only known template ids are stored; anything odd falls back to the default. */
+function cardTemplate(form: FormData): string {
+  const value = text(form, "template");
+  return CARD_TEMPLATE_IDS.includes(value as CardTemplateId)
+    ? value
+    : DEFAULT_CARD_TEMPLATE;
 }

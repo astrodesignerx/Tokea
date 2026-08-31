@@ -219,7 +219,10 @@ model Organisation {
   website       String?
   website_label String?
   logo_url      String?
-  tagline       String?
+  // Banner shown at the top of profile-template cards, like a vCard landing
+  // page's cover photo. Cards fall back to a solid brand block without it.
+  cover_image_url String?
+  tagline         String?
 
   // Brand palette as hex, applied to every card in the organisation. Defaults
   // are the neutral shell colours, overridden per client.
@@ -253,6 +256,16 @@ model ContactCard {
   // the slug, so a code can be repointed (to a renamed card, a successor, or
   // an external URL) without reprinting anything.
   destination String
+
+  // Page design. "classic" (the original card) | "profile" (cover banner,
+  // centred identity, quick-action icons). Defaults to profile.
+  template String @default("profile")
+
+  // Images of the printed card itself (front and back), shown at the foot of
+  // profile-template cards. URLs, usually /cards/<slug>-{front,back}.png
+  // converted from the client's design files.
+  card_front_url String?
+  card_back_url  String?
 
   first_name   String
   last_name    String

@@ -54,6 +54,21 @@
   background-repeat: repeat-x;
 }
 
+/* Profile-template splash: the client logo on white for a beat, then it
+   fades out and removes itself from hit-testing and the accessibility tree
+   via visibility. Mirrors the one-second loader on the reference pages. */
+@keyframes card-splash-hide {
+  to {
+    opacity: 0;
+    visibility: hidden;
+  }
+}
+
+.cards-surface .card-splash {
+  animation: card-splash-hide var(--card-duration-base) var(--card-ease-out)
+    1000ms forwards;
+}
+
 /* Entry choreography: the container settles first, contents follow. */
 @keyframes cards-rise {
   from {
@@ -75,6 +90,7 @@
   .cards-surface *::before,
   .cards-surface *::after {
     animation-duration: 0.01ms !important;
+    animation-delay: 0.01ms !important;
     animation-iteration-count: 1 !important;
     transition-duration: 0.01ms !important;
   }

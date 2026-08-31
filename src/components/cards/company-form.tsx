@@ -13,6 +13,7 @@ export type CompanyFormValues = {
   website: string;
   website_label: string;
   logo_url: string;
+  cover_image_url: string;
   tagline: string;
   brand_primary: string;
   brand_secondary: string;
@@ -103,6 +104,18 @@ export function CompanyForm({
             value={values.logo_url}
             onChange={(e) => set("logo_url", e.target.value)}
             placeholder="/brand/energy4impact.png"
+          />
+        </Field>
+
+        <Field
+          label="Cover image URL"
+          hint="Wide banner shown at the top of profile-template cards. Without one they use a solid brand-colour header."
+        >
+          <Input
+            name="cover_image_url"
+            value={values.cover_image_url}
+            onChange={(e) => set("cover_image_url", e.target.value)}
+            placeholder="https://…/cover.jpg"
           />
         </Field>
 

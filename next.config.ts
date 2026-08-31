@@ -7,7 +7,7 @@ const nextConfig: NextConfig = {
    * reaching lib/db.ts returns 500. Externalising both leaves them to be
    * required at runtime on the server, which is where they always run anyway.
    */
-  serverExternalPackages: ["pg", "@prisma/adapter-pg"],
+  serverExternalPackages: ["pg", "@prisma/adapter-pg", "sharp"],
 };
 
 export default nextConfig;

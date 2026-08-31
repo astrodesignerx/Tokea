@@ -35,6 +35,7 @@ export default async function NewCompanyPage() {
           website: "",
           website_label: "",
           logo_url: "",
+          cover_image_url: "",
           tagline: "",
           brand_primary: "#1DB8AF",
           brand_secondary: "#87CFC8",

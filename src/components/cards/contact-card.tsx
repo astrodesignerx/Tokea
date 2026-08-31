@@ -12,13 +12,14 @@ type ContactCardProps = {
   /** The permanent short link. Everything shareable points here, not at the slug. */
   shortUrl: string;
   qrDataUrl: string;
+  brandDataUrl?: string;
 };
 
 const SERIF = {
   fontFamily: "var(--font-card-serif), ui-serif, Georgia, serif",
 } as const;
 
-export function ContactCard({ card, shortUrl, qrDataUrl }: ContactCardProps) {
+export function ContactCard({ card, shortUrl, qrDataUrl, brandDataUrl }: ContactCardProps) {
   const name = fullName(card);
   const org = card.organisation;
 
@@ -61,7 +62,7 @@ export function ContactCard({ card, shortUrl, qrDataUrl }: ContactCardProps) {
 
           <div className="flex gap-2">
             <ShareActions url={shortUrl} name={name} title={card.title} />
-            <QrDialog dataUrl={qrDataUrl} name={name} />
+            <QrDialog dataUrl={qrDataUrl} name={name} brandDataUrl={brandDataUrl} />
           </div>
         </div>
 

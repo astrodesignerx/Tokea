@@ -1,4 +1,4 @@
-import { Jost, Source_Serif_4 } from "next/font/google";
+import { Jost, Source_Serif_4, Work_Sans } from "next/font/google";
 import "./cards.css";
 
 /* Jost stands in for the Futura-style geometric sans on the printed card. */
@@ -14,6 +14,14 @@ const sourceSerif = Source_Serif_4({
   display: "swap",
 });
 
+/* The profile template matches the vCard-profile pages it is modelled on,
+   which are set in Work Sans. */
+const workSans = Work_Sans({
+  subsets: ["latin"],
+  variable: "--font-card-profile",
+  display: "swap",
+});
+
 /**
  * Public card pages sit outside the app's chrome entirely: no nav, no theme
  * toggle, no dark mode. They are client-branded surfaces that happen to be
@@ -24,7 +32,7 @@ export default function CardsLayout({
 }: Readonly<{ children: React.ReactNode }>) {
   return (
     <div
-      className={`cards-surface ${jost.variable} ${sourceSerif.variable}`}
+      className={`cards-surface ${jost.variable} ${sourceSerif.variable} ${workSans.variable}`}
       style={{ fontFamily: "var(--font-card-sans), ui-sans-serif, system-ui, sans-serif" }}
     >
       {children}

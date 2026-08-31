@@ -46,6 +46,7 @@ export default async function CompanySettingsPage({ params }: PageProps) {
           website: org.website ?? "",
           website_label: org.website_label ?? "",
           logo_url: org.logo_url ?? "",
+          cover_image_url: org.cover_image_url ?? "",
           tagline: org.tagline ?? "",
           brand_primary: org.brand_primary,
           brand_secondary: org.brand_secondary,

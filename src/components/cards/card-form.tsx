@@ -1,11 +1,18 @@
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import {
+  CARD_TEMPLATE_OPTIONS,
+  DEFAULT_CARD_TEMPLATE,
+} from "@/lib/card-templates";
 
 export type CardFormValues = {
   id?: string;
   slug?: string;
   shortCode?: string;
+  template?: string;
+  card_front_url?: string;
+  card_back_url?: string;
   first_name: string;
   last_name: string;
   title: string;
@@ -71,8 +78,62 @@ export function CardForm({
         </Field>
       </div>
 
+      <fieldset className="space-y-3">
+        <legend className="text-sm font-medium">Page design</legend>
+        <div className="grid gap-3 sm:grid-cols-2">
+          {CARD_TEMPLATE_OPTIONS.map((t) => (
+            <label
+              key={t.value}
+              className="flex cursor-pointer items-start gap-3 rounded-lg border p-3 transition-colors has-checked:border-foreground has-checked:bg-accent"
+            >
+              <input
+                type="radio"
+                name="template"
+                value={t.value}
+                defaultChecked={
+                  initial.template
+                    ? initial.template === t.value
+                    : t.value === DEFAULT_CARD_TEMPLATE
+                }
+                className="mt-0.5 size-4 shrink-0 cursor-pointer accent-foreground"
+              />
+              <span>
+                <span className="block text-sm font-medium">{t.label}</span>
+                <span className="mt-0.5 block text-xs text-muted-foreground">
+                  {t.description}
+                </span>
+              </span>
+            </label>
+          ))}
+        </div>
+      </fieldset>
+
       {editing && (
         <>
+          <fieldset className="space-y-3">
+            <legend className="text-sm font-medium">Printed card images</legend>
+            <p className="text-xs text-muted-foreground">
+              Front and back of the physical card, shown at the foot of
+              profile-template pages.
+            </p>
+            <div className="grid gap-5 sm:grid-cols-2">
+              <Field label="Front image URL">
+                <Input
+                  name="card_front_url"
+                  defaultValue={initial.card_front_url}
+                  placeholder="/cards/mathieu-dalle-front.png"
+                />
+              </Field>
+              <Field label="Back image URL">
+                <Input
+                  name="card_back_url"
+                  defaultValue={initial.card_back_url}
+                  placeholder="/cards/mathieu-dalle-back.png"
+                />
+              </Field>
+            </div>
+          </fieldset>
+
           <Field
             label="Page address"
             hint="Changing this moves the card's URL. Anything already printed keeps working."
