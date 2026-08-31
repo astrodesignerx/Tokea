@@ -1,7 +1,6 @@
 import { existsSync, readFileSync } from "node:fs";
 import path from "node:path";
 import QRCode from "qrcode";
-import sharp from "sharp";
 
 /**
  * Card QR codes, kept separate from src/lib/qr.ts (event check-in codes): these
@@ -9,9 +8,26 @@ import sharp from "sharp";
  * into the centre for print without breaking the scan. The organisation logo is
  * composited onto a white rounded plate in the middle, contain-fit so both
  * landscape and portrait logos sit undistorted.
+ *
+ * sharp is loaded lazily and defensively: if its native binary is missing from
+ * a deployment's bundle, QR codes fall back to unbranded rather than taking the
+ * route down with a module-load error.
  */
 
 const BRAND_DARK = "#464F58";
+
+type SharpModule = typeof import("sharp");
+let sharpModule: SharpModule | null | undefined;
+
+async function loadSharp(): Promise<SharpModule | null> {
+  if (sharpModule !== undefined) return sharpModule;
+  try {
+    sharpModule = await import("sharp");
+  } catch {
+    sharpModule = null;
+  }
+  return sharpModule;
+}
 
 export type CardQrLogo = Buffer | null;
 
@@ -86,14 +102,14 @@ export function ensureScannableDark(hex: string): string {
 }
 
 /** A white rounded plate that "cuts out" the modules behind the logo. */
-async function platePng(box: number): Promise<Buffer> {
+async function platePng(sharp: SharpModule, box: number): Promise<Buffer> {
   const radius = Math.round(box * 0.18);
   const svg = Buffer.from(
     `<svg xmlns="http://www.w3.org/2000/svg" width="${box}" height="${box}">` +
       `<rect x="0" y="0" width="${box}" height="${box}" rx="${radius}" fill="#ffffff"/>` +
       `</svg>`
   );
-  return sharp(svg).png().toBuffer();
+  return sharp.default(svg).png().toBuffer();
 }
 
 async function withLogo(
@@ -101,12 +117,16 @@ async function withLogo(
   width: number,
   logo: Buffer
 ): Promise<Buffer> {
+  const sharp = await loadSharp();
+  if (!sharp) return qr;
+
   try {
     const box = Math.round(width * 0.24);
     const logoSize = Math.round(box * 0.72);
 
-    const plate = await platePng(box);
-    const mark = await sharp(logo)
+    const plate = await platePng(sharp, box);
+    const mark = await sharp
+      .default(logo)
       .resize({
         width: logoSize,
         height: logoSize,
@@ -116,7 +136,8 @@ async function withLogo(
       .png()
       .toBuffer();
 
-    return sharp(qr)
+    return sharp
+      .default(qr)
       .composite([
         { input: plate, gravity: "centre" },
         { input: mark, gravity: "centre" },
