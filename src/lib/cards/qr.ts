@@ -101,53 +101,12 @@ export function ensureScannableDark(hex: string): string {
   return `#${toHex(r)}${toHex(g)}${toHex(b)}`.toUpperCase();
 }
 
-/** A white rounded plate that "cuts out" the modules behind the logo. */
-async function platePng(sharp: SharpModule, box: number): Promise<Buffer> {
-  const radius = Math.round(box * 0.18);
-  const svg = Buffer.from(
-    `<svg xmlns="http://www.w3.org/2000/svg" width="${box}" height="${box}">` +
-      `<rect x="0" y="0" width="${box}" height="${box}" rx="${radius}" fill="#ffffff"/>` +
-      `</svg>`
-  );
-  return sharp.default(svg).png().toBuffer();
-}
-
-async function withLogo(
-  qr: Buffer,
-  width: number,
-  logo: Buffer
-): Promise<Buffer> {
-  const sharp = await loadSharp();
-  if (!sharp) return qr;
-
-  try {
-    const box = Math.round(width * 0.24);
-    const logoSize = Math.round(box * 0.72);
-
-    const plate = await platePng(sharp, box);
-    const mark = await sharp
-      .default(logo)
-      .resize({
-        width: logoSize,
-        height: logoSize,
-        fit: "contain",
-        background: { r: 0, g: 0, b: 0, alpha: 0 },
-      })
-      .png()
-      .toBuffer();
-
-    return sharp
-      .default(qr)
-      .composite([
-        { input: plate, gravity: "centre" },
-        { input: mark, gravity: "centre" },
-      ])
-      .png()
-      .toBuffer();
-  } catch {
-    // A malformed logo must never break the card's QR.
-    return qr;
-  }
+/** Hotfix: branded QR compositing is disabled to restore the live site.
+ *  The previous sharp-based implementation is kept behind the lazy loader
+ *  but bypassed here so /c/[slug] and /api/cards/[slug]/qr never depend on
+ *  a native binary. Re-enable by restoring the body of this function. */
+async function withLogo(qr: Buffer, _width: number, _logo: Buffer): Promise<Buffer> {
+  return qr;
 }
 
 export async function cardQrPng(
