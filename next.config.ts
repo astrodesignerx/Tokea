@@ -7,16 +7,7 @@ const nextConfig: NextConfig = {
    * reaching lib/db.ts returns 500. Externalising both leaves them to be
    * required at runtime on the server, which is where they always run anyway.
    */
-  serverExternalPackages: ["pg", "@prisma/adapter-pg", "sharp"],
-  /*
-   * sharp's platform binaries (@img/sharp-*) live outside its own package
-   * under pnpm's store layout, so serverless file tracing misses them and the
-   * require throws at runtime — every route touching it then returns 500.
-   * Included explicitly so the bundle carries the whole package.
-   */
-  outputFileTracingIncludes: {
-    "/**": ["./node_modules/sharp/**", "./node_modules/@img/**"],
-  },
+  serverExternalPackages: ["pg", "@prisma/adapter-pg"],
 };
 
 export default nextConfig;

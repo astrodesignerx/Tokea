@@ -1,10 +1,6 @@
 import { findCardBySlug } from "@/lib/cards/data";
 import { shortUrl } from "@/lib/cards/links";
-import {
-  cardQrPng,
-  ensureScannableDark,
-  fetchLogoBytes,
-} from "@/lib/cards/qr";
+import { cardQrPng } from "@/lib/cards/qr";
 
 type RouteContext = { params: Promise<{ slug: string }> };
 
@@ -32,15 +28,7 @@ export async function GET(request: Request, { params }: RouteContext) {
     ? Math.min(Math.max(requested, MIN_SIZE), MAX_SIZE)
     : DEFAULT_SIZE;
 
-  const brand = url.searchParams.get("colour") === "brand";
-  const dark = brand ? ensureScannableDark(card.organisation.brand_primary) : undefined;
-  const logo = await fetchLogoBytes(card.organisation.logo_url);
-
-  const png = await cardQrPng(await shortUrl(card.short_code), {
-    width: size,
-    dark,
-    logo,
-  });
+  const png = await cardQrPng(await shortUrl(card.short_code), size);
 
   return new Response(new Uint8Array(png), {
     headers: {
