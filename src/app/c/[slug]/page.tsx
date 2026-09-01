@@ -3,7 +3,7 @@ import { notFound } from "next/navigation";
 import { CardSplash } from "@/components/cards/card-splash";
 import { renderCardTemplate } from "@/components/cards/templates";
 import { findCardBySlug, fullName } from "@/lib/cards/data";
-import { cardQrDataUrl } from "@/lib/cards/qr";
+import { cardQrDataUrl, ensureScannableDark, fetchLogoBytes } from "@/lib/cards/qr";
 import { getCardsOrigin, shortUrl } from "@/lib/cards/links";
 
 type PageProps = { params: Promise<{ slug: string }> };
@@ -35,7 +35,21 @@ export default async function CardPage({ params }: PageProps) {
   // The QR and everything shareable encode the short link, never the slug, so
   // a printed card survives a rename.
   const permanentUrl = await shortUrl(card.short_code);
-  const qr = await cardQrDataUrl(permanentUrl);
+  const logo = await fetchLogoBytes(card.organisation.logo_url);
+  let qr: string;
+  let qrBrand: string | undefined;
+  try {
+    qr = await cardQrDataUrl(permanentUrl, { logo });
+    if (logo) {
+      qrBrand = await cardQrDataUrl(permanentUrl, {
+        dark: ensureScannableDark(card.organisation.brand_primary),
+        logo,
+      });
+    }
+  } catch {
+    qr = await cardQrDataUrl(permanentUrl);
+    qrBrand = undefined;
+  }
   const signupHref = `${await getCardsOrigin()}/signup`;
 
   // The profile template owns the whole page (white, top-aligned, splash),
@@ -48,6 +62,7 @@ export default async function CardPage({ params }: PageProps) {
           card,
           shortUrl: permanentUrl,
           qrDataUrl: qr,
+          brandDataUrl: qrBrand,
           backlinkHref: signupHref,
         })}
         <CardSplash
@@ -64,6 +79,7 @@ export default async function CardPage({ params }: PageProps) {
         card,
         shortUrl: permanentUrl,
         qrDataUrl: qr,
+        brandDataUrl: qrBrand,
       })}
     </main>
   );
