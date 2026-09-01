@@ -62,7 +62,7 @@ export function ContactCard({ card, shortUrl, qrDataUrl, brandDataUrl }: Contact
 
           <div className="flex gap-2">
             <ShareActions url={shortUrl} name={name} title={card.title} />
-            <QrDialog dataUrl={qrDataUrl} name={name} brandDataUrl={brandDataUrl} />
+            <QrDialog dataUrl={qrDataUrl} name={name} brandDataUrl={brandDataUrl} slug={card.slug} />
           </div>
         </div>
 

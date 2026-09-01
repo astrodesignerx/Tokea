@@ -51,6 +51,7 @@
     "next-auth": "5.0.0-beta.25",
     "nodemailer": "^6.9.16",
     "papaparse": "^5.4.1",
+    "pdf-lib": "^1.17.1",
     "pg": "^8.22.0",
     "qrcode": "^1.5.4",
     "react": "19.2.4",

@@ -226,7 +226,7 @@ export function ProfileCard({
             </header>
             <div className="flex gap-2 px-5 pb-4">
               <ShareActions url={shortUrl} name={name} title={card.title} />
-              <QrDialog dataUrl={qrDataUrl} name={name} brandDataUrl={brandDataUrl} />
+              <QrDialog dataUrl={qrDataUrl} name={name} brandDataUrl={brandDataUrl} slug={card.slug} />
             </div>
           </section>
 

@@ -131,14 +131,24 @@ export default async function CompanyPage({ params }: PageProps) {
                         <ExternalLink className="size-3.5" /> View
                       </Link>
                     </Button>
-                    <Button asChild size="sm" variant="ghost">
-                      <a
-                        href={`/api/cards/${card.slug}/qr?size=2048`}
-                        download={`${card.slug}-qr.png`}
-                      >
-                        <Download className="size-3.5" /> QR
-                      </a>
-                    </Button>
+                    <span className="inline-flex items-center gap-1 rounded-md border bg-white p-0.5">
+                      {(
+                        [
+                          ["PNG", "png"],
+                          ["SVG", "svg"],
+                          ["PDF", "pdf"],
+                        ] as const
+                      ).map(([label, format]) => (
+                        <Button key={format} asChild size="sm" variant="ghost" className="h-7 px-2 text-xs">
+                          <a
+                            href={`/api/cards/${card.slug}/qr?size=2048&format=${format}`}
+                            download={`${card.slug}-qr.${format}`}
+                          >
+                            <Download className="size-3" /> {label}
+                          </a>
+                        </Button>
+                      ))}
+                    </span>
                     <span className="ml-auto" title="Copy permanent link">
                       <CopyButton value={permanent} />
                     </span>

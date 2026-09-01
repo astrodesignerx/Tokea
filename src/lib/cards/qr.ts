@@ -96,14 +96,93 @@ async function svgWithLogo(svg: string, logo: { bytes: Buffer; mime: string }): 
   return svg.replace("</svg>", `${inject}</svg>`);
 }
 
-export async function cardQrPng(url: string, width = 1024): Promise<Buffer> {
+export async function cardQrPng(
+  url: string,
+  widthOrOptions: number | { width?: number; dark?: string } = 1024
+): Promise<Buffer> {
+  const opts = typeof widthOrOptions === "number" ? { width: widthOrOptions } : widthOrOptions;
+  const width = opts.width ?? 1024;
+  const dark = opts.dark ?? BRAND_DARK;
   return QRCode.toBuffer(url, {
     type: "png",
     width,
     margin: 2,
     errorCorrectionLevel: "H",
-    color: { dark: BRAND_DARK, light: "#FFFFFF" },
+    color: { dark, light: "#FFFFFF" },
   });
+}
+
+export async function cardQrSvg(
+  url: string,
+  options: { dark?: string; logo?: { bytes: Buffer; mime: string } | null } = {}
+): Promise<string> {
+  const dark = options.dark ?? BRAND_DARK;
+  const svg = await QRCode.toString(url, {
+    type: "svg",
+    margin: 1,
+    errorCorrectionLevel: "H",
+    color: { dark, light: "#FFFFFF" },
+  });
+  if (options.logo) return svgWithLogo(svg, options.logo);
+  return svg;
+}
+
+export async function cardQrPdf(
+  url: string,
+  options: { size?: number; dark?: string; logo?: { bytes: Buffer; mime: string } | null } = {}
+): Promise<Buffer> {
+  const size = options.size ?? 512;
+  const dark = options.dark ?? BRAND_DARK;
+  const qrPng = await QRCode.toBuffer(url, {
+    type: "png",
+    width: size,
+    margin: 2,
+    errorCorrectionLevel: "H",
+    color: { dark, light: "#FFFFFF" },
+  });
+  const { PDFDocument } = await import("pdf-lib");
+  const doc = await PDFDocument.create();
+  const page = doc.addPage([size, size]);
+  const qrImage = await doc.embedPng(qrPng);
+  page.drawImage(qrImage, { x: 0, y: 0, width: size, height: size });
+  if (options.logo && options.logo.mime !== "image/svg+xml") {
+    try {
+      const box = size * 0.24;
+      const logoSize = box * 0.72;
+      const plateSize = box;
+      const plateX = (size - plateSize) / 2;
+      const plateY = (size - plateSize) / 2;
+      const logoX = (size - logoSize) / 2;
+      const logoY = (size - logoSize) / 2;
+      // white rounded plate — pdf-lib has no rounded rect, use square plate
+      page.drawRectangle({
+        x: plateX,
+        y: plateY,
+        width: plateSize,
+        height: plateSize,
+        color: { type: "RGB", red: 1, green: 1, blue: 1 } as any,
+      });
+      const isJpg = options.logo.mime === "image/jpeg";
+      const logoImage = isJpg ? await doc.embedJpg(options.logo.bytes) : await doc.embedPng(options.logo.bytes);
+      // contain-fit: pdf-lib drawImage with width/height will stretch; for PNG logos
+      // we keep aspect by using logo's natural dims to compute fitted size
+      const { width: naturalW, height: naturalH } = logoImage as any;
+      let drawW = logoSize;
+      let drawH = logoSize;
+      if (naturalW && naturalH) {
+        const scale = Math.min(logoSize / naturalW, logoSize / naturalH);
+        drawW = naturalW * scale;
+        drawH = naturalH * scale;
+      }
+      const dx = (size - drawW) / 2;
+      const dy = (size - drawH) / 2;
+      page.drawImage(logoImage, { x: dx, y: dy, width: drawW, height: drawH });
+    } catch {
+      // logo embed must never break the PDF
+    }
+  }
+  const pdfBytes = await doc.save();
+  return Buffer.from(pdfBytes);
 }
 
 export async function cardQrDataUrl(

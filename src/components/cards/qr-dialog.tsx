@@ -10,13 +10,15 @@ type QrDialogProps = {
   name: string;
   /** The same QR tinted with a scannable brand colour, when the org has one. */
   brandDataUrl?: string;
+  /** Card slug so the dialog can link to the print downloads. */
+  slug?: string;
 };
 
 /**
  * Shown as an overlay rather than an inline expander: an overlay animates on
  * opacity and transform alone, where an inline panel would push the page around.
  */
-export function QrDialog({ dataUrl, name, brandDataUrl }: QrDialogProps) {
+export function QrDialog({ dataUrl, name, brandDataUrl, slug }: QrDialogProps) {
   const [open, setOpen] = useState(false);
   const [variant, setVariant] = useState<"neutral" | "brand">("neutral");
 
@@ -119,6 +121,27 @@ export function QrDialog({ dataUrl, name, brandDataUrl }: QrDialogProps) {
                 >
                   {v === "neutral" ? "Neutral" : "Brand"}
                 </button>
+              ))}
+            </div>
+          )}
+
+          {slug && (
+            <div className="mt-4 flex gap-2">
+              {(
+                [
+                  ["PNG", "png"],
+                  ["SVG", "svg"],
+                  ["PDF", "pdf"],
+                ] as const
+              ).map(([label, format]) => (
+                <a
+                  key={format}
+                  href={`/api/cards/${slug}/qr?size=2048&format=${format}${variant === "brand" ? "&colour=brand" : ""}`}
+                  download={`${slug}-qr.${format}`}
+                  className="flex flex-1 items-center justify-center gap-1 rounded-lg border border-[var(--card-border)] px-2 py-2 text-xs font-medium text-[var(--brand-ink)] transition-colors hover:border-[var(--brand-primary)] hover:bg-[color-mix(in_srgb,var(--brand-primary)_6%,transparent)]"
+                >
+                  {label}
+                </a>
               ))}
             </div>
           )}
