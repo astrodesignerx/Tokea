@@ -33,12 +33,20 @@ export default async function CardPage({ params }: PageProps) {
   if (!card || card.status !== "active") notFound();
 
   // The QR and everything shareable encode the short link, never the slug, so
-  // a printed card survives a rename.
-  const permanentUrl = await shortUrl(card.short_code);
-  const logo = await fetchLogoBytes(card.organisation.logo_url);
+  // a printed card survives a rename. Every step here is wrapped so a single
+  // failing helper (logo fetch, QR render, origin lookup) can never take the
+  // whole page down — critical while the links are live.
+  let permanentUrl: string;
   let qr: string;
   let qrBrand: string | undefined;
+  let signupHref: string | undefined;
   try {
+    permanentUrl = await shortUrl(card.short_code);
+  } catch {
+    permanentUrl = `/s/${card.short_code}`;
+  }
+  try {
+    const logo = await fetchLogoBytes(card.organisation.logo_url);
     qr = await cardQrDataUrl(permanentUrl, { logo });
     if (logo) {
       qrBrand = await cardQrDataUrl(permanentUrl, {
@@ -47,10 +55,18 @@ export default async function CardPage({ params }: PageProps) {
       });
     }
   } catch {
-    qr = await cardQrDataUrl(permanentUrl);
+    try {
+      qr = await cardQrDataUrl(permanentUrl);
+    } catch {
+      qr = "";
+    }
     qrBrand = undefined;
   }
-  const signupHref = `${await getCardsOrigin()}/signup`;
+  try {
+    signupHref = `${await getCardsOrigin()}/signup`;
+  } catch {
+    signupHref = "/signup";
+  }
 
   // The profile template owns the whole page (white, top-aligned, splash),
   // where the classic card sits centred on the tinted surface.
