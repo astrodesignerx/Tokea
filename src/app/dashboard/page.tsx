@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { ArrowRight, BarChart3, CalendarCheck, IdCard, Plus } from "lucide-react";
+import { ArrowRight, BarChart3, CalendarCheck, IdCard, Plus, QrCode } from "lucide-react";
 import { requireUser } from "@/lib/require-user";
 import { prisma } from "@/lib/db";
 import { Button } from "@/components/ui/button";
@@ -21,7 +21,7 @@ export const metadata = { title: "Dashboard" };
 export default async function DashboardPage() {
   const user = await requireUser();
 
-  const [companies, cards, scans, events] = await Promise.all([
+  const [companies, cards, scans, events, qrCodes, qrScans] = await Promise.all([
     prisma.organisation.count({ where: { owner_id: user.id } }),
     prisma.contactCard.count({
       where: { organisation: { owner_id: user.id }, status: "active" },
@@ -30,6 +30,8 @@ export default async function DashboardPage() {
       where: { card: { organisation: { owner_id: user.id } } },
     }),
     prisma.event.count({ where: { owner_id: user.id } }),
+    prisma.qrCode.count({ where: { owner_id: user.id, status: { not: "archived" } } }),
+    prisma.qrScan.count({ where: { qr_code: { owner_id: user.id } } }),
   ]);
 
   const services = [
@@ -47,6 +49,18 @@ export default async function DashboardPage() {
       action: { label: "New company", href: "/dashboard/companies/new" },
     },
     {
+      icon: QrCode,
+      name: "Dynamic QR codes",
+      description:
+        "Print a code once and change where it goes whenever you like, with scan counts for each one.",
+      stats: [
+        { label: qrCodes === 1 ? "code" : "codes", value: qrCodes },
+        { label: qrScans === 1 ? "scan" : "scans", value: qrScans },
+      ],
+      href: "/dashboard/qr",
+      action: { label: "New QR code", href: "/dashboard/qr/new" },
+    },
+    {
       icon: CalendarCheck,
       name: "Events and RSVPs",
       description:
@@ -60,7 +74,12 @@ export default async function DashboardPage() {
       name: "Analytics",
       description:
         "Every scan of every code, which links get used, and where the activity comes from.",
-      stats: [{ label: scans === 1 ? "scan recorded" : "scans recorded", value: scans }],
+      stats: [
+        {
+          label: scans + qrScans === 1 ? "scan recorded" : "scans recorded",
+          value: scans + qrScans,
+        },
+      ],
       href: "/dashboard/analytics",
       action: null,
     },

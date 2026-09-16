@@ -27,6 +27,7 @@ model User {
   sessions      Session[]
   events        Event[]
   organisations Organisation[]
+  qr_codes      QrCode[]
 }
 
 model Account {
@@ -300,4 +301,104 @@ model CardScan {
   card ContactCard @relation(fields: [card_id], references: [id], onDelete: Cascade)
 
   @@index([card_id, scanned_at])
+}
+
+// A standalone dynamic QR code: the printed image encodes /q/<short_code>
+// forever, and the redirect behind it goes wherever destination says today.
+model QrCode {
+  id       String @id @default(cuid())
+  owner_id String
+
+  // Internal label, never shown to whoever scans the code.
+  name String
+
+  // Immutable, like ContactCard.short_code. NEVER change or recycle one.
+  short_code String @unique
+
+  // Absolute http(s) URL the code currently redirects to. Editable at any time.
+  destination String
+
+  // Optional per-platform overrides, e.g. App Store and Play Store links.
+  // Anything else (desktop, unknown) gets destination.
+  ios_destination     String?
+  android_destination String?
+
+  // After expires_at, scans go to expired_destination, or to the /q page when
+  // that is empty. Null means the code never expires.
+  expires_at          DateTime?
+  expired_destination String?
+
+  // scrypt hash ("salt:hash", hex). When set, scanners must enter the password
+  // before being forwarded.
+  password_hash String?
+
+  // Campaign tags appended at redirect time, so analytics tools can tell QR
+  // traffic apart. Tags already present in the destination win.
+  utm_source   String?
+  utm_medium   String?
+  utm_campaign String?
+
+  // Print styling. colour is the module colour (darkened on render until it
+  // scans reliably); logo_url is dropped into the centre plate.
+  colour   String  @default("#464F58")
+  logo_url String?
+
+  // "active" | "paused" | "archived". Paused and archived codes both land on
+  // the explanatory /q page; archived ones are also hidden from the main list.
+  status String @default("active")
+
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+
+  owner     User                @relation(fields: [owner_id], references: [id], onDelete: Cascade)
+  scans     QrScan[]
+  history   QrLinkChange[]
+  scheduled QrScheduledChange[]
+
+  @@index([owner_id])
+  @@index([status])
+}
+
+model QrScan {
+  id         String   @id @default(cuid())
+  qr_code_id String
+  scanned_at DateTime @default(now())
+  referrer   String?
+  user_agent String?
+  country    String?
+  // "ios" | "android" | "other", from the user agent.
+  device     String?
+
+  qr_code QrCode @relation(fields: [qr_code_id], references: [id], onDelete: Cascade)
+
+  @@index([qr_code_id, scanned_at])
+}
+
+// One row per edit of QrCode.destination, holding the address it replaced, so
+// a mistaken edit can be undone from the dashboard.
+model QrLinkChange {
+  id          String   @id @default(cuid())
+  qr_code_id  String
+  destination String
+  changed_at  DateTime @default(now())
+
+  qr_code QrCode @relation(fields: [qr_code_id], references: [id], onDelete: Cascade)
+
+  @@index([qr_code_id, changed_at])
+}
+
+// A destination change booked for later. Applied lazily: the first scan or
+// dashboard view after run_at swaps it in and stamps applied_at, so no cron
+// job is needed and a missed run can never leave a code on the old link.
+model QrScheduledChange {
+  id          String    @id @default(cuid())
+  qr_code_id  String
+  destination String
+  run_at      DateTime
+  applied_at  DateTime?
+  created_at  DateTime  @default(now())
+
+  qr_code QrCode @relation(fields: [qr_code_id], references: [id], onDelete: Cascade)
+
+  @@index([qr_code_id, applied_at, run_at])
 }

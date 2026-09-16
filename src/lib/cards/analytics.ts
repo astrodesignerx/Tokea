@@ -19,12 +19,23 @@ export type LinkRow = {
   lastScan: Date | null;
 };
 
+export type QrLinkRow = {
+  qrCodeId: string;
+  name: string;
+  shortCode: string;
+  destination: string;
+  status: string;
+  scans: number;
+  lastScan: Date | null;
+};
+
+/** One row of the recent-activity feed, from either a card or a QR code. */
 export type ScanRow = {
   id: string;
   scannedAt: Date;
   country: string | null;
-  cardName: string;
-  shortCode: string;
+  label: string;
+  path: string;
 };
 
 const DAY = 24 * 60 * 60 * 1000;
@@ -43,6 +54,7 @@ export async function getAnalytics(ownerId: string, days = 30) {
   const sevenDaysAgo = new Date(Date.now() - 7 * DAY);
 
   const ownedCards = { organisation: { owner_id: ownerId } };
+  const ownedQr = { owner_id: ownerId };
 
   const [totalScans, recentScanCount, activeCards, archivedCards, companies, cards, windowScans, recent] =
     await Promise.all([
@@ -76,6 +88,36 @@ export async function getAnalytics(ownerId: string, days = 30) {
       }),
     ]);
 
+  // Dynamic QR codes, counted alongside cards: to whoever reads this page a
+  // scan is a scan, whichever kind of code it came through.
+  const [qrTotal, qrRecentCount, activeQrCodes, qrCodes, qrWindowScans, qrRecent, qrLast] =
+    await Promise.all([
+      prisma.qrScan.count({ where: { qr_code: ownedQr } }),
+      prisma.qrScan.count({
+        where: { qr_code: ownedQr, scanned_at: { gte: sevenDaysAgo } },
+      }),
+      prisma.qrCode.count({ where: { ...ownedQr, status: "active" } }),
+      prisma.qrCode.findMany({
+        where: { ...ownedQr, status: { not: "archived" } },
+        include: { _count: { select: { scans: true } } },
+      }),
+      prisma.qrScan.findMany({
+        where: { qr_code: ownedQr, scanned_at: { gte: since } },
+        select: { scanned_at: true },
+      }),
+      prisma.qrScan.findMany({
+        where: { qr_code: ownedQr },
+        orderBy: { scanned_at: "desc" },
+        take: 12,
+        include: { qr_code: { select: { name: true, short_code: true } } },
+      }),
+      prisma.qrScan.groupBy({
+        by: ["qr_code_id"],
+        where: { qr_code: ownedQr },
+        _max: { scanned_at: true },
+      }),
+    ]);
+
   // Bucket in memory rather than in SQL: Prisma cannot group by a truncated
   // date without raw SQL, and at this volume the difference is not measurable.
   // Revisit with a raw query if a single account ever passes tens of thousands.
@@ -83,7 +125,7 @@ export async function getAnalytics(ownerId: string, days = 30) {
   for (let i = 0; i < days; i++) {
     buckets.set(isoDay(new Date(since.getTime() + i * DAY)), 0);
   }
-  for (const scan of windowScans) {
+  for (const scan of [...windowScans, ...qrWindowScans]) {
     const key = isoDay(scan.scanned_at);
     if (buckets.has(key)) buckets.set(key, (buckets.get(key) ?? 0) + 1);
   }
@@ -114,24 +156,50 @@ export async function getAnalytics(ownerId: string, days = 30) {
     }))
     .sort((a, b) => b.scans - a.scans);
 
-  const recentScans: ScanRow[] = recent.map((scan) => ({
-    id: scan.id,
-    scannedAt: scan.scanned_at,
-    country: scan.country,
-    cardName: `${scan.card.first_name} ${scan.card.last_name}`,
-    shortCode: scan.card.short_code,
-  }));
+  const qrLastById = new Map(qrLast.map((row) => [row.qr_code_id, row._max.scanned_at]));
+  const qrLinks: QrLinkRow[] = qrCodes
+    .map((code) => ({
+      qrCodeId: code.id,
+      name: code.name,
+      shortCode: code.short_code,
+      destination: code.destination,
+      status: code.status,
+      scans: code._count.scans,
+      lastScan: qrLastById.get(code.id) ?? null,
+    }))
+    .sort((a, b) => b.scans - a.scans);
+
+  const recentScans: ScanRow[] = [
+    ...recent.map((scan) => ({
+      id: scan.id,
+      scannedAt: scan.scanned_at,
+      country: scan.country,
+      label: `${scan.card.first_name} ${scan.card.last_name}`,
+      path: `/s/${scan.card.short_code}`,
+    })),
+    ...qrRecent.map((scan) => ({
+      id: scan.id,
+      scannedAt: scan.scanned_at,
+      country: scan.country,
+      label: scan.qr_code.name,
+      path: `/q/${scan.qr_code.short_code}`,
+    })),
+  ]
+    .sort((a, b) => b.scannedAt.getTime() - a.scannedAt.getTime())
+    .slice(0, 12);
 
   return {
     totals: {
-      totalScans,
-      recentScanCount,
+      totalScans: totalScans + qrTotal,
+      recentScanCount: recentScanCount + qrRecentCount,
       activeCards,
+      activeQrCodes,
       archivedCards,
       companies,
     },
     daily,
     links,
+    qrLinks,
     recentScans,
   };
 }

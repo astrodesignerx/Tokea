@@ -21,14 +21,14 @@ function relative(date: Date): string {
 
 export default async function AnalyticsPage() {
   const user = await requireUser();
-  const { totals, daily, links, recentScans } = await getAnalytics(user.id);
+  const { totals, daily, links, qrLinks, recentScans } = await getAnalytics(user.id);
   const origin = await getCardsOrigin();
 
   const stats = [
     { label: "Scans, all time", value: totals.totalScans },
     { label: "Last 7 days", value: totals.recentScanCount },
     { label: "Active cards", value: totals.activeCards },
-    { label: "Companies", value: totals.companies },
+    { label: "Active QR codes", value: totals.activeQrCodes },
   ];
 
   return (
@@ -135,6 +135,66 @@ export default async function AnalyticsPage() {
         )}
       </section>
 
+      {qrLinks.length > 0 && (
+        <section className="mt-10">
+          <h2 className="nf-eyebrow">QR codes</h2>
+          <div className="nf-panel mt-5 overflow-hidden">
+            <div className="overflow-x-auto">
+              <table className="w-full min-w-[40rem] text-sm">
+                <thead>
+                  <tr className="border-b text-left text-xs text-muted-foreground">
+                    <th className="px-5 py-3 font-medium">Name</th>
+                    <th className="px-5 py-3 font-medium">Code</th>
+                    <th className="px-5 py-3 font-medium">Points at</th>
+                    <th className="px-5 py-3 text-right font-medium">Scans</th>
+                    <th className="px-5 py-3 font-medium">Last scan</th>
+                    <th className="px-5 py-3" />
+                  </tr>
+                </thead>
+                <tbody className="divide-y">
+                  {qrLinks.map((row) => (
+                    <tr key={row.qrCodeId} className="align-middle">
+                      <td className="px-5 py-3">
+                        <span className="font-medium">{row.name}</span>
+                        {row.status !== "active" && (
+                          <Badge variant="secondary" className="ml-2 capitalize">
+                            {row.status}
+                          </Badge>
+                        )}
+                      </td>
+                      <td className="px-5 py-3">
+                        <span className="font-mono text-xs text-brand">/q/{row.shortCode}</span>
+                      </td>
+                      <td className="max-w-[18rem] px-5 py-3">
+                        <span className="block truncate font-mono text-xs text-muted-foreground">
+                          {row.destination}
+                        </span>
+                      </td>
+                      <td className="px-5 py-3 text-right tabular-nums">{row.scans}</td>
+                      <td className="px-5 py-3 text-muted-foreground">
+                        {row.lastScan ? relative(row.lastScan) : "never"}
+                      </td>
+                      <td className="px-5 py-3">
+                        <div className="flex items-center justify-end gap-1">
+                          <CopyButton value={`${origin}/q/${row.shortCode}`} />
+                          <Link
+                            href={`/dashboard/qr/${row.qrCodeId}`}
+                            className="rounded-md p-2 text-muted-foreground transition-colors hover:text-foreground"
+                            aria-label={`Edit ${row.name}`}
+                          >
+                            <ExternalLink className="size-4" />
+                          </Link>
+                        </div>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </section>
+      )}
+
       <section className="mt-10">
         <h2 className="nf-eyebrow">Recent scans</h2>
         {recentScans.length === 0 ? (
@@ -149,9 +209,9 @@ export default async function AnalyticsPage() {
                 className="flex flex-wrap items-center justify-between gap-3 px-5 py-3"
               >
                 <span>
-                  <span className="font-medium">{scan.cardName}</span>{" "}
+                  <span className="font-medium">{scan.label}</span>{" "}
                   <span className="font-mono text-xs text-muted-foreground">
-                    /s/{scan.shortCode}
+                    {scan.path}
                   </span>
                 </span>
                 <span className="flex items-center gap-3 text-muted-foreground">
