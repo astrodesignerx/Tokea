@@ -343,6 +343,17 @@ model QrCode {
   colour   String  @default("#464F58")
   logo_url String?
 
+  // Design. dot_style: "square" | "rounded" | "dots" | "soft".
+  // corner_style (the three big corner squares): "square" | "rounded" | "circle".
+  // corner_colour falls back to colour when null. background: "white" |
+  // "transparent". frame_text, when set, adds a border with that label below
+  // the code. Defaults reproduce the original plain design.
+  dot_style     String  @default("square")
+  corner_style  String  @default("square")
+  corner_colour String?
+  background    String  @default("white")
+  frame_text    String?
+
   // "active" | "paused" | "archived". Paused and archived codes both land on
   // the explanatory /q page; archived ones are also hidden from the main list.
   status String @default("active")

@@ -1,7 +1,8 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { ArrowLeft, Download, ExternalLink, Lock, RotateCcw, X } from "lucide-react";
+import { ArrowLeft, ExternalLink, Lock, RotateCcw, X } from "lucide-react";
 import { requireUser } from "@/lib/require-user";
+import { prisma } from "@/lib/db";
 import {
   cancelScheduledQrChangeAction,
   restoreQrLinkAction,
@@ -10,8 +11,10 @@ import {
 } from "@/lib/actions/qr-codes";
 import { findOwnedQrCode, getQrCodeActivity } from "@/lib/qr-codes/data";
 import { isExpired, qrPath } from "@/lib/qr-codes/links";
+import { designFromRow } from "@/lib/qr-codes/design";
 import { getCardsOrigin } from "@/lib/cards/links";
-import { QrCodeForm } from "@/components/qr-codes/qr-code-form";
+import { QrCodeForm, type BrandPreset } from "@/components/qr-codes/qr-code-form";
+import { QrDownloads } from "@/components/qr-codes/qr-downloads";
 import { LocalTime } from "@/components/qr-codes/local-time";
 import { ScheduleChangeForm } from "@/components/qr-codes/schedule-change-form";
 import { ScanChart } from "@/components/dashboard/scan-chart";
@@ -29,16 +32,34 @@ const DEVICE_LABELS: Record<string, string> = {
   other: "Other",
 };
 
+/** The signed-in user's companies, offered as brand starting points. */
+async function brandPresets(ownerId: string): Promise<BrandPreset[]> {
+  const orgs = await prisma.organisation.findMany({
+    where: { owner_id: ownerId },
+    orderBy: { name: "asc" },
+    select: { id: true, name: true, brand_primary: true, brand_accent: true, logo_url: true },
+  });
+  return orgs.map((o) => ({
+    id: o.id,
+    name: o.name,
+    primary: o.brand_primary,
+    accent: o.brand_accent,
+    logoUrl: o.logo_url,
+  }));
+}
+
 export default async function EditQrCodePage({ params }: PageProps) {
   const { id } = await params;
   const user = await requireUser();
   const code = await findOwnedQrCode(user.id, id);
   if (!code) notFound();
 
-  const [activity, origin] = await Promise.all([
+  const [activity, origin, brands] = await Promise.all([
     getQrCodeActivity(code.id),
     getCardsOrigin(),
+    brandPresets(user.id),
   ]);
+  const design = designFromRow(code);
   const permanent = `${origin}${qrPath(code.short_code)}`;
   const expired = isExpired(code);
 
@@ -80,12 +101,18 @@ export default async function EditQrCodePage({ params }: PageProps) {
         action={updateQrCodeAction}
         encodedUrl={permanent}
         submitLabel="Save changes"
+        brands={brands}
         initial={{
           id: code.id,
           name: code.name,
           destination: code.destination,
           colour: code.colour,
           logo_url: code.logo_url ?? "",
+          dot_style: design.dotStyle,
+          corner_style: design.cornerStyle,
+          corner_colour: code.corner_colour ?? "",
+          background: design.background,
+          frame_text: code.frame_text ?? "",
           utm_source: code.utm_source ?? "",
           utm_medium: code.utm_medium ?? "",
           utm_campaign: code.utm_campaign ?? "",
@@ -100,18 +127,11 @@ export default async function EditQrCodePage({ params }: PageProps) {
       <section className="mt-12">
         <h2 className="nf-eyebrow">Download for print</h2>
         <p className="mt-2 text-sm text-muted-foreground">
-          SVG and PDF include the centre logo and scale to any size. Save your
-          style changes first; downloads use the saved version.
+          All three include the full design. SVG and PDF stay sharp at any size,
+          so use them for print. Save your changes first; downloads use the saved
+          version.
         </p>
-        <div className="mt-4 flex flex-wrap gap-2">
-          {(["png", "svg", "pdf"] as const).map((format) => (
-            <Button key={format} asChild variant="outline" size="sm">
-              <a href={`/api/qr/${code.id}?format=${format}&size=2048`} download>
-                <Download className="size-4" /> {format.toUpperCase()}
-              </a>
-            </Button>
-          ))}
-        </div>
+        <QrDownloads id={code.id} shortCode={code.short_code} />
       </section>
 
       <section className="mt-12">

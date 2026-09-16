@@ -1,16 +1,29 @@
 "use client";
 
-import { startTransition, useActionState, useEffect, useState } from "react";
-import QRCode from "qrcode";
+import { startTransition, useActionState, useEffect, useMemo, useState } from "react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { BRAND_DARK, ensureScannableDark } from "@/lib/cards/qr-colour";
 import { normaliseLogoUrl } from "@/lib/qr-codes/links";
+import {
+  CORNER_STYLES,
+  CORNER_STYLE_LABELS,
+  DOT_STYLES,
+  DOT_STYLE_LABELS,
+  FRAME_TEXT_MAX,
+  cleanFrameText,
+  layoutQr,
+  layoutToSvg,
+  type Background,
+  type CornerStyle,
+  type DotStyle,
+} from "@/lib/qr-codes/design";
 import type { QrFormSection, QrFormState } from "@/lib/actions/qr-codes";
 import { cn } from "@/lib/utils";
 import { FormSection } from "./form-section";
+import { StyleIcon } from "./style-icon";
 import { LocalDateTimeInput, LocalTime } from "./local-time";
 
 export type QrCodeFormValues = {
@@ -19,6 +32,12 @@ export type QrCodeFormValues = {
   destination: string;
   colour: string;
   logo_url: string;
+  dot_style: DotStyle;
+  corner_style: CornerStyle;
+  /** Empty when corners match the dots. */
+  corner_colour: string;
+  background: Background;
+  frame_text: string;
   utm_source: string;
   utm_medium: string;
   utm_campaign: string;
@@ -30,9 +49,19 @@ export type QrCodeFormValues = {
   hasPassword: boolean;
 };
 
+/** A company's saved brand, offered as a one-click starting style. */
+export type BrandPreset = {
+  id: string;
+  name: string;
+  primary: string;
+  accent: string;
+  logoUrl: string | null;
+};
+
 type Props = {
   action: (state: QrFormState, form: FormData) => Promise<QrFormState>;
   initial: QrCodeFormValues;
+  brands: BrandPreset[];
   /** What the code encodes. A placeholder on the create page. */
   encodedUrl: string;
   submitLabel: string;
@@ -53,11 +82,15 @@ const HINT = "placeholder:text-muted-foreground/50";
  * The preview redraws as the colour or logo changes. The destination never
  * changes the image: the code always encodes the permanent short link.
  */
-export function QrCodeForm({ action, initial, encodedUrl, submitLabel }: Props) {
+export function QrCodeForm({ action, initial, brands, encodedUrl, submitLabel }: Props) {
   const [state, formAction, pending] = useActionState(action, { error: null });
   const [colour, setColour] = useState(initial.colour || BRAND_DARK);
   const [logo, setLogo] = useState(initial.logo_url);
-  const [preview, setPreview] = useState<string | null>(null);
+  const [dotStyle, setDotStyle] = useState<DotStyle>(initial.dot_style);
+  const [cornerStyle, setCornerStyle] = useState<CornerStyle>(initial.corner_style);
+  const [cornerColour, setCornerColour] = useState(initial.corner_colour);
+  const [background, setBackground] = useState<Background>(initial.background);
+  const [frameText, setFrameText] = useState(initial.frame_text);
 
   // Mirrored only to keep the section summaries current.
   const [utm, setUtm] = useState({
@@ -84,20 +117,35 @@ export function QrCodeForm({ action, initial, encodedUrl, submitLabel }: Props) 
   const dark = ensureScannableDark(colour);
   const safeLogo = normaliseLogoUrl(logo);
 
-  useEffect(() => {
-    let cancelled = false;
-    QRCode.toDataURL(encodedUrl, {
-      width: 480,
-      margin: 1,
-      errorCorrectionLevel: "H",
-      color: { dark, light: "#FFFFFF" },
-    }).then((url) => {
-      if (!cancelled) setPreview(url);
+  const cornerDark = cornerColour ? ensureScannableDark(cornerColour) : dark;
+  const frame = cleanFrameText(frameText);
+  const darkened = [
+    dark !== colour && `dots ${dark}`,
+    cornerColour && cornerDark !== cornerColour && `corners ${cornerDark}`,
+  ].filter(Boolean);
+
+  // Drawn by the same code as the downloads, so the preview is exact.
+  const previewSvg = useMemo(() => {
+    const layout = layoutQr(encodedUrl, {
+      dotStyle,
+      cornerStyle,
+      colour,
+      cornerColour: cornerColour || null,
+      background,
+      frameText: frame,
+      hasLogo: Boolean(safeLogo),
     });
-    return () => {
-      cancelled = true;
-    };
-  }, [encodedUrl, dark]);
+    return layoutToSvg(layout, { logoHref: safeLogo, pixelWidth: 480 });
+  }, [encodedUrl, dotStyle, cornerStyle, colour, cornerColour, background, frame, safeLogo]);
+
+  function applyBrand(id: string) {
+    const brand = brands.find((b) => b.id === id);
+    if (!brand) return;
+    setColour(brand.primary.toUpperCase());
+    setCornerColour(brand.accent.toUpperCase());
+    if (brand.logoUrl) setLogo(brand.logoUrl);
+    toast.success(`${brand.name} brand applied`);
+  }
 
   // Edits stay on the page, so a successful save needs its own confirmation.
   useEffect(() => {
@@ -165,37 +213,117 @@ export function QrCodeForm({ action, initial, encodedUrl, submitLabel }: Props) 
                   style={{ backgroundColor: dark }}
                   aria-hidden="true"
                 />
-                {colour}, {safeLogo ? "with logo" : "no logo"}
+                {DOT_STYLE_LABELS[dotStyle]} dots
+                {safeLogo ? ", logo" : ""}
+                {frame ? ", frame" : ""}
+                {background === "transparent" ? ", clear" : ""}
               </span>
             }
           >
-            <div className="grid gap-5 sm:grid-cols-[8rem_minmax(0,1fr)]">
-              <Field label="Colour">
-                <div className="flex items-center gap-2">
-                  <input
-                    type="color"
-                    value={colour}
-                    onChange={(e) => setColour(e.target.value.toUpperCase())}
-                    aria-label="QR colour"
-                    className="h-9 w-12 shrink-0 cursor-pointer rounded-md border border-input bg-transparent p-1"
+            {brands.length > 0 && (
+              <Field label="Start from a company brand">
+                <select
+                  value=""
+                  onChange={(e) => applyBrand(e.target.value)}
+                  className="h-9 w-full rounded-md border border-input bg-transparent px-3 text-sm shadow-xs outline-none transition-colors focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50"
+                >
+                  <option value="">Choose a company...</option>
+                  {brands.map((b) => (
+                    <option key={b.id} value={b.id}>
+                      {b.name}
+                    </option>
+                  ))}
+                </select>
+              </Field>
+            )}
+
+            <ChoiceRow
+              label="Dots"
+              name="dot_style"
+              value={dotStyle}
+              options={DOT_STYLES.map((v) => ({ value: v, label: DOT_STYLE_LABELS[v] }))}
+              onChange={(v) => setDotStyle(v as DotStyle)}
+              icon={(v) => <StyleIcon kind="dot" variant={v} />}
+            />
+            <ChoiceRow
+              label="Corners"
+              name="corner_style"
+              value={cornerStyle}
+              options={CORNER_STYLES.map((v) => ({ value: v, label: CORNER_STYLE_LABELS[v] }))}
+              onChange={(v) => setCornerStyle(v as CornerStyle)}
+              icon={(v) => <StyleIcon kind="corner" variant={v} />}
+            />
+
+            <div className="grid gap-5 sm:grid-cols-2">
+              <Field label="Dot colour">
+                <ColourInput value={colour} onChange={setColour} name="colour" label="Dot colour" />
+              </Field>
+              <Field label="Corner colour">
+                <div className="flex items-center gap-3">
+                  <ColourInput
+                    value={cornerColour || colour}
+                    onChange={setCornerColour}
+                    name="corner_colour"
+                    submitValue={cornerColour}
+                    label="Corner colour"
+                    disabled={!cornerColour}
                   />
-                  <input type="hidden" name="colour" value={colour} />
-                  <span className="font-mono text-xs text-muted-foreground">{colour}</span>
+                  <label className="flex cursor-pointer items-center gap-2 text-xs">
+                    <input
+                      type="checkbox"
+                      checked={!cornerColour}
+                      onChange={(e) => setCornerColour(e.target.checked ? "" : colour)}
+                      className="size-4 cursor-pointer accent-foreground"
+                    />
+                    Same as dots
+                  </label>
                 </div>
               </Field>
-              <Field label="Centre logo URL" hint="https address or /path in public.">
-                <Input
-                  name="logo_url"
-                  value={logo}
-                  onChange={(e) => setLogo(e.target.value)}
-                  placeholder="https://example.com/logo.png"
-                  className={HINT}
-                />
-              </Field>
             </div>
-            {dark !== colour && (
+            {darkened.length > 0 && (
               <p className="qr-rise text-xs text-muted-foreground">
-                Darkened to {dark} on print so phones can still read it.
+                Too light to scan, so printed darker: {darkened.join(", ")}.
+              </p>
+            )}
+
+            <Field label="Centre logo URL" hint="https address or /path in public.">
+              <Input
+                name="logo_url"
+                value={logo}
+                onChange={(e) => setLogo(e.target.value)}
+                placeholder="https://example.com/logo.png"
+                className={HINT}
+              />
+            </Field>
+
+            <Field
+              label="Frame label"
+              hint={`Adds a border with this text under the code, e.g. "Scan for the menu". Up to ${FRAME_TEXT_MAX} characters; leave blank for no frame.`}
+            >
+              <Input
+                name="frame_text"
+                value={frameText}
+                onChange={(e) => setFrameText(e.target.value)}
+                maxLength={FRAME_TEXT_MAX}
+                placeholder="e.g. Scan to register"
+                className={HINT}
+              />
+            </Field>
+
+            <ChoiceRow
+              label="Background"
+              name="background"
+              value={background}
+              options={[
+                { value: "white", label: "White" },
+                { value: "transparent", label: "Clear" },
+              ]}
+              onChange={(v) => setBackground(v as Background)}
+            />
+            {background === "transparent" && (
+              <p className="qr-rise text-xs text-muted-foreground">
+                Only print a clear code on a plain, light surface. Phones struggle
+                to read it on dark or busy backgrounds.
               </p>
             )}
           </FormSection>
@@ -340,30 +468,21 @@ export function QrCodeForm({ action, initial, encodedUrl, submitLabel }: Props) 
 
       <aside className="md:sticky md:top-24 md:self-start">
         <p className="nf-eyebrow">Preview</p>
-        <div className="relative mt-3 aspect-square w-full max-w-64 overflow-hidden rounded-2xl border bg-white p-3">
-          {preview && (
-            // eslint-disable-next-line @next/next/no-img-element
-            <img
-              key={preview}
-              src={preview}
-              alt="QR code preview"
-              className="qr-fade size-full"
-            />
+        <div
+          className={cn(
+            "mt-3 w-full max-w-64 overflow-hidden rounded-2xl border p-3",
+            background === "white" ? "bg-white" : "qr-checker"
           )}
-          {safeLogo && (
-            <div className="absolute inset-0 grid place-items-center">
-              <div className="grid size-[24%] place-items-center rounded-[18%] bg-white">
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img
-                  src={safeLogo}
-                  alt=""
-                  className="size-[72%] object-contain"
-                  onError={(e) => (e.currentTarget.style.visibility = "hidden")}
-                  onLoad={(e) => (e.currentTarget.style.visibility = "visible")}
-                />
-              </div>
-            </div>
-          )}
+        >
+          <div
+            // Remounts on each design change so the new drawing fades in.
+            key={[dotStyle, cornerStyle, dark, cornerDark, background, frame, safeLogo].join("|")}
+            role="img"
+            aria-label="QR code preview"
+            className="qr-fade [&>svg]:block [&>svg]:h-auto [&>svg]:w-full"
+            // Built by layoutToSvg, which escapes every user-supplied value.
+            dangerouslySetInnerHTML={{ __html: previewSvg }}
+          />
         </div>
         <p
           className={cn(
@@ -437,6 +556,89 @@ function PasswordSection({
         </label>
       )}
     </FormSection>
+  );
+}
+
+function ChoiceRow({
+  label,
+  name,
+  value,
+  options,
+  onChange,
+  icon,
+}: {
+  label: string;
+  name: string;
+  value: string;
+  options: { value: string; label: string }[];
+  onChange: (value: string) => void;
+  icon?: (value: string) => React.ReactNode;
+}) {
+  return (
+    <fieldset className="space-y-1.5">
+      <legend className="text-sm font-medium">{label}</legend>
+      <div className="flex flex-wrap gap-2">
+        {options.map((o) => (
+          <label
+            key={o.value}
+            className={cn(
+              "flex cursor-pointer items-center gap-2 rounded-md border px-3 py-1.5 text-sm",
+              "transition-[background-color,border-color,transform] duration-150 active:scale-[0.97]",
+              "has-focus-visible:ring-[3px] has-focus-visible:ring-ring/50",
+              value === o.value ? "border-foreground bg-accent" : "hover:bg-muted/40"
+            )}
+          >
+            <input
+              type="radio"
+              name={name}
+              value={o.value}
+              checked={value === o.value}
+              onChange={() => onChange(o.value)}
+              className="sr-only"
+            />
+            {icon?.(o.value)}
+            {o.label}
+          </label>
+        ))}
+      </div>
+    </fieldset>
+  );
+}
+
+function ColourInput({
+  value,
+  onChange,
+  name,
+  label,
+  submitValue,
+  disabled,
+}: {
+  value: string;
+  onChange: (value: string) => void;
+  name: string;
+  label: string;
+  /** What the form sends, when it differs from what is shown. */
+  submitValue?: string;
+  disabled?: boolean;
+}) {
+  return (
+    <div
+      className={cn(
+        "flex items-center gap-2 transition-opacity duration-200",
+        disabled && "opacity-40"
+      )}
+    >
+      <input
+        type="color"
+        value={value.toLowerCase()}
+        onChange={(e) => onChange(e.target.value.toUpperCase())}
+        aria-label={label}
+        disabled={disabled}
+        className="h-9 w-12 shrink-0 cursor-pointer rounded-md border border-input bg-transparent p-1 disabled:cursor-default"
+      />
+      <input type="hidden" name={name} value={submitValue ?? value} />
+      <span className="font-mono text-xs text-muted-foreground">{value}</span>
+    </div>
   );
 }
 
