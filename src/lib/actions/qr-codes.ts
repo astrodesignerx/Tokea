@@ -20,8 +20,26 @@ import {
  * signed-in user; an id in a form body is attacker-controlled.
  */
 
-/** savedAt changes on every successful edit, so the form knows to confirm it. */
-export type QrFormState = { error: string | null; savedAt?: number };
+/** The folded form section a validation error belongs to, so it can open itself. */
+export type QrFormSection = "basics" | "style" | "tracking" | "devices" | "expiry" | "password";
+
+/**
+ * savedAt changes on every successful edit, so the form knows to confirm it.
+ * errorAt changes on every failed one, so a repeated error still reopens its
+ * section.
+ */
+export type QrFormState = {
+  error: string | null;
+  section?: QrFormSection;
+  errorAt?: number;
+  savedAt?: number;
+};
+
+type FieldError = { error: string; section: QrFormSection };
+
+function failed({ error, section }: FieldError): QrFormState {
+  return { error, section, errorAt: Date.now() };
+}
 
 const LIST_PATH = "/dashboard/qr";
 
@@ -48,32 +66,41 @@ type QrFields = {
 };
 
 /** Validates the fields shared by create and edit. */
-function readFields(form: FormData): { error: string } | { fields: QrFields } {
+function readFields(form: FormData): FieldError | { fields: QrFields } {
   const name = text(form, "name", 120);
-  if (!name) return { error: "Give the code a name so you can find it later." };
+  if (!name) return { error: "Give the code a name so you can find it later.", section: "basics" };
 
   const destination = normaliseDestination(String(form.get("destination") ?? ""));
   if (!destination) {
-    return { error: "Enter a full web address, like https://example.com/menu." };
+    return {
+      error: "Enter a full web address, like https://example.com/menu.",
+      section: "basics",
+    };
   }
 
   const ios = optionalUrl(form, "ios_destination");
   const android = optionalUrl(form, "android_destination");
   const expiredTo = optionalUrl(form, "expired_destination");
-  if (ios === false || android === false || expiredTo === false) {
-    return { error: "Device and after-expiry links must be full web addresses too." };
+  if (ios === false || android === false) {
+    return { error: "iPhone and Android links must be full web addresses.", section: "devices" };
+  }
+  if (expiredTo === false) {
+    return { error: "The after-expiry link must be a full web address.", section: "expiry" };
   }
 
   const rawExpiry = text(form, "expires_at", 40);
   const expires_at = rawExpiry ? new Date(rawExpiry) : null;
   if (expires_at && Number.isNaN(expires_at.getTime())) {
-    return { error: "That expiry date could not be read." };
+    return { error: "That expiry date could not be read.", section: "expiry" };
   }
 
   const rawLogo = text(form, "logo_url", 2000);
   const logo_url = normaliseLogoUrl(rawLogo);
   if (rawLogo && !logo_url) {
-    return { error: "Logo must be an https address or a path starting with /." };
+    return {
+      error: "Logo must be an https address or a path starting with /.",
+      section: "style",
+    };
   }
 
   return {
@@ -106,12 +133,15 @@ function optionalUrl(form: FormData, key: string): string | null | false {
  */
 async function readPassword(
   form: FormData
-): Promise<{ error: string } | { hash: string | null | undefined }> {
+): Promise<FieldError | { hash: string | null | undefined }> {
   if (form.get("remove_password") === "on") return { hash: null };
   const password = String(form.get("password") ?? "");
   if (!password) return { hash: undefined };
   if (password.length < MIN_PASSWORD_LENGTH) {
-    return { error: `Passwords need at least ${MIN_PASSWORD_LENGTH} characters.` };
+    return {
+      error: `Passwords need at least ${MIN_PASSWORD_LENGTH} characters.`,
+      section: "password",
+    };
   }
   return { hash: await hashPassword(password.slice(0, 200)) };
 }
@@ -129,9 +159,9 @@ export async function createQrCodeAction(
 ): Promise<QrFormState> {
   const user = await requireUser();
   const parsed = readFields(form);
-  if ("error" in parsed) return { error: parsed.error };
+  if ("error" in parsed) return failed(parsed);
   const password = await readPassword(form);
-  if ("error" in password) return { error: password.error };
+  if ("error" in password) return failed(password);
 
   const code = await prisma.qrCode.create({
     data: {
@@ -152,9 +182,9 @@ export async function updateQrCodeAction(
 ): Promise<QrFormState> {
   const code = await requireOwnedQrCode(text(form, "qr_code_id"));
   const parsed = readFields(form);
-  if ("error" in parsed) return { error: parsed.error };
+  if ("error" in parsed) return failed(parsed);
   const password = await readPassword(form);
-  if ("error" in password) return { error: password.error };
+  if ("error" in password) return failed(password);
 
   // The previous address is kept so a mistaken edit can be undone. Both writes
   // go together: history without the change, or the reverse, would mislead.

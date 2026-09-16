@@ -316,9 +316,58 @@
   animation: qr-fade var(--fast) var(--ease) both;
 }
 
+/*
+  Folding form sections (components/qr-codes/form-section.tsx). The body grows
+  from a zero-height grid row, which is the only way to reveal content of
+  unknown height without measuring it; the contents then fade and settle a
+  beat later, so the container leads and the fields follow.
+*/
+.qr-section-body {
+  display: grid;
+  grid-template-rows: 0fr;
+  transition: grid-template-rows 220ms var(--ease);
+}
+
+.qr-section[data-open="true"] .qr-section-body {
+  grid-template-rows: 1fr;
+}
+
+.qr-section-inner {
+  min-height: 0;
+  overflow: hidden;
+}
+
+.qr-section-inner > * {
+  opacity: 0;
+  transform: translate3d(0, -4px, 0);
+  transition:
+    opacity 140ms var(--ease),
+    transform 140ms var(--ease);
+}
+
+.qr-section[data-open="true"] .qr-section-inner > * {
+  opacity: 1;
+  transform: translate3d(0, 0, 0);
+  transition-delay: 70ms;
+}
+
+.qr-section-chevron {
+  transition: transform var(--fast) var(--ease);
+}
+
+.qr-section[data-open="true"] .qr-section-chevron {
+  transform: rotate(180deg);
+}
+
 @media (prefers-reduced-motion: reduce) {
   .qr-rise,
   .qr-fade {
     animation: none;
+  }
+
+  .qr-section-body,
+  .qr-section-inner > *,
+  .qr-section-chevron {
+    transition: none;
   }
 }
