@@ -289,3 +289,36 @@
     animation: none;
   }
 }
+
+/* ---------------------------------------------------------------------------
+   Dynamic QR codes (app/dashboard/qr, app/q)
+
+   qr-rise marks a new message arriving (a hint, an error, a page body).
+   qr-fade crossfades the preview image when its colour changes, so the
+   redraw reads as the same code updating rather than a new one flashing in.
+--------------------------------------------------------------------------- */
+
+@keyframes qr-rise {
+  from { transform: translate3d(0, 4px, 0); opacity: 0; }
+  to   { transform: translate3d(0, 0, 0);   opacity: 1; }
+}
+
+@keyframes qr-fade {
+  from { opacity: 0.4; }
+  to   { opacity: 1; }
+}
+
+.qr-rise {
+  animation: qr-rise 240ms var(--ease) both;
+}
+
+.qr-fade {
+  animation: qr-fade var(--fast) var(--ease) both;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .qr-rise,
+  .qr-fade {
+    animation: none;
+  }
+}

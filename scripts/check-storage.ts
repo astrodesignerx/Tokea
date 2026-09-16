@@ -112,7 +112,7 @@ async function checkCors(client: S3Client, bucket: string, uploadUrl: string) {
 }
 
 async function main() {
-  console.log("Checking Tokea storage configuration...");
+  console.log("Checking NikoForm storage configuration...");
 
   if (!checkEnv()) {
     console.log("\nFix the variables above, then run this again.");

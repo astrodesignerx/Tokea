@@ -33,7 +33,7 @@ export async function GET(_req: Request, ctx: { params: Promise<{ id: string }> 
   return new NextResponse(csv, {
     headers: {
       "Content-Type": "text/csv; charset=utf-8",
-      "Content-Disposition": `attachment; filename="tokea-${event.slug}-guests.csv"`,
+      "Content-Disposition": `attachment; filename="nikoform-${event.slug}-guests.csv"`,
     },
   });
 }

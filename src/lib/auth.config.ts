@@ -24,7 +24,7 @@ providers.push(
   Resend({
     // The provider only needs a key to satisfy its own config check; delivery
     // goes through sendEmail() so magic links use the same branded template
-    // and transport as every other Tokea email.
+    // and transport as every other NikoForm email.
     apiKey: process.env.RESEND_API_KEY ?? "re_dev_placeholder",
     from: EMAIL_FROM,
     maxAge: SIGN_IN_LINK_MAX_AGE_SECONDS,

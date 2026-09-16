@@ -1,6 +1,10 @@
-# Tokea
+# NikoForm
 
-Event software for hosts: create a public event page, send one magic link per guest, collect RSVPs, and scan QR codes at the door.
+NikoForm, live at https://nikoform.co.ke, gives clients three services:
+
+- Digital business cards: a page per person with a permanent QR code.
+- Dynamic QR codes: print once, then change where the code goes at any time.
+- Events: a public event page, one magic link per guest, RSVPs, and QR check-in at the door.
 
 Built with Next.js 16 (App Router), Prisma 7 + PostgreSQL, Auth.js v5, Tailwind CSS 4, and Resend for email.
 
@@ -110,7 +114,7 @@ Paystack's test M-Pesa number is **+254 710 000 000**, which needs no PIN or OTP
 ### Before going live
 
 - Confirm which way `percentage_charge` splits. Paystack's subaccount reference describes it as the commission the **main** account takes, while it is widely used as the share the **subaccount** receives. Create a test subaccount, run one transaction, and read the split off the verify response. Getting this backwards pays the wrong party and is invisible until settlement.
-- Decide who bears the Paystack fee. The `bearer` field defaults to the main account, meaning Tokea pays the fee on every organiser's ticket.
+- Decide who bears the Paystack fee. The `bearer` field defaults to the main account, meaning NikoForm pays the fee on every organiser's ticket.
 - Check that deployment protection does not sit in front of `/api/webhooks/*`, or Paystack will retry into a login page for 72 hours.
 
 ## Scripts

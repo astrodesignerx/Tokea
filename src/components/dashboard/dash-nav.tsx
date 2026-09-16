@@ -17,6 +17,7 @@ import { cn } from "@/lib/utils";
 const TABS = [
   { href: "/dashboard", label: "Services", exact: true },
   { href: "/dashboard/companies", label: "Cards", exact: false },
+  { href: "/dashboard/qr", label: "QR codes", exact: false },
   { href: "/dashboard/events", label: "Events", exact: false },
   { href: "/dashboard/analytics", label: "Analytics", exact: false },
 ];

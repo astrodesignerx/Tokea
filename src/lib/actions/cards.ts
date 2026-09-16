@@ -5,7 +5,7 @@ import { redirect } from "next/navigation";
 import { prisma } from "@/lib/db";
 import { requireUser } from "@/lib/require-user";
 import { slugify, withCollisionSuffix } from "@/lib/slug";
-import { generateShortCode } from "@/lib/cards/short-code";
+import { allocateShortCode } from "@/lib/short-code-allocator";
 import { cardPath } from "@/lib/cards/links";
 import {
   CARD_TEMPLATE_IDS,
@@ -48,22 +48,6 @@ async function uniqueSlug(
   }
 
   throw new Error(`Could not find a free slug for "${base}"`);
-}
-
-/**
- * Short codes are the one identifier that must never collide: a duplicate would
- * silently point a printed QR code at the wrong person. Retry until clear
- * rather than trusting randomness.
- */
-async function uniqueShortCode(): Promise<string> {
-  for (let attempt = 0; attempt < 10; attempt++) {
-    const candidate = generateShortCode();
-    const taken = await prisma.contactCard.findUnique({
-      where: { short_code: candidate },
-    });
-    if (!taken) return candidate;
-  }
-  throw new Error("Could not allocate a unique short code");
 }
 
 function text(form: FormData, key: string): string {
@@ -135,7 +119,7 @@ export async function createCardAction(form: FormData) {
     data: {
       organisation_id: org.id,
       slug,
-      short_code: await uniqueShortCode(),
+      short_code: await allocateShortCode(),
       // Points at its own page to begin with; editable later without
       // invalidating the short code.
       destination: cardPath(slug),
