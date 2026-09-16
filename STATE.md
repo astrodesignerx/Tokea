@@ -8,7 +8,7 @@
 - Next.js refuses to run two `next dev` servers for this folder at once.
 
 ## Current status
-- Dynamic QR codes, including all extra features, are committed on branch `feature/dynamic-qr-codes` (2026-09-17) and being released to `master`.
+- Dynamic QR codes, including all extra features, are on branch `feature/dynamic-qr-codes`, open as https://github.com/astrodesignerx/Tokea/pull/1 (2026-09-17). Not yet merged, so not live on https://tokea.vercel.app. Vercel preview built successfully (it sits behind Vercel login).
 - Migration `20260916120000_add_dynamic_qr_codes` is applied to Supabase (2026-09-16).
 - Verified: type check, lint on new files, `next build`, 19 end-to-end redirect checks against the production build, and password hashing checks.
 - Not yet verified in a browser: the signed-in dashboard pages (`/dashboard/qr`, create, edit, schedule, restore, downloads, Analytics) and typing a password on the unlock page. Needs the owner to sign in.
@@ -38,7 +38,9 @@
 - Motion classes `qr-rise` and `qr-fade` at the end of `src/app/globals.css`.
 
 ## Open questions
-- **Blocking:** owner signs in and checks the dashboard pages and the unlock form in the browser.
+- **Blocking:** owner merges PR #1, then checks on production: `https://tokea.vercel.app/q/zzzzzzzz` should redirect (307) to `/q`; a 500 means production uses a different database that still needs `prisma migrate deploy`.
+- Owner signs in and checks the dashboard pages and the unlock form in the browser.
+- Before printing client codes: set `CARDS_URL` in Vercel if a custom domain is planned, since QR codes encode the origin and a domain change breaks printed codes.
 - The password throttle is per server instance; use a shared store (database or Redis) if brute-force attempts become a concern.
 - PNG downloads have no centre logo (same as cards; SVG and PDF do).
 - Pre-existing lint errors in `src/lib/cards/qr.ts` (two `any`, two unused variables).
