@@ -11,12 +11,12 @@
 - Next.js refuses to run two `next dev` servers for this folder at once.
 
 ## Current status
-- Dynamic QR codes, including all extra features, are on branch `feature/dynamic-qr-codes`, open as https://github.com/astrodesignerx/Tokea/pull/1 (2026-09-17). Being merged and deployed to https://nikoform.co.ke.
-- Migration `20260916120000_add_dynamic_qr_codes` is applied to Supabase (2026-09-16).
-- Verified: type check, lint on new files, `next build`, 19 end-to-end redirect checks against the production build, and password hashing checks.
-- Not yet verified in a browser: the signed-in dashboard pages (`/dashboard/qr`, create, edit, schedule, restore, downloads, Analytics) and typing a password on the unlock page. Needs the owner to sign in.
-- Test data was removed on 2026-09-17; all four QR tables were empty before the first client code.
-- The dev server on port 3012 hit a Turbopack internal error on 2026-09-16 and stopped answering; it needs a manual restart. Workaround used for testing: `pnpm exec next build` then `pnpm exec next start -p 3014`.
+- Dynamic QR codes (with iPhone/Android links, expiry, passwords, scheduled changes) are merged to `master` via https://github.com/astrodesignerx/Tokea/pull/1 (commit `b27e0f7`) and live on https://nikoform.co.ke since 2026-09-17.
+- Migration `20260916120000_add_dynamic_qr_codes` is applied; production uses the same Supabase database as `.env.local` (confirmed by scanning a test code through production).
+- Verified on production (2026-09-17, 17 checks): unknown and password codes, UTM tags, iPhone link, instant link edits, scan logging with device and country, owner-only downloads, existing card short links, and sign-in redirects on dashboard pages. Test codes were deleted afterwards; the QR tables held no client data at that point.
+- Not yet verified in a browser: the signed-in dashboard pages (`/dashboard/qr`, create, edit, schedule, restore, downloads, Analytics). Claude cannot sign in; the owner must check these or sign in to a browser Claude can use.
+- The local dev server on port 3012 hit a Turbopack internal error on 2026-09-16 and needs a manual restart. Workaround for local testing: `pnpm exec next build` then `pnpm exec next start -p 3014`.
+- Merging to `master` from a Claude session needs the owner's approval; changes go through a PR.
 
 ## Decisions
 - Standalone QR codes live in `QrCode` and resolve under `/q/<code>`, separate from card links under `/s/<code>`.
