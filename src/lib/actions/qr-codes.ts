@@ -8,6 +8,12 @@ import { allocateShortCode } from "@/lib/short-code-allocator";
 import { BRAND_DARK } from "@/lib/cards/qr-colour";
 import { MIN_PASSWORD_LENGTH, hashPassword } from "@/lib/qr-codes/password";
 import {
+  BACKGROUNDS,
+  CORNER_STYLES,
+  DOT_STYLES,
+  cleanFrameText,
+} from "@/lib/qr-codes/design";
+import {
   QR_STATUSES,
   normaliseColour,
   normaliseDestination,
@@ -60,6 +66,11 @@ type QrFields = {
   expired_destination: string | null;
   logo_url: string | null;
   colour: string;
+  dot_style: string;
+  corner_style: string;
+  corner_colour: string | null;
+  background: string;
+  frame_text: string | null;
   utm_source: string | null;
   utm_medium: string | null;
   utm_campaign: string | null;
@@ -113,11 +124,23 @@ function readFields(form: FormData): FieldError | { fields: QrFields } {
       expired_destination: expiredTo,
       logo_url,
       colour: normaliseColour(text(form, "colour"), BRAND_DARK),
+      dot_style: pick(text(form, "dot_style"), DOT_STYLES),
+      corner_style: pick(text(form, "corner_style"), CORNER_STYLES),
+      corner_colour: text(form, "corner_colour")
+        ? normaliseColour(text(form, "corner_colour"), BRAND_DARK)
+        : null,
+      background: pick(text(form, "background"), BACKGROUNDS),
+      frame_text: cleanFrameText(String(form.get("frame_text") ?? "")),
       utm_source: optional(form, "utm_source"),
       utm_medium: optional(form, "utm_medium"),
       utm_campaign: optional(form, "utm_campaign"),
     },
   };
+}
+
+/** A known option, or the first (default) one. */
+function pick(value: string, allowed: readonly string[]): string {
+  return allowed.includes(value) ? value : allowed[0];
 }
 
 /** A blank field is null; a filled one must be a valid link, or false. */
