@@ -60,6 +60,7 @@ export default async function NewQrCodePage() {
           corner_colour: "",
           background: "white",
           frame_text: "",
+          density: "detailed",
           utm_source: "",
           utm_medium: "",
           utm_campaign: "",

@@ -10,6 +10,7 @@ import { MIN_PASSWORD_LENGTH, hashPassword } from "@/lib/qr-codes/password";
 import {
   BACKGROUNDS,
   CORNER_STYLES,
+  DENSITIES,
   DOT_STYLES,
   cleanFrameText,
 } from "@/lib/qr-codes/design";
@@ -71,6 +72,7 @@ type QrFields = {
   corner_colour: string | null;
   background: string;
   frame_text: string | null;
+  density: string;
   utm_source: string | null;
   utm_medium: string | null;
   utm_campaign: string | null;
@@ -131,6 +133,7 @@ function readFields(form: FormData): FieldError | { fields: QrFields } {
         : null,
       background: pick(text(form, "background"), BACKGROUNDS),
       frame_text: cleanFrameText(String(form.get("frame_text") ?? "")),
+      density: pick(text(form, "density"), DENSITIES),
       utm_source: optional(form, "utm_source"),
       utm_medium: optional(form, "utm_medium"),
       utm_campaign: optional(form, "utm_campaign"),

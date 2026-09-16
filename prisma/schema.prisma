@@ -353,6 +353,10 @@ model QrCode {
   corner_colour String?
   background    String  @default("white")
   frame_text    String?
+  // "detailed": lower-case link, highest error correction (more, smaller
+  // squares). "compact": the link in capitals, which QR packs far more
+  // tightly, for fewer, bigger squares that scan smaller and farther away.
+  density       String  @default("detailed")
 
   // "active" | "paused" | "archived". Paused and archived codes both land on
   // the explanatory /q page; archived ones are also hidden from the main list.
