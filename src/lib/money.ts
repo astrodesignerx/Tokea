@@ -1,5 +1,5 @@
 /**
- * Money handling for Tokea.
+ * Money handling for NikoForm.
  *
  * Amounts are stored and passed around as integers in the currency's minor
  * unit (KES cents), never as floats. 0.1 * 100 is 10.000000000000002, and

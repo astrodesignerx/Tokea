@@ -1,4 +1,4 @@
-// Tokea Prisma config
+// NikoForm Prisma config
 // Loads .env first, then .env.local overrides for local dev.
 import "dotenv/config";
 import { config as loadEnv } from "dotenv";

@@ -2,7 +2,7 @@
  * Scoped styling for the public digital card pages.
  *
  * Deliberately not in globals.css: these pages are client-branded and always
- * light, so they must not inherit Tokea's shadcn palette or its dark mode.
+ * light, so they must not inherit NikoForm's shadcn palette or its dark mode.
  * Everything here is namespaced under .cards-surface or prefixed --card-* so it
  * cannot leak into the event side of the app.
  */

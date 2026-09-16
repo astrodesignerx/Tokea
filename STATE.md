@@ -1,14 +1,17 @@
-# Tokea project state
+# NikoForm project state
 
 ## Goal and hard constraints
-- Next.js 16 + Prisma 7 (Postgres on Supabase) app: digital business cards, events/RSVPs, and dynamic QR codes.
+- NikoForm (formerly Tokea), live at https://nikoform.co.ke with active clients. Next.js 16 + Prisma 7 (Postgres on Supabase) on Vercel: digital business cards, events/RSVPs, and dynamic QR codes.
+- The GitHub repo (`astrodesignerx/Tokea`), Vercel project (`tokea`) and local folder keep the old name. `tokea.vercel.app` still serves the same app.
+- Deliberately unchanged old-name identifiers, because live data depends on them: `STORAGE_BUCKET=tokea-covers`, the `tokea-` Paystack reference prefix (`src/lib/paystack.ts`), the `@tokea.app` calendar UID (`src/lib/ics.ts`, changing it duplicates events in guests' calendars), and the `tokea-theme` storage key (`src/lib/theme.ts`).
+- Printed cards and QR codes encode `https://nikoform.co.ke` (resolved at runtime by `getCardsOrigin` in `src/lib/cards/links.ts`).
 - Printed short codes (`ContactCard.short_code`, `QrCode.short_code`) must never change or be reused.
 - Redirects for printed codes are always 307 with `Cache-Control: no-store`, never 301/308.
 - `.env.local` points `DATABASE_URL` and `DIRECT_URL` at Supabase, so the local dev server and `pnpm db:deploy` both use that database.
 - Next.js refuses to run two `next dev` servers for this folder at once.
 
 ## Current status
-- Dynamic QR codes, including all extra features, are on branch `feature/dynamic-qr-codes`, open as https://github.com/astrodesignerx/Tokea/pull/1 (2026-09-17). Not yet merged, so not live on https://tokea.vercel.app. Vercel preview built successfully (it sits behind Vercel login).
+- Dynamic QR codes, including all extra features, are on branch `feature/dynamic-qr-codes`, open as https://github.com/astrodesignerx/Tokea/pull/1 (2026-09-17). Being merged and deployed to https://nikoform.co.ke.
 - Migration `20260916120000_add_dynamic_qr_codes` is applied to Supabase (2026-09-16).
 - Verified: type check, lint on new files, `next build`, 19 end-to-end redirect checks against the production build, and password hashing checks.
 - Not yet verified in a browser: the signed-in dashboard pages (`/dashboard/qr`, create, edit, schedule, restore, downloads, Analytics) and typing a password on the unlock page. Needs the owner to sign in.
@@ -38,7 +41,7 @@
 - Motion classes `qr-rise` and `qr-fade` at the end of `src/app/globals.css`.
 
 ## Open questions
-- **Blocking:** owner merges PR #1, then checks on production: `https://tokea.vercel.app/q/zzzzzzzz` should redirect (307) to `/q`; a 500 means production uses a different database that still needs `prisma migrate deploy`.
+- After each deploy, check production: `https://nikoform.co.ke/q/zzzzzzzz` should redirect (307) to `/q`; a 500 means production uses a different database that still needs `prisma migrate deploy`.
 - Owner signs in and checks the dashboard pages and the unlock form in the browser.
 - Before printing client codes: set `CARDS_URL` in Vercel if a custom domain is planned, since QR codes encode the origin and a domain change breaks printed codes.
 - The password throttle is per server instance; use a shared store (database or Redis) if brute-force attempts become a concern.

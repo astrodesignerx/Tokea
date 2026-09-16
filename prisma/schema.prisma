@@ -1,4 +1,4 @@
-// Tokea data model, v0
+// NikoForm data model
 // Spec: organizer creates event → guest RSVPs via magic link → organizer tracks → QR check-in at door.
 
 generator client {
