@@ -27,6 +27,7 @@
 - Expired codes go to `expired_destination`, or `/q` when it is blank, and skip the password.
 - Passwords: salted scrypt hash in `password_hash`. A correct entry sets an httpOnly cookie scoped to `/q/<code>` for 12 hours, holding an HMAC (keyed by `AUTH_SECRET`) of the code and hash, so changing the password logs everyone out. Failed attempts are throttled in memory (5 per 10 minutes per IP and code, per server instance).
 - Scheduled changes (`QrScheduledChange`) are applied lazily when a code is scanned or viewed in the dashboard, not by cron. Each is claimed with a conditional update in a transaction and logged to `QrLinkChange`.
+- QR form layout (2026-09-17, replaced the long single-column form): Name and Destination always open; Style, Tracking tags, Device links, Expiry and Password fold into `FormSection` rows (`src/components/qr-codes/form-section.tsx`) whose headers summarise the current setting. Closed bodies stay mounted but `inert`, so their values still submit. Actions tag each validation error with a `section` and `errorAt`, and the form reopens that section. The Save button sits in a sticky bar with the error message.
 - Dates are stored in UTC; the browser converts to local time (`src/components/qr-codes/local-time.tsx`).
 - Downloads (`/api/qr/[id]`) are owner-only because rendering fetches the logo URL server-side. Logo URLs must be https or a `/public` path.
 - The Analytics page counts card and QR scans together, and lists QR codes in their own table. The "Companies" tile was replaced by "Active QR codes".

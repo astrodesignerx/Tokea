@@ -52,11 +52,14 @@ export function LocalDateTimeInput({
   defaultIso,
   id,
   required,
+  onIsoChange,
 }: {
   name: string;
   defaultIso?: string | null;
   id?: string;
   required?: boolean;
+  /** Called with the UTC ISO string (empty when cleared) whenever it changes. */
+  onIsoChange?: (iso: string) => void;
 }) {
   const hydrated = useHydrated();
   // null until the person edits the field; until then the saved value shows.
@@ -70,7 +73,10 @@ export function LocalDateTimeInput({
         id={id}
         type="datetime-local"
         value={local}
-        onChange={(e) => setEdited(e.target.value)}
+        onChange={(e) => {
+          setEdited(e.target.value);
+          onIsoChange?.(e.target.value ? new Date(e.target.value).toISOString() : "");
+        }}
         required={required}
       />
       <input type="hidden" name={name} value={iso} />
