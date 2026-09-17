@@ -1,5 +1,6 @@
 import { fetchLogoBytes } from "@/lib/cards/qr";
-import { layoutQr, layoutToSvg, type QrDesign, type QrLayout } from "./design";
+import { layoutQr, layoutToSvg, type QrDesign } from "./design";
+import { buildQrPdf, type PdfLogo } from "./pdf";
 
 /**
  * Server-side downloads for styled QR codes. The logo is fetched once and
@@ -8,7 +9,7 @@ import { layoutQr, layoutToSvg, type QrDesign, type QrLayout } from "./design";
 
 type Logo = { bytes: Buffer; mime: string } | null;
 
-async function loadLogo(url: string | null): Promise<Logo> {
+export async function loadLogo(url: string | null): Promise<Logo> {
   return url ? fetchLogoBytes(url) : null;
 }
 
@@ -24,25 +25,10 @@ export async function styledQrSvg(
   return layoutToSvg(layout, { logoHref: href, pixelWidth });
 }
 
-function hexToRgb(hex: string) {
-  const clean = hex.replace(/^#/, "");
-  const value = /^[0-9a-fA-F]{6}$/.test(clean) ? clean : "000000";
-  return {
-    red: parseInt(value.slice(0, 2), 16) / 255,
-    green: parseInt(value.slice(2, 4), 16) / 255,
-    blue: parseInt(value.slice(4, 6), 16) / 255,
-  };
-}
-
-/** Standard PDF fonts only cover Latin-1, so anything else is dropped. */
-function pdfSafe(text: string): string {
-  return text.replace(/[^\x20-\x7E\xA0-\xFF]/g, "").trim();
-}
-
 /**
- * Vector PDF, `size` points wide. Shapes are drawn as paths, so the file
- * scales cleanly for print. SVG logos cannot be embedded by pdf-lib and are
- * left out; PNG and JPEG logos are drawn on their plate.
+ * Server PDF. The server has no way to turn SVG or WebP into pixels without a
+ * native library, so those logos are left out here; the dashboard builds its
+ * PDFs in the browser instead, where they are included.
  */
 export async function styledQrPdf(
   text: string,
@@ -50,63 +36,10 @@ export async function styledQrPdf(
   logoUrl: string | null,
   size = 512
 ): Promise<Buffer> {
-  const { PDFDocument, StandardFonts, rgb } = await import("pdf-lib");
-  const rawLogo = await loadLogo(logoUrl);
-  const logo = rawLogo && rawLogo.mime !== "image/svg+xml" ? rawLogo : null;
-  const layout: QrLayout = layoutQr(text, { ...design, hasLogo: Boolean(logo) });
-
-  const scale = size / layout.width;
-  const pageHeight = layout.height * scale;
-  const doc = await PDFDocument.create();
-  const page = doc.addPage([size, pageHeight]);
-  // drawSvgPath flips the y axis, so the origin is the page's top-left corner.
-  const at = { x: 0, y: pageHeight, scale };
-  const colour = (hex: string) => {
-    const c = hexToRgb(hex);
-    return rgb(c.red, c.green, c.blue);
-  };
-
-  if (layout.backgroundPath) {
-    page.drawSvgPath(layout.backgroundPath, { ...at, color: rgb(1, 1, 1) });
-  }
-  for (const part of layout.parts) {
-    if (part.d) page.drawSvgPath(part.d, { ...at, color: colour(part.fill) });
-  }
-
-  if (layout.logo && logo) {
-    try {
-      page.drawSvgPath(layout.logo.plate, { ...at, color: rgb(1, 1, 1) });
-      const image =
-        logo.mime === "image/jpeg" ? await doc.embedJpg(logo.bytes) : await doc.embedPng(logo.bytes);
-      const box = layout.logo.size * scale;
-      const fit = Math.min(box / image.width, box / image.height);
-      const w = image.width * fit;
-      const h = image.height * fit;
-      const left = layout.logo.x * scale + (box - w) / 2;
-      const top = layout.logo.y * scale + (box - h) / 2;
-      page.drawImage(image, { x: left, y: pageHeight - top - h, width: w, height: h });
-    } catch {
-      // A logo that cannot be embedded must never break the download.
-    }
-  }
-
-  if (layout.frame) {
-    const label = pdfSafe(layout.frame.text);
-    if (label) {
-      const font = await doc.embedFont(StandardFonts.HelveticaBold);
-      const fontSize = layout.frame.fontSize * scale;
-      const width = font.widthOfTextAtSize(label, fontSize);
-      // Helvetica capitals are about 0.72em tall; centre them on the band.
-      const halfCap = fontSize * 0.36;
-      page.drawText(label, {
-        x: layout.frame.textX * scale - width / 2,
-        y: pageHeight - layout.frame.textY * scale - halfCap,
-        size: fontSize,
-        font,
-        color: rgb(1, 1, 1),
-      });
-    }
-  }
-
-  return Buffer.from(await doc.save());
+  const raw = await loadLogo(logoUrl);
+  const kind: PdfLogo["kind"] | null =
+    raw?.mime === "image/png" ? "png" : raw?.mime === "image/jpeg" ? "jpg" : null;
+  const logo = raw && kind ? { bytes: new Uint8Array(raw.bytes), kind } : null;
+  const layout = layoutQr(text, { ...design, hasLogo: Boolean(logo) });
+  return Buffer.from(await buildQrPdf(layout, logo, size));
 }

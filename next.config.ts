@@ -8,6 +8,17 @@ const nextConfig: NextConfig = {
    * required at runtime on the server, which is where they always run anyway.
    */
   serverExternalPackages: ["pg", "@prisma/adapter-pg"],
+
+  /*
+   * Compact QR codes encode their link in capitals (QR "alphanumeric" mode
+   * only has capitals, and packs a link into far fewer squares). Domains are
+   * case-insensitive but paths are not, so /Q/<CODE> is mapped onto the real
+   * route, which already lower-cases the code. Never remove this: printed
+   * compact codes depend on it.
+   */
+  async rewrites() {
+    return [{ source: "/Q/:code", destination: "/q/:code" }];
+  },
 };
 
 export default nextConfig;

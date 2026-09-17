@@ -4,7 +4,7 @@ import { cardQrPng, ensureScannableDark } from "@/lib/cards/qr";
 import { findOwnedQrCode } from "@/lib/qr-codes/data";
 import { designFromRow } from "@/lib/qr-codes/design";
 import { qrPath } from "@/lib/qr-codes/links";
-import { styledQrPdf, styledQrSvg } from "@/lib/qr-codes/render";
+import { loadLogo, styledQrPdf, styledQrSvg } from "@/lib/qr-codes/render";
 
 type RouteContext = { params: Promise<{ id: string }> };
 
@@ -18,7 +18,9 @@ const DEFAULT_SIZE = 1024;
  * something any visitor can trigger.
  *
  * Query params:
- *   ?format=svg|pdf|png  default svg
+ *   ?format=svg|pdf|png|logo  default svg
+ *   (logo returns the code's logo file, so the dashboard can build PDFs in
+ *   the browser without cross-site image rules getting in the way)
  *   ?size=256..2048      pixel width (SVG) or point width (PDF)
  *
  * SVG and PDF carry the full design. The dashboard makes PNGs in the browser
@@ -52,6 +54,10 @@ export async function GET(request: Request, { params }: RouteContext) {
         "Content-Disposition": `attachment; filename="${filename}.${ext}"`,
         // Styling can change, so downloads are never cached.
         "Cache-Control": "private, no-store",
+        // Logos are user-supplied files served from this site. An SVG can
+        // carry script, so nothing in these responses may ever run.
+        "Content-Security-Policy": "default-src 'none'; img-src data:; style-src 'unsafe-inline'; sandbox",
+        "X-Content-Type-Options": "nosniff",
       },
     });
 
@@ -68,6 +74,12 @@ export async function GET(request: Request, { params }: RouteContext) {
       return respond(new Uint8Array(pdf), "application/pdf", "pdf");
     }
     if (format === "png") return await plainPng();
+    if (format === "logo") {
+      const logo = await loadLogo(qr.logo_url);
+      if (!logo) return new Response("No logo", { status: 404 });
+      const ext = logo.mime.split("/")[1]?.replace("+xml", "") ?? "img";
+      return respond(new Uint8Array(logo.bytes), logo.mime, ext);
+    }
     return respond(await styledQrSvg(target, design, qr.logo_url, size), "image/svg+xml", "svg");
   } catch {
     // Never fail a download: fall back to a plain PNG.

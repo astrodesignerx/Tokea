@@ -113,6 +113,7 @@ export default async function EditQrCodePage({ params }: PageProps) {
           corner_colour: code.corner_colour ?? "",
           background: design.background,
           frame_text: code.frame_text ?? "",
+          density: design.density,
           utm_source: code.utm_source ?? "",
           utm_medium: code.utm_medium ?? "",
           utm_campaign: code.utm_campaign ?? "",
@@ -127,11 +128,11 @@ export default async function EditQrCodePage({ params }: PageProps) {
       <section className="mt-12">
         <h2 className="nf-eyebrow">Download for print</h2>
         <p className="mt-2 text-sm text-muted-foreground">
-          All three include the full design. SVG and PDF stay sharp at any size,
-          so use them for print. Save your changes first; downloads use the saved
-          version.
+          All three include the full design and logo. SVG and PDF stay sharp at
+          any size, so use them for print. Save your changes first; downloads use
+          the saved version.
         </p>
-        <QrDownloads id={code.id} shortCode={code.short_code} />
+        <QrDownloads id={code.id} shortCode={code.short_code} url={permanent} design={design} />
       </section>
 
       <section className="mt-12">

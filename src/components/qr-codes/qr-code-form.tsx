@@ -10,6 +10,8 @@ import { normaliseLogoUrl } from "@/lib/qr-codes/links";
 import {
   CORNER_STYLES,
   CORNER_STYLE_LABELS,
+  DENSITIES,
+  DENSITY_LABELS,
   DOT_STYLES,
   DOT_STYLE_LABELS,
   FRAME_TEXT_MAX,
@@ -18,6 +20,7 @@ import {
   layoutToSvg,
   type Background,
   type CornerStyle,
+  type Density,
   type DotStyle,
 } from "@/lib/qr-codes/design";
 import type { QrFormSection, QrFormState } from "@/lib/actions/qr-codes";
@@ -38,6 +41,7 @@ export type QrCodeFormValues = {
   corner_colour: string;
   background: Background;
   frame_text: string;
+  density: Density;
   utm_source: string;
   utm_medium: string;
   utm_campaign: string;
@@ -91,6 +95,7 @@ export function QrCodeForm({ action, initial, brands, encodedUrl, submitLabel }:
   const [cornerColour, setCornerColour] = useState(initial.corner_colour);
   const [background, setBackground] = useState<Background>(initial.background);
   const [frameText, setFrameText] = useState(initial.frame_text);
+  const [density, setDensity] = useState<Density>(initial.density);
 
   // Mirrored only to keep the section summaries current.
   const [utm, setUtm] = useState({
@@ -134,9 +139,13 @@ export function QrCodeForm({ action, initial, brands, encodedUrl, submitLabel }:
       background,
       frameText: frame,
       hasLogo: Boolean(safeLogo),
+      density,
     });
-    return layoutToSvg(layout, { logoHref: safeLogo, pixelWidth: 480 });
-  }, [encodedUrl, dotStyle, cornerStyle, colour, cornerColour, background, frame, safeLogo]);
+    return {
+      svg: layoutToSvg(layout, { logoHref: safeLogo, pixelWidth: 480 }),
+      grid: layout.gridSize,
+    };
+  }, [encodedUrl, dotStyle, cornerStyle, colour, cornerColour, background, frame, safeLogo, density]);
 
   function applyBrand(id: string) {
     const brand = brands.find((b) => b.id === id);
@@ -213,7 +222,7 @@ export function QrCodeForm({ action, initial, brands, encodedUrl, submitLabel }:
                   style={{ backgroundColor: dark }}
                   aria-hidden="true"
                 />
-                {DOT_STYLE_LABELS[dotStyle]} dots
+                {DENSITY_LABELS[density]}, {DOT_STYLE_LABELS[dotStyle].toLowerCase()} dots
                 {safeLogo ? ", logo" : ""}
                 {frame ? ", frame" : ""}
                 {background === "transparent" ? ", clear" : ""}
@@ -236,6 +245,21 @@ export function QrCodeForm({ action, initial, brands, encodedUrl, submitLabel }:
                 </select>
               </Field>
             )}
+
+            <ChoiceRow
+              label="Density"
+              name="density"
+              value={density}
+              options={DENSITIES.map((v) => ({ value: v, label: DENSITY_LABELS[v] }))}
+              onChange={(v) => setDensity(v as Density)}
+              icon={(v) => <StyleIcon kind="density" variant={v} />}
+            />
+            <p className="-mt-1 text-xs text-muted-foreground">
+              {density === "detailed"
+                ? "More, smaller squares with the strongest damage protection. Best for large prints, rough surfaces and busy logos."
+                : "Fewer, bigger squares that scan faster, from farther away and at small sizes like business cards and stickers."}{" "}
+              This one is {previewSvg.grid} by {previewSvg.grid} squares.
+            </p>
 
             <ChoiceRow
               label="Dots"
@@ -476,12 +500,12 @@ export function QrCodeForm({ action, initial, brands, encodedUrl, submitLabel }:
         >
           <div
             // Remounts on each design change so the new drawing fades in.
-            key={[dotStyle, cornerStyle, dark, cornerDark, background, frame, safeLogo].join("|")}
+            key={[dotStyle, cornerStyle, dark, cornerDark, background, frame, safeLogo, density].join("|")}
             role="img"
             aria-label="QR code preview"
             className="qr-fade [&>svg]:block [&>svg]:h-auto [&>svg]:w-full"
             // Built by layoutToSvg, which escapes every user-supplied value.
-            dangerouslySetInnerHTML={{ __html: previewSvg }}
+            dangerouslySetInnerHTML={{ __html: previewSvg.svg }}
           />
         </div>
         <p
