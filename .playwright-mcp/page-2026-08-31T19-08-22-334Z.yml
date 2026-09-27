@@ -1,0 +1,55 @@
+- generic [active] [ref=e1]:
+  - generic [ref=e9]:
+    - generic [ref=e11]:
+      - heading "Mohamed Somo Hassan" [level=3] [ref=e12]
+      - heading "Regional Security Director" [level=4] [ref=e13]
+    - list [ref=e16]:
+      - listitem [ref=e17]:
+        - link "" [ref=e18] [cursor=pointer]:
+          - /url: tel:(+254) 710 153 101
+      - listitem [ref=e20]:
+        - link "" [ref=e21] [cursor=pointer]:
+          - /url: sms:(+254) 710 153 101
+      - listitem [ref=e23]:
+        - link "" [ref=e24] [cursor=pointer]:
+          - /url: tel:(+254) 20 444 112643
+      - listitem [ref=e26]:
+        - link "" [ref=e27] [cursor=pointer]:
+          - /url: mailto:mohassan@mercycorps.org
+      - text: 
+    - generic [ref=e29]:
+      - generic [ref=e30]:
+        - link "Save To Contacts " [ref=e31] [cursor=pointer]:
+          - /url: /user/services/openapi?cmd=downloadVcf&id=sz2lkiwp39jt
+          - text: Save To Contacts
+          - generic [ref=e32]: 
+        - generic [ref=e33]: 
+        - text: Contact
+      - list [ref=e35]:
+        - listitem [ref=e36]:
+          - text: Name
+          - generic [ref=e37]: Mohamed Somo Hassan
+        - listitem [ref=e38]:
+          - text: Mobile
+          - generic [ref=e39]: (+254) 710 153 101
+        - listitem [ref=e40]:
+          - text: Work Phone
+          - generic [ref=e41]: (+254) 20 444 112643
+        - listitem [ref=e42]:
+          - text: Email
+          - link "mohassan@mercycorps.org" [ref=e44] [cursor=pointer]:
+            - /url: mailto:mohassan@mercycorps.org
+        - listitem [ref=e45]:
+          - text: Company
+          - generic [ref=e46]: Mercy Corps
+    - text: 
+    - generic [ref=e47]:
+      - link [ref=e49] [cursor=pointer]:
+        - /url: //cdn0030.qrcodechimp.com/qr/PROD/685292bf2e962c1f41572838/ga/688730d96af691753690329/1753690329q664uj.png
+      - link [ref=e52] [cursor=pointer]:
+        - /url: //cdn0030.qrcodechimp.com/qr/PROD/685292bf2e962c1f41572838/ga/688730df0eb281753690335/17536903353gbvev.png
+  - generic [ref=e55]:
+    - text: Get your own
+    - link "vCard Plus" [ref=e56] [cursor=pointer]:
+      - /url: https://www.qrcodechimp.com/qr-code-generator-for-vcardWeb
+    - text: for free!

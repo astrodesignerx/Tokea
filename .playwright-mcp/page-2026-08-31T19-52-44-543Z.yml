@@ -1,0 +1,46 @@
+- generic [active] [ref=f2e1]:
+  - main [ref=f2e3]:
+    - article [ref=f2e4]:
+      - img "Energy 4 Impact" [ref=f2e6]
+      - generic [ref=f2e8]:
+        - generic [ref=f2e9]:
+          - heading "Mathieu Dalle" [level=1] [ref=f2e10]
+          - paragraph [ref=f2e11]: Director of Advisory and Programs
+        - list [ref=f2e12]:
+          - listitem [ref=f2e13]:
+            - link "Email Mathieu Dalle" [ref=f2e14] [cursor=pointer]:
+              - /url: mailto:mdalle@mercycorps.org
+          - listitem [ref=f2e18]:
+            - link "Visit www.energy4impact.org" [ref=f2e19] [cursor=pointer]:
+              - /url: https://www.energy4impact.org
+        - generic [ref=f2e23]:
+          - generic [ref=f2e24]: Contact
+          - link "Save To Contacts" [ref=f2e29] [cursor=pointer]:
+            - /url: /api/cards/mathieu-dalle/vcard
+          - generic [ref=f2e33]:
+            - generic [ref=f2e34]:
+              - term [ref=f2e35]: Name
+              - definition [ref=f2e36]: Mathieu Dalle
+            - link [ref=f2e37] [cursor=pointer]:
+              - /url: mailto:mdalle@mercycorps.org
+              - term [ref=f2e38]: Email
+              - definition [ref=f2e39]: mdalle@mercycorps.org
+            - generic [ref=f2e40]:
+              - term [ref=f2e41]: Company
+              - definition [ref=f2e42]: Energy 4 Impact
+            - link [ref=f2e43] [cursor=pointer]:
+              - /url: https://www.energy4impact.org
+              - term [ref=f2e44]: Website
+              - definition [ref=f2e45]: www.energy4impact.org
+        - generic [ref=f2e46]:
+          - generic [ref=f2e47]: Share
+          - generic [ref=f2e54]:
+            - button "Copy link to this card" [ref=f2e55]: Copy link
+            - button "QR code" [ref=f2e62]
+        - generic [ref=f2e69]:
+          - 'button "Zoom in: Front of Mathieu Dalle''s printed card" [ref=f2e70]':
+            - img "Front of Mathieu Dalle's printed card" [ref=f2e71]
+          - 'button "Zoom in: Back of Mathieu Dalle''s printed card" [ref=f2e72]':
+            - img "Back of Mathieu Dalle's printed card" [ref=f2e73]
+  - region "Notifications alt+T"
+  - button "Open Next.js Dev Tools" [ref=f2e79] [cursor=pointer]

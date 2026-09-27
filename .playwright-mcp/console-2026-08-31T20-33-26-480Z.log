@@ -1,0 +1,13 @@
+[     182ms] [LOG] [Fast Refresh] rebuilding @ http://localhost:3012/_next/static/chunks/1fx4_next_dist_1yayjbw._.js:2489
+[     282ms] [LOG] [Fast Refresh] done in 215ms @ http://localhost:3012/_next/static/chunks/1fx4_next_dist_1yayjbw._.js:2489
+[    1860ms] [INFO] %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold @ http://localhost:3012/_next/static/chunks/1fx4_next_dist_1yayjbw._.js:2489
+[    2088ms] [LOG] [HMR] connected @ http://localhost:3012/_next/static/chunks/1fx4_next_dist_1yayjbw._.js:2489
+[    2494ms] [LOG] [Fast Refresh] rebuilding @ http://localhost:3012/_next/static/chunks/1fx4_next_dist_1yayjbw._.js:2489
+[    2852ms] [LOG] [Fast Refresh] done in 462ms @ http://localhost:3012/_next/static/chunks/1fx4_next_dist_1yayjbw._.js:2489
+[    5759ms] [WARNING] The resource http://localhost:3012/_next/static/chunks/Documents_Tokea_src_app_not-found_0t7a4og.css was preloaded using link preload but not used within a few seconds from the window's load event. Please make sure it has an appropriate `as` value and it is preloaded intentionally. @ http://localhost:3012/c/mathieu-dalle:0
+[   18700ms] [LOG] [Fast Refresh] rebuilding @ http://localhost:3012/_next/static/chunks/1fx4_next_dist_1yayjbw._.js:2489
+[   18764ms] [LOG] [Fast Refresh] done in 165ms @ http://localhost:3012/_next/static/chunks/1fx4_next_dist_1yayjbw._.js:2489
+[  590888ms] [ERROR] WebSocket connection to 'ws://localhost:3012/_next/webpack-hmr?id=Aw0VieM3hdbeg72isHiEu' failed: Error in connection establishment: net::ERR_CONNECTION_REFUSED @ http://localhost:3012/_next/static/chunks/1fx4_next_dist_client_04fo8h4._.js:13422
+[  594996ms] [ERROR] WebSocket connection to 'ws://localhost:3012/_next/webpack-hmr?id=Aw0VieM3hdbeg72isHiEu' failed: Error in connection establishment: net::ERR_CONNECTION_REFUSED @ http://localhost:3012/_next/static/chunks/1fx4_next_dist_client_04fo8h4._.js:13422
+[  641173ms] [LOG] [HMR] connected @ http://localhost:3012/_next/static/chunks/1fx4_next_dist_1yayjbw._.js:2489
+[  644208ms] [WARNING] The resource http://localhost:3012/_next/static/chunks/Documents_Tokea_src_app_not-found_0t7a4og.css was preloaded using link preload but not used within a few seconds from the window's load event. Please make sure it has an appropriate `as` value and it is preloaded intentionally. @ http://localhost:3012/c/mathieu-dalle:0

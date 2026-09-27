@@ -1,0 +1,42 @@
+- generic [active] [ref=f1e1]:
+  - main [ref=f1e3]:
+    - article [ref=f1e4]:
+      - generic [ref=f1e6]:
+        - generic [ref=f1e7]:
+          - heading "Mathieu Dalle" [level=1] [ref=f1e8]
+          - paragraph [ref=f1e9]: Director of Advisory and Programs
+        - list [ref=f1e10]:
+          - listitem [ref=f1e11]:
+            - link "Email Mathieu Dalle" [ref=f1e12] [cursor=pointer]:
+              - /url: mailto:mdalle@mercycorps.org
+          - listitem [ref=f1e16]:
+            - link "Visit www.energy4impact.org" [ref=f1e17] [cursor=pointer]:
+              - /url: https://www.energy4impact.org
+        - generic [ref=f1e21]:
+          - generic [ref=f1e22]: Contact
+          - link "Save To Contacts" [ref=f1e27] [cursor=pointer]:
+            - /url: /api/cards/mathieu-dalle/vcard
+          - generic [ref=f1e31]:
+            - generic [ref=f1e32]:
+              - term [ref=f1e33]: Name
+              - definition [ref=f1e34]: Mathieu Dalle
+            - link [ref=f1e35] [cursor=pointer]:
+              - /url: mailto:mdalle@mercycorps.org
+              - term [ref=f1e36]: Email
+              - definition [ref=f1e37]: mdalle@mercycorps.org
+            - generic [ref=f1e38]:
+              - term [ref=f1e39]: Company
+              - definition [ref=f1e40]: Energy 4 Impact
+            - link [ref=f1e41] [cursor=pointer]:
+              - /url: https://www.energy4impact.org
+              - term [ref=f1e42]: Website
+              - definition [ref=f1e43]: www.energy4impact.org
+        - generic [ref=f1e44]:
+          - generic [ref=f1e45]: Share
+          - generic [ref=f1e52]:
+            - button "Copy link to this card" [ref=f1e53]: Copy link
+            - button "Share this card" [ref=f1e60]: Share
+            - button "QR code" [ref=f1e67]
+  - region "Notifications alt+T"
+  - button "Open Next.js Dev Tools" [ref=f1e79] [cursor=pointer]
+  - alert [ref=f1e83]
