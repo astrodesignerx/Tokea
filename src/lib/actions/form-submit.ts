@@ -67,8 +67,12 @@ export async function submitFormResponseAction(
   if (String(form.get("website") ?? "").trim() !== "") {
     return { error: GENERIC_ERROR, errorAt: Date.now() };
   }
-  const startedAt = Number(form.get("started_at"));
-  if (!Number.isFinite(startedAt) || Date.now() - startedAt < MIN_FILL_MS) {
+  // A blank value reads as 0, which would look like a very slow fill, so only
+  // a real, past timestamp counts.
+  const startedRaw = String(form.get("started_at") ?? "").trim();
+  const startedAt = Number(startedRaw);
+  const elapsed = Date.now() - startedAt;
+  if (!startedRaw || !Number.isFinite(startedAt) || startedAt <= 0 || elapsed < MIN_FILL_MS) {
     return { error: GENERIC_ERROR, errorAt: Date.now() };
   }
 
@@ -100,6 +104,9 @@ export async function submitFormResponseAction(
   // The count and the insert must agree: a limit reached between the check
   // above and here still stops the answer.
   const saved = await prisma.$transaction(async (tx) => {
+    // Lock the form row so two people taking the last slot are counted one
+    // after the other rather than both seeing room.
+    await tx.$queryRaw`SELECT id FROM "Form" WHERE id = ${live.form.id} FOR UPDATE`;
     const formNow = await tx.form.findUnique({
       where: { id: live.form.id },
       select: { status: true, live_version: true, closes_at: true, response_limit: true },

@@ -311,6 +311,8 @@ export async function createFormQrAction(form: FormData) {
 
   const created = await prisma.$transaction(async (tx) => {
     // A second click may have created one in the meantime; use that instead.
+    // The row lock makes a concurrent click wait here instead of racing.
+    await tx.$queryRaw`SELECT id FROM "Form" WHERE id = ${owned.id} FOR UPDATE`;
     const fresh = await tx.form.findUnique({
       where: { id: owned.id },
       select: { qr_code_id: true },
