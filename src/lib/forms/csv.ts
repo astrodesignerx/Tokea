@@ -22,11 +22,7 @@ export type CsvResponse = {
   submitted_at: Date;
 };
 
-type ParsedVersion = {
-  id: string;
-  number: number;
-  fields: FormField[];
-};
+export type ResponseColumn = { id: string; label: string };
 
 /** RFC 4180: quote when the value contains a delimiter, a quote or a newline. */
 function quote(value: string): string {
@@ -41,7 +37,8 @@ function guard(value: string): string {
   return /^[=+\-@]/.test(value) ? `'${value}` : value;
 }
 
-function render(value: unknown): string {
+/** How one stored answer reads in a cell or a table. */
+export function answerText(value: unknown): string {
   if (value === undefined || value === null) return "";
   if (Array.isArray(value)) return value.map((item) => String(item)).join("; ");
   if (typeof value === "boolean") return value ? "Yes" : "No";
@@ -51,29 +48,22 @@ function render(value: unknown): string {
 }
 
 function cell(value: unknown): string {
-  return quote(guard(render(value)));
+  return quote(guard(answerText(value)));
 }
 
-export function responsesToCsv(
-  versions: CsvVersion[],
-  responses: CsvResponse[],
-): string {
-  const parsed: ParsedVersion[] = versions.map((version) => {
-    const result = parseFields(version.fields);
-    return {
-      id: version.id,
-      number: version.number,
-      fields: "error" in result ? [] : result.fields,
-    };
-  });
-
-  // Newest first, so the first time a field id appears gives its newest label.
-  const byNumber = [...parsed].sort((a, b) => b.number - a.number);
-  const columns: { id: string; label: string }[] = [];
+/**
+ * The columns every response shares, newest version first. Also used by the
+ * responses table, so the table and the download always line up.
+ */
+export function responseColumns(versions: CsvVersion[]): ResponseColumn[] {
+  const columns: ResponseColumn[] = [];
   const seen = new Set<string>();
 
-  for (const version of byNumber) {
-    for (const field of version.fields) {
+  const newestFirst = [...versions].sort((a, b) => b.number - a.number);
+  for (const version of newestFirst) {
+    const parsed = parseFields(version.fields);
+    if ("error" in parsed) continue;
+    for (const field of parsed.fields) {
       // Headings are labels on a group, not questions with answers.
       if (field.type === "heading" || seen.has(field.id)) continue;
       seen.add(field.id);
@@ -81,25 +71,39 @@ export function responsesToCsv(
     }
   }
 
-  const versionFields = new Map(parsed.map((version) => [version.id, version.fields]));
-  const versionNumber = new Map(parsed.map((version) => [version.id, version.number]));
+  return columns;
+}
+
+export function responsesToCsv(
+  versions: CsvVersion[],
+  responses: CsvResponse[],
+): string {
+  const fieldsByVersion = new Map<string, FormField[]>(
+    versions.map((version) => {
+      const parsed = parseFields(version.fields);
+      return [version.id, "error" in parsed ? [] : parsed.fields];
+    }),
+  );
+  const numberByVersion = new Map(versions.map((version) => [version.id, version.number]));
+  const columns = responseColumns(versions);
 
   const lines: string[] = [];
-  lines.push(["Submitted", "Version", ...columns.map((column) => column.label)].map(cell).join(","));
+  lines.push(
+    ["Submitted", "Version", ...columns.map((column) => column.label)].map(cell).join(","),
+  );
 
   for (const response of responses) {
-    const fields = versionFields.get(response.version_id) ?? [];
+    const fields = fieldsByVersion.get(response.version_id) ?? [];
     const present = new Set(fields.map((field) => field.id));
     const answers =
       response.answers && typeof response.answers === "object" && !Array.isArray(response.answers)
         ? (response.answers as Record<string, unknown>)
         : {};
+
     const row = [
       response.submitted_at.toISOString(),
-      versionNumber.get(response.version_id)?.toString() ?? "",
-      ...columns.map((column) =>
-        present.has(column.id) ? answers[column.id] : undefined,
-      ),
+      numberByVersion.get(response.version_id)?.toString() ?? "",
+      ...columns.map((column) => (present.has(column.id) ? answers[column.id] : undefined)),
     ];
     lines.push(row.map(cell).join(","));
   }
