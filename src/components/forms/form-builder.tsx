@@ -654,7 +654,7 @@ function FormSettings({
             >
               <Field
                 label="Email me when an answer arrives"
-                hint="Up to 5 addresses, one per line. The email links to the responses; it never repeats the answers."
+                hint="Up to 5 addresses, one per line. Each email shows the first 10 answers and links to the rest."
               >
                 <Textarea
                   name="notify_emails"
