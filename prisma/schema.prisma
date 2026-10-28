@@ -28,6 +28,7 @@ model User {
   events        Event[]
   organisations Organisation[]
   qr_codes      QrCode[]
+  forms         Form[]
 }
 
 model Account {
@@ -70,31 +71,31 @@ model VerificationToken {
 }
 
 model Event {
-  id                   String    @id @default(cuid())
-  owner_id             String
-  title                String
-  description          String?
-  slug                 String    @unique
-  starts_at            DateTime
-  timezone             String
-  venue_name           String?
-  venue_address        String?
-  cover_image_url      String?
+  id              String   @id @default(cuid())
+  owner_id        String
+  title           String
+  description     String?
+  slug            String   @unique
+  starts_at       DateTime
+  timezone        String
+  venue_name      String?
+  venue_address   String?
+  cover_image_url String?
   // "none" | "drift": ambient motion on the cover. Only the image-led and
   // type-led templates render a cover, so it has no effect on the others.
-  cover_motion         String    @default("none")
+  cover_motion    String   @default("none")
 
   // "free" | "paid". The organiser chooses per event; this field is the
   // authority. Prices are kept when switching back to free so the setting
   // survives a change of mind, which is why nothing may read the amounts
   // without checking the mode first.
-  payment_mode         String    @default("free")
-  currency             String    @default("KES")
+  payment_mode   String @default("free")
+  currency       String @default("KES")
   // Minor units (KES cents). Integers only, never floats.
-  price_amount         Int?
+  price_amount   Int?
   // Optional part-payment that secures a spot; the balance is settled at the
   // door. Null means the organiser is not offering a deposit.
-  deposit_amount       Int?
+  deposit_amount Int?
 
   custom_question      String?
   template             String    @default("image-led")
@@ -162,19 +163,19 @@ model CheckIn {
 /// One attempt to pay for a spot. A guest may have several, since an
 /// abandoned M-Pesa prompt is routine, but only ever one with status "success".
 model Payment {
-  id       String @id @default(cuid())
+  id        String @id @default(cuid())
   /// Our own idempotency key, sent to Paystack as its reference.
   reference String @unique
-  guest_id String
-  event_id String
+  guest_id  String
+  event_id  String
 
   /// "deposit" | "full"
-  kind     String
+  kind        String
   /// What we asked for, in minor units. Never taken from the client.
-  amount   Int
+  amount      Int
   /// What Paystack confirmed was actually collected.
   amount_paid Int?
-  currency String
+  currency    String
 
   /// "pending" | "success" | "failed" | "abandoned" | "refunded"
   status          String    @default("pending")
@@ -211,15 +212,15 @@ model CronedReminder {
 // ---------------------------------------------------------------------------
 
 model Organisation {
-  id       String @id @default(cuid())
-  owner_id String
-  slug     String @unique
-  name     String
+  id              String  @id @default(cuid())
+  owner_id        String
+  slug            String  @unique
+  name            String
   // Written into the vCard ORG field, which is often the fuller legal name.
-  legal_name    String
-  website       String?
-  website_label String?
-  logo_url      String?
+  legal_name      String
+  website         String?
+  website_label   String?
+  logo_url        String?
   // Banner shown at the top of profile-template cards, like a vCard landing
   // page's cover photo. Cards fall back to a solid brand block without it.
   cover_image_url String?
@@ -237,6 +238,7 @@ model Organisation {
 
   owner User          @relation(fields: [owner_id], references: [id], onDelete: Cascade)
   cards ContactCard[]
+  forms Form[]
 
   @@index([owner_id])
 }
@@ -369,6 +371,7 @@ model QrCode {
   scans     QrScan[]
   history   QrLinkChange[]
   scheduled QrScheduledChange[]
+  form      Form?
 
   @@index([owner_id])
   @@index([status])
@@ -416,4 +419,76 @@ model QrScheduledChange {
   qr_code QrCode @relation(fields: [qr_code_id], references: [id], onDelete: Cascade)
 
   @@index([qr_code_id, applied_at, run_at])
+}
+
+// ---------------------------------------------------------------------------
+// Forms
+//
+// A Form is the editable thing; a FormVersion is what people actually filled
+// in. Answers point at the version they were given, so editing a live form
+// never rewrites the meaning of responses already collected.
+// ---------------------------------------------------------------------------
+
+model Form {
+  id              String         @id @default(cuid())
+  owner_id        String
+  // Optional branding: logo, brand_primary, brand_ink. Null uses NikoForm's own theme.
+  organisation_id String?
+  qr_code_id      String?        @unique
+  title           String
+  description     String?
+  // Fixed once created: printed QR codes point at it.
+  slug            String         @unique
+  // "draft" | "open" | "closed" | "archived"
+  status          String         @default("draft")
+  // What the builder edits. Publishing copies it into a FormVersion.
+  draft_fields    Json           @default("[]")
+  // FormVersion.number people currently see; null = never published.
+  live_version    Int?
+  closes_at       DateTime?
+  response_limit  Int?
+  // Where a new response is announced. Answers are never sent, only a link.
+  notify_emails   String[]       @default([])
+  thank_you       String?
+  created_at      DateTime       @default(now())
+  updated_at      DateTime       @updatedAt
+  owner           User           @relation(fields: [owner_id], references: [id], onDelete: Cascade)
+  organisation    Organisation?  @relation(fields: [organisation_id], references: [id], onDelete: SetNull)
+  qr_code         QrCode?        @relation(fields: [qr_code_id], references: [id], onDelete: SetNull)
+  versions        FormVersion[]
+  responses       FormResponse[]
+
+  @@index([owner_id])
+}
+
+model FormVersion {
+  id           String         @id @default(cuid())
+  form_id      String
+  number       Int
+  // The frozen questions this version asked, in display order.
+  fields       Json
+  published_at DateTime       @default(now())
+  form         Form           @relation(fields: [form_id], references: [id], onDelete: Cascade)
+  responses    FormResponse[]
+
+  @@unique([form_id, number])
+}
+
+model FormResponse {
+  id           String      @id @default(cuid())
+  form_id      String
+  version_id   String
+  // { [fieldId]: string | string[] | number | boolean }
+  answers      Json
+  submitted_at DateTime    @default(now())
+  // "ios" | "android" | "other", from detectDevice()
+  device       String?
+  // x-vercel-ip-country
+  country      String?
+  // HMAC-SHA256 of the IP keyed by AUTH_SECRET; never store the raw IP.
+  ip_hash      String?
+  form         Form        @relation(fields: [form_id], references: [id], onDelete: Cascade)
+  version      FormVersion @relation(fields: [version_id], references: [id], onDelete: Cascade)
+
+  @@index([form_id, submitted_at])
 }
