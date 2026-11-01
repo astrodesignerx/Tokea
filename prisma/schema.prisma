@@ -23,12 +23,19 @@ model User {
   // the organiser connects payout details; payments then go unsplit.
   paystack_subaccount String?
 
-  accounts      Account[]
-  sessions      Session[]
-  events        Event[]
-  organisations Organisation[]
-  qr_codes      QrCode[]
-  forms         Form[]
+  accounts                 Account[]
+  sessions                 Session[]
+  events                   Event[]
+  organisations            Organisation[]
+  qr_codes                 QrCode[]
+  forms                    Form[]
+  checklists               Checklist[]
+  checklist_memberships    ChecklistMember[]
+  checklist_assigned_items ChecklistItem[]     @relation("ChecklistItemAssignee")
+  checklist_done_items     ChecklistItem[]     @relation("ChecklistItemDoneBy")
+  checklist_created_items  ChecklistItem[]     @relation("ChecklistItemCreatedBy")
+  checklist_sent_invites   ChecklistInvite[]   @relation("ChecklistInviteSender")
+  checklist_activity       ChecklistActivity[] @relation("ChecklistActivityActor")
 }
 
 model Account {
@@ -491,4 +498,90 @@ model FormResponse {
   version      FormVersion @relation(fields: [version_id], references: [id], onDelete: Cascade)
 
   @@index([form_id, submitted_at])
+}
+
+// Personal lists become team lists when someone is invited.
+model Checklist {
+  id          String    @id @default(cuid())
+  owner_id    String
+  title       String
+  archived_at DateTime?
+  created_at  DateTime  @default(now())
+  updated_at  DateTime  @updatedAt
+
+  owner    User                @relation(fields: [owner_id], references: [id], onDelete: Cascade)
+  items    ChecklistItem[]
+  members  ChecklistMember[]
+  invites  ChecklistInvite[]
+  activity ChecklistActivity[]
+
+  @@index([owner_id])
+}
+
+model ChecklistItem {
+  id            String    @id @default(cuid())
+  checklist_id  String
+  kind          String    @default("task") // task | heading
+  title         String
+  notes         String?
+  position      Float
+  assignee_id   String?
+  due_on        DateTime? @db.Date
+  done_at       DateTime?
+  done_by_id    String?
+  created_by_id String
+  created_at    DateTime  @default(now())
+  updated_at    DateTime  @updatedAt
+
+  checklist  Checklist @relation(fields: [checklist_id], references: [id], onDelete: Cascade)
+  assignee   User?     @relation("ChecklistItemAssignee", fields: [assignee_id], references: [id], onDelete: SetNull)
+  done_by    User?     @relation("ChecklistItemDoneBy", fields: [done_by_id], references: [id], onDelete: SetNull)
+  created_by User      @relation("ChecklistItemCreatedBy", fields: [created_by_id], references: [id], onDelete: Cascade)
+
+  @@index([checklist_id, position])
+  @@index([assignee_id, done_at])
+}
+
+model ChecklistMember {
+  id           String   @id @default(cuid())
+  checklist_id String
+  user_id      String
+  role         String // owner | editor
+  joined_at    DateTime @default(now())
+
+  checklist Checklist @relation(fields: [checklist_id], references: [id], onDelete: Cascade)
+  user      User      @relation(fields: [user_id], references: [id], onDelete: Cascade)
+
+  @@unique([checklist_id, user_id])
+  @@index([user_id])
+}
+
+model ChecklistInvite {
+  id            String    @id @default(cuid())
+  checklist_id  String
+  email         String // Lower-cased and bound to the signed-in account.
+  token_hash    String    @unique // Only the SHA-256 hash is stored.
+  expires_at    DateTime
+  accepted_at   DateTime?
+  invited_by_id String
+  created_at    DateTime  @default(now())
+
+  checklist  Checklist @relation(fields: [checklist_id], references: [id], onDelete: Cascade)
+  invited_by User      @relation("ChecklistInviteSender", fields: [invited_by_id], references: [id], onDelete: Cascade)
+
+  @@index([checklist_id])
+}
+
+model ChecklistActivity {
+  id           String   @id @default(cuid())
+  checklist_id String
+  actor_id     String
+  action       String // added | ticked | unticked | assigned | edited | removed | joined | left
+  item_title   String? // A copy keeps the feed readable after deletion.
+  created_at   DateTime @default(now())
+
+  checklist Checklist @relation(fields: [checklist_id], references: [id], onDelete: Cascade)
+  actor     User      @relation("ChecklistActivityActor", fields: [actor_id], references: [id], onDelete: Cascade)
+
+  @@index([checklist_id, created_at])
 }

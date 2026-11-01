@@ -1,0 +1,42 @@
+import assert from "node:assert/strict";
+import { createHash } from "node:crypto";
+import { ACTIONS, can, dueState, hashInviteToken, isTeam, needsRenumber, newInviteToken, positionBetween } from "../src/lib/checklists/rules";
+import { safeNext } from "../src/lib/checklists/redirect";
+
+const editor = new Set(["add", "edit", "tick", "untick", "assign", "due", "reorder", "deleteItem", "leave"]);
+for (const action of ACTIONS) {
+  assert.equal(can("owner", action), action !== "leave", `owner ${action}`);
+  assert.equal(can("editor", action), editor.has(action), `editor ${action}`);
+  assert.equal(can("stranger", action), false, `stranger ${action}`);
+}
+assert.equal(positionBetween(null, null), 1024);
+assert.equal(positionBetween(null, 1024), 0);
+assert.equal(positionBetween(1024, null), 2048);
+assert.equal(positionBetween(1024, 2048), 1536);
+assert.equal(needsRenumber(0, 0.0000009), true);
+assert.equal(needsRenumber(0, 0.000001), false);
+assert.equal(needsRenumber(null, 0), false);
+assert.equal(needsRenumber(0, null), false);
+assert.equal(needsRenumber(1024, 1024), true);
+const beforeMidnight = new Date("2026-10-28T20:59:00Z");
+const afterMidnight = new Date("2026-10-28T21:01:00Z");
+assert.equal(dueState("2026-10-28", beforeMidnight), "today");
+assert.equal(dueState("2026-10-28", afterMidnight), "overdue");
+assert.equal(dueState("2026-10-29", beforeMidnight), "soon");
+assert.equal(dueState("2026-10-29", afterMidnight), "today");
+assert.equal(dueState(new Date("2026-11-01T00:00:00Z"), afterMidnight), "soon");
+assert.equal(dueState("2026-11-02", afterMidnight), "later");
+assert.equal(dueState(null, afterMidnight), "none");
+assert.equal(isTeam(1, 0), false);
+assert.equal(isTeam(2, 0), true);
+assert.equal(isTeam(1, 1), true);
+const token = newInviteToken();
+assert.match(token, /^[A-Za-z0-9_-]{43}$/);
+assert.equal(Buffer.from(token, "base64url").length, 32);
+assert.notEqual(token, newInviteToken());
+assert.equal(hashInviteToken(token), createHash("sha256").update(token).digest("hex"));
+assert.equal(hashInviteToken("test"), "9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08");
+assert.notEqual(hashInviteToken(token), hashInviteToken(newInviteToken()));
+assert.equal(safeNext("/join/abc"), "/join/abc");
+for (const unsafe of [undefined, ["/dashboard"], "https://example.com", "//example.com", "/\\example.com", "/\n/example.com", ""]) assert.equal(safeNext(unsafe), "/dashboard");
+console.log("checklists checks: all passed");

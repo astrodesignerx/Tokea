@@ -1,9 +1,10 @@
 import Link from "next/link";
-import { ArrowRight, BarChart3, CalendarCheck, ClipboardList, IdCard, Plus, QrCode } from "lucide-react";
+import { ArrowRight, BarChart3, CalendarCheck, ClipboardList, IdCard, ListChecks, Plus, QrCode } from "lucide-react";
 import { requireUser } from "@/lib/require-user";
 import { prisma } from "@/lib/db";
 import { Button } from "@/components/ui/button";
 import { PRODUCT } from "@/lib/brand";
+import { checklistCounts } from "@/lib/checklists/data";
 
 export const metadata = { title: "Dashboard" };
 
@@ -20,6 +21,7 @@ export const metadata = { title: "Dashboard" };
  */
 export default async function DashboardPage() {
   const user = await requireUser();
+  const checklists = await checklistCounts(user.id);
 
   const [companies, cards, scans, events, qrCodes, qrScans, forms, formResponses] =
     await Promise.all([
@@ -74,6 +76,17 @@ export default async function DashboardPage() {
       ],
       href: "/dashboard/forms",
       action: { label: "New form", href: "/dashboard/forms/new" },
+    },
+    {
+      icon: ListChecks,
+      name: "Checklists",
+      description: "Keep personal to-do lists or invite a team. Assign tasks, set due dates and see who did what.",
+      stats: [
+        { label: checklists.active === 1 ? "list" : "lists", value: checklists.active },
+        { label: checklists.tasks === 1 ? "open task" : "open tasks", value: checklists.tasks },
+      ],
+      href: "/dashboard/checklists",
+      action: { label: "New list", href: "/dashboard/checklists?new=1" },
     },
     {
       icon: CalendarCheck,
