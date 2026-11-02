@@ -15,10 +15,10 @@ export default async function ChecklistPage({ params }: { params: Promise<{ id: 
   return <div className="cl-workspace">
     <section className="cl-main qr-rise">
       <p className="nf-eyebrow">{team ? `Team list / ${members.length} people` : "Personal list"}</p>
-      <h1 className="mt-2 break-words font-display text-2xl font-medium">{checklist.title}</h1>
+      <h1 className="mt-3 break-words font-display text-3xl font-medium tracking-tight">{checklist.title}</h1>
       <div className="my-3 flex flex-wrap items-center gap-2">
         <Badge variant="outline">{done} of {tasks.length} done</Badge>
-        {archived && <Badge variant="muted">Archived</Badge>}
+        {archived && <Badge variant="secondary">Archived</Badge>}
       </div>
       <div className="mb-6 h-1 overflow-hidden rounded-full bg-muted" role="progressbar" aria-label="Tasks completed" aria-valuenow={done} aria-valuemin={0} aria-valuemax={tasks.length || 1}>
         <div className="cl-progress-fill h-full w-full bg-brand" style={{ transform: `scaleX(${tasks.length ? done / tasks.length : 0})` }} />

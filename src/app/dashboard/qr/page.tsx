@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { Lock, Plus, QrCode } from "lucide-react";
+import { Lock, Pencil, Plus, QrCode } from "lucide-react";
 import { requireUser } from "@/lib/require-user";
 import { countArchivedQrCodes, listQrCodes } from "@/lib/qr-codes/data";
 import { isExpired, qrPath } from "@/lib/qr-codes/links";
@@ -34,7 +34,7 @@ export default async function QrCodesPage({ searchParams }: PageProps) {
   ]);
 
   return (
-    <div className="mx-auto max-w-6xl px-6 py-10">
+    <div className="mx-auto max-w-6xl px-4 py-10 sm:px-6">
       <div className="flex flex-wrap items-center justify-between gap-4">
         <div>
           <p className="nf-eyebrow">Dynamic QR codes</p>
@@ -81,7 +81,7 @@ export default async function QrCodesPage({ searchParams }: PageProps) {
               </thead>
               <tbody className="divide-y">
                 {codes.map((code) => (
-                  <tr key={code.id} className="align-middle transition-colors duration-200 hover:bg-muted/40">
+                  <tr key={code.id} className="align-middle transition-colors duration-(--fast) ease-(--ease) motion-reduce:transition-none hover:bg-muted/40">
                     <td className="px-5 py-3">
                       <Link
                         href={`/dashboard/qr/${code.id}`}
@@ -90,8 +90,8 @@ export default async function QrCodesPage({ searchParams }: PageProps) {
                         {code.name}
                       </Link>
                       {code.status !== "active" && (
-                        <Badge variant="secondary" className="ml-2 capitalize">
-                          {code.status}
+                        <Badge variant="secondary" className="ml-2">
+                          {code.status.charAt(0).toUpperCase() + code.status.slice(1)}
                         </Badge>
                       )}
                       {isExpired(code) && (
@@ -124,7 +124,7 @@ export default async function QrCodesPage({ searchParams }: PageProps) {
                       <div className="flex items-center justify-end gap-1">
                         <CopyButton value={`${origin}${qrPath(code.short_code)}`} />
                         <Button asChild variant="ghost" size="sm">
-                          <Link href={`/dashboard/qr/${code.id}`}>Edit</Link>
+                          <Link href={`/dashboard/qr/${code.id}`}><Pencil className="size-4" /> Edit</Link>
                         </Button>
                       </div>
                     </td>
@@ -147,7 +147,7 @@ export default async function QrCodesPage({ searchParams }: PageProps) {
         <p className="mt-4 text-sm">
           <Link
             href={showArchived ? "/dashboard/qr" : "/dashboard/qr?archived=1"}
-            className="text-muted-foreground underline-offset-4 transition-colors hover:text-foreground hover:underline"
+            className="text-muted-foreground underline-offset-4 transition-colors duration-(--fast) ease-(--ease) motion-reduce:transition-none hover:text-foreground hover:underline"
           >
             {showArchived ? "Hide archived" : `Show ${archivedCount} archived`}
           </Link>

@@ -3,6 +3,8 @@
 import { startTransition, useActionState, useEffect, useMemo, useState } from "react";
 import {
   AlignLeft,
+  Archive,
+  ArchiveRestore,
   ArrowDown,
   ArrowUp,
   AtSign,
@@ -13,8 +15,10 @@ import {
   Hash,
   Heading as HeadingIcon,
   ListFilter,
+  Lock,
   Phone,
   Plus,
+  Unlock,
   ShieldCheck,
   SlidersHorizontal,
   Star,
@@ -27,6 +31,10 @@ import {
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Select } from "@/components/ui/select";
+import { Label } from "@/components/ui/label";
+import { HoldToConfirm } from "@/components/ui/hold-to-confirm";
+import { Card, CardContent } from "@/components/ui/card";
 import { Textarea } from "@/components/ui/textarea";
 import { FormSection } from "@/components/qr-codes/form-section";
 import { LocalDateTimeInput } from "@/components/qr-codes/local-time";
@@ -107,10 +115,9 @@ export function CreateForm({ organisations }: { organisations: OrgOption[] }) {
         label="Company branding"
         hint="Uses the company's logo and colours on the public page. Leave blank for NikoForm's own theme."
       >
-        <select
+        <Select
           name="organisation_id"
           defaultValue=""
-          className="h-10 w-full rounded-md border border-input bg-background px-3 text-sm transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
         >
           <option value="">No branding</option>
           {organisations.map((organisation) => (
@@ -118,7 +125,7 @@ export function CreateForm({ organisations }: { organisations: OrgOption[] }) {
               {organisation.name}
             </option>
           ))}
-        </select>
+        </Select>
       </Field>
 
       {state.error && (
@@ -128,7 +135,7 @@ export function CreateForm({ organisations }: { organisations: OrgOption[] }) {
       )}
 
       <Button type="submit" disabled={pending}>
-        {pending ? "Creating..." : "Create form"}
+        {pending ? "Creating…" : "Create form"}
       </Button>
     </form>
   );
@@ -273,7 +280,7 @@ export function FormBuilder({
                         key={type}
                         type="button"
                         onClick={() => addField(type)}
-                        className="flex h-9 items-center gap-2 rounded-md border px-2.5 text-left text-sm transition-[background-color,transform] duration-200 hover:bg-muted/50 active:scale-[0.98]"
+                        className="flex h-9 items-center gap-2 rounded-md border px-2.5 text-left text-sm transition-[background-color,transform] duration-(--fast) ease-(--ease) motion-reduce:transition-none hover:bg-muted/50 active:scale-[0.98]"
                       >
                         <Icon className="size-3.5 shrink-0 text-muted-foreground" aria-hidden="true" />
                         <span className="truncate">{FIELD_TYPE_LABELS[type]}</span>
@@ -289,12 +296,15 @@ export function FormBuilder({
         <div className="min-w-0">
           <div className="space-y-3">
             {fields.length === 0 && (
-              <div className="rounded-lg border border-dashed px-5 py-10 text-center">
-                <p className="text-sm font-medium">No questions yet</p>
-                <p className="mt-1 text-sm text-muted-foreground">
-                  Pick a type on the left to add the first one.
-                </p>
-              </div>
+              <Card className="border-dashed bg-transparent">
+                <CardContent className="p-12 text-center">
+                  <ListFilter className="mx-auto size-8 text-brand" />
+                  <h2 className="mt-4 font-display text-lg font-medium">No questions yet</h2>
+                  <p className="mt-1 text-sm text-muted-foreground">
+                    Pick a type on the left to add the first one.
+                  </p>
+                </CardContent>
+              </Card>
             )}
 
             {fields.map((field, index) => (
@@ -303,13 +313,13 @@ export function FormBuilder({
                 onClick={() => setSelectedId(field.id)}
                 className={cn(
                   "qr-rise group cursor-pointer rounded-lg border bg-card p-4",
-                  "transition-[box-shadow,border-color] duration-200",
+                  "transition-[box-shadow,border-color] duration-(--fast) ease-(--ease) motion-reduce:transition-none",
                   field.id === selectedId
                     ? "border-brand ring-1 ring-brand"
                     : "hover:border-foreground/20",
                 )}
               >
-                <div className="flex items-start justify-between gap-3">
+                <div className="flex flex-wrap items-start justify-between gap-3">
                   <div className="min-w-0">
                     <p className="text-xs text-muted-foreground">
                       {FIELD_TYPE_LABELS[field.type]}
@@ -323,7 +333,7 @@ export function FormBuilder({
                     )}
                   </div>
 
-                  <div className="flex shrink-0 items-center gap-0.5 opacity-0 transition-opacity duration-200 focus-within:opacity-100 group-hover:opacity-100 max-lg:opacity-100">
+                  <div className="flex max-w-full flex-wrap items-center gap-0.5 opacity-0 transition-opacity duration-(--fast) ease-(--ease) motion-reduce:transition-none focus-within:opacity-100 group-hover:opacity-100 max-lg:opacity-100">
                     <IconButton
                       label={`Edit ${field.label}`}
                       onClick={(event) => {
@@ -362,15 +372,14 @@ export function FormBuilder({
                     >
                       <Copy className="size-3.5" />
                     </IconButton>
-                    <IconButton
-                      label="Delete"
-                      onClick={(event) => {
-                        event.stopPropagation();
-                        removeField(field.id);
-                      }}
-                    >
-                      <Trash2 className="size-3.5" />
-                    </IconButton>
+                    <div onClick={(event) => event.stopPropagation()}>
+                      <HoldToConfirm
+                        label="Hold to delete question"
+                        icon={<Trash2 className="size-3.5" />}
+                        className="h-8 w-auto text-xs"
+                        onConfirm={() => removeField(field.id)}
+                      />
+                    </div>
                   </div>
                 </div>
 
@@ -399,14 +408,14 @@ export function FormBuilder({
               <input type="hidden" name="form_id" value={formId} />
               <input type="hidden" name="draft_fields" value={draftJson} />
               <Button type="submit" variant="outline" disabled={saving || publishing}>
-                {saving ? "Saving..." : "Save draft"}
+                {saving ? "Saving…" : "Save draft"}
               </Button>
             </form>
             <form action={publishFormAction}>
               <input type="hidden" name="form_id" value={formId} />
               <input type="hidden" name="draft_fields" value={draftJson} />
               <Button type="submit" disabled={saving || publishing}>
-                {publishing ? "Publishing..." : "Publish changes"}
+                {publishing ? "Publishing…" : "Publish changes"}
               </Button>
             </form>
             {error && (
@@ -492,15 +501,11 @@ export function FormBuilder({
                 </>
               )}
 
-              <Button
-                type="button"
-                variant="ghost"
-                size="sm"
-                className="text-destructive hover:text-destructive"
-                onClick={() => removeField(selected.id)}
-              >
-                <Trash2 className="size-4" /> Delete question
-              </Button>
+              <HoldToConfirm
+                label="Hold to delete question"
+                icon={<Trash2 className="size-4" />}
+                onConfirm={() => removeField(selected.id)}
+              />
             </div>
           ) : (
             <p className="mt-3 text-sm text-muted-foreground">
@@ -591,7 +596,7 @@ function FormSettings({
           <input type="hidden" name="form_id" value={formId} />
 
           <div className="space-y-4">
-            <Field label="Title">
+            <Field label="Title" required>
               <Input
                 name="title"
                 defaultValue={settings.title}
@@ -704,10 +709,9 @@ function FormSettings({
                 label="Company"
                 hint="Uses that company's logo and colours on the public page."
               >
-                <select
+                <Select
                   name="organisation_id"
                   defaultValue={settings.organisationId}
-                  className="h-10 w-full rounded-md border border-input bg-background px-3 text-sm transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
                 >
                   <option value="">No branding</option>
                   {organisations.map((organisation) => (
@@ -715,14 +719,14 @@ function FormSettings({
                       {organisation.name}
                     </option>
                   ))}
-                </select>
+                </Select>
               </Field>
             </FormSection>
           </div>
 
           <div className="mt-4 flex flex-wrap items-center gap-3">
             <Button type="submit" disabled={pending}>
-              {pending ? "Saving..." : "Save settings"}
+              {pending ? "Saving…" : "Save settings"}
             </Button>
             {state.error && (
               <p key={state.errorAt} role="alert" className="qr-rise text-sm text-destructive">
@@ -750,7 +754,7 @@ function FormSettings({
                 <StatusButton
                   formId={formId}
                   status="open"
-                  label="Open"
+                  label={settings.status === "archived" ? "Restore" : "Open"}
                   disabled={!canOpen}
                 />
               )}
@@ -784,6 +788,7 @@ function StatusButton({
       <input type="hidden" name="form_id" value={formId} />
       <input type="hidden" name="status" value={status} />
       <Button type="submit" variant="outline" size="sm" disabled={disabled}>
+        {status === "archived" ? <Archive className="size-4" /> : label === "Restore" ? <ArchiveRestore className="size-4" /> : status === "closed" ? <Lock className="size-4" /> : <Unlock className="size-4" />}
         {label}
       </Button>
     </form>
@@ -804,7 +809,7 @@ function ChoiceSettings({
       <p className="text-sm font-medium">Options</p>
       <div className="mt-1.5 space-y-1.5">
         {options.map((option, index) => (
-          <div key={index} className="flex items-center gap-1.5">
+          <div key={`${index}-${options.length}`} className="space-y-1.5">
             <Input
               value={option}
               maxLength={MAX_OPTION_LENGTH}
@@ -815,17 +820,13 @@ function ChoiceSettings({
               }}
               className="h-9"
             />
-            <Button
-              type="button"
-              variant="ghost"
-              size="icon"
-              className="size-9 shrink-0"
-              aria-label={`Remove option ${index + 1}`}
+            <HoldToConfirm
+              label={`Hold to remove option ${index + 1}`}
+              icon={<X className="size-4" />}
+              className="w-auto text-xs"
               disabled={options.length <= 1}
-              onClick={() => onChange(options.filter((_, i) => i !== index))}
-            >
-              <X className="size-4" />
-            </Button>
+              onConfirm={() => onChange(options.filter((_, i) => i !== index))}
+            />
           </div>
         ))}
       </div>
@@ -949,10 +950,10 @@ function Field({
 }) {
   return (
     <div className="space-y-1.5">
-      <p className="text-sm font-medium">
+      <Label>
         {label}
-        {required && <span className="ml-0.5 text-destructive">*</span>}
-      </p>
+        {required && <span className="text-muted-foreground"> *</span>}
+      </Label>
       {children}
       {hint && <p className="text-xs text-muted-foreground">{hint}</p>}
     </div>

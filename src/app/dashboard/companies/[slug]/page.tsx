@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { Archive, ArchiveRestore, ArrowLeft, Download, ExternalLink, Plus, Settings2 } from "lucide-react";
+import { Archive, ArchiveRestore, ArrowLeft, Download, ExternalLink, IdCard, Pencil, Plus, Settings2 } from "lucide-react";
 import { requireUser } from "@/lib/require-user";
 import { prisma } from "@/lib/db";
 import { setCardStatusAction } from "@/lib/actions/cards";
@@ -34,10 +34,10 @@ export default async function CompanyPage({ params }: PageProps) {
   const origin = await getCardsOrigin();
 
   return (
-    <div className="mx-auto max-w-5xl px-6 py-10">
+    <div className="mx-auto max-w-6xl px-4 py-10 sm:px-6">
       <Link
         href="/dashboard/companies"
-        className="inline-flex items-center gap-1.5 text-sm text-muted-foreground transition-colors hover:text-foreground"
+        className="inline-flex items-center gap-1.5 text-sm text-muted-foreground transition-colors duration-(--fast) ease-(--ease) motion-reduce:transition-none hover:text-foreground"
       >
         <ArrowLeft className="size-4" /> Companies
       </Link>
@@ -75,13 +75,14 @@ export default async function CompanyPage({ params }: PageProps) {
       {org.cards.length === 0 ? (
         <Card className="mt-10 border-dashed bg-transparent">
           <CardContent className="p-12 text-center">
-            <h2 className="font-display text-lg font-medium">No cards yet</h2>
+            <IdCard className="mx-auto size-8 text-brand" />
+            <h2 className="mt-4 font-display text-lg font-medium">No cards yet</h2>
             <p className="mt-1 text-sm text-muted-foreground">
               Add someone and they get a page, a vCard and a permanent QR code.
             </p>
             <Button asChild className="mt-6">
               <Link href={`/dashboard/companies/${org.slug}/cards/new`}>
-                Add the first card
+                Create your first card
               </Link>
             </Button>
           </CardContent>
@@ -124,7 +125,7 @@ export default async function CompanyPage({ params }: PageProps) {
                       <Link
                         href={`/dashboard/companies/${org.slug}/cards/${card.id}`}
                       >
-                        Edit
+                        <Pencil className="size-4" /> Edit
                       </Link>
                     </Button>
                     <form action={setCardStatusAction}>
@@ -134,7 +135,7 @@ export default async function CompanyPage({ params }: PageProps) {
                         name="status"
                         value={card.status === "archived" ? "active" : "archived"}
                       />
-                      <Button type="submit" size="sm" variant="ghost">
+                      <Button type="submit" size="sm" variant="outline">
                         {card.status === "archived" ? (
                           <>
                             <ArchiveRestore className="size-3.5" /> Restore
@@ -151,7 +152,7 @@ export default async function CompanyPage({ params }: PageProps) {
                         <ExternalLink className="size-3.5" /> View
                       </Link>
                     </Button>
-                    <span className="inline-flex items-center gap-0.5 rounded-md border p-0.5">
+                    <span className="inline-flex flex-wrap items-center gap-2">
                       {(
                         [
                           ["PNG", "png"],
@@ -159,7 +160,7 @@ export default async function CompanyPage({ params }: PageProps) {
                           ["PDF", "pdf"],
                         ] as const
                       ).map(([label, format]) => (
-                        <Button key={format} asChild size="sm" variant="ghost" className="h-7 px-2 text-xs">
+                        <Button key={format} asChild size="sm" variant="outline">
                           <a
                             href={`/api/cards/${card.slug}/qr?size=2048&format=${format}`}
                             download={`${card.slug}-qr.${format}`}

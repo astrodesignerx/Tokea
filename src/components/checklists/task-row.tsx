@@ -1,11 +1,12 @@
 "use client";
 
 import { useState, type PointerEvent } from "react";
-import { Check, GripVertical, MoreHorizontal, Pencil } from "lucide-react";
+import { Check, GripVertical, MoreHorizontal, Pencil, Trash2 } from "lucide-react";
 import type { Person, TaskItem } from "@/lib/checklists/types";
 import { dueState } from "@/lib/checklists/due-state";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { HoldToConfirm } from "@/components/ui/hold-to-confirm";
 
 export type ItemOperation = "tick" | "untick" | "edit" | "assign" | "due" | "delete";
 export type RunItem = (operation: ItemOperation, item: TaskItem, fields?: Record<string, string>) => Promise<boolean>;
@@ -67,7 +68,9 @@ export function TaskRow({ item, members, disabled, archived, compact, first, las
         </>}
         <Button type="button" size="sm" variant="ghost" className="w-full justify-start" disabled={disabled || first} onClick={() => onMove(item, -1)}>Move up</Button>
         <Button type="button" size="sm" variant="ghost" className="w-full justify-start" disabled={disabled || last} onClick={() => onMove(item, 1)}>Move down</Button>
-        <Button type="button" size="sm" variant="ghost" className="w-full justify-start text-destructive" disabled={disabled} onClick={() => void onRun("delete", item)}>Delete {heading ? "heading" : "task"}</Button>
+        <HoldToConfirm label={`Hold to delete ${heading ? "heading" : "task"}`} icon={<Trash2 className="size-4" />} disabled={disabled} onConfirm={async () => {
+          if (!await onRun("delete", item)) throw new Error(`Could not delete ${heading ? "heading" : "task"}.`);
+        }} />
       </div>
     </details>}
   </div>;

@@ -34,7 +34,7 @@ export function UnlockForm({ code }: { code: string }) {
         </p>
       )}
       <Button type="submit" className="w-full" disabled={pending}>
-        {pending ? "Checking..." : "Continue"}
+        {pending ? "Checking…" : "Continue"}
       </Button>
     </form>
   );

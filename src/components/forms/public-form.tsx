@@ -79,7 +79,7 @@ export function PublicForm({ action, versionId, fields, brand }: Props) {
           !brand && "bg-primary text-primary-foreground hover:bg-primary/90",
         )}
       >
-        {pending ? "Sending..." : "Send"}
+        {pending ? "Sending…" : "Send"}
       </button>
     </form>
   );

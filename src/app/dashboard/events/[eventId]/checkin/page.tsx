@@ -3,7 +3,6 @@ import { requireUser } from "@/lib/require-user";
 import { prisma } from "@/lib/db";
 import { getEventCounts } from "@/lib/queries/events";
 import { CheckinClient } from "@/components/checkin/checkin-client";
-import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
 
@@ -21,16 +20,13 @@ export default async function CheckinPage({ params }: { params: Promise<Params> 
   const counts = await getEventCounts(eventId);
 
   return (
-    <div className="mx-auto max-w-3xl px-6 py-10 space-y-6">
-      <div className="flex items-center gap-4">
-        <Button asChild variant="ghost" size="sm">
-          <Link href={`/dashboard/events/${eventId}`}>
-            <ArrowLeft className="size-4" /> Back
-          </Link>
-        </Button>
-      </div>
+    <div className="mx-auto max-w-6xl px-4 py-10 sm:px-6 space-y-6">
+      <Link href={`/dashboard/events/${eventId}`} className="inline-flex items-center gap-1.5 text-sm text-muted-foreground transition-colors duration-(--fast) ease-(--ease) hover:text-foreground motion-reduce:transition-none">
+        <ArrowLeft className="size-4" /> {event.title}
+      </Link>
       <div>
-        <h1 className="text-3xl font-semibold tracking-tight">Check-in</h1>
+        <p className="nf-eyebrow">Invitations and RSVPs</p>
+        <h1 className="mt-3 font-display text-3xl font-medium tracking-tight">Check-in</h1>
         <p className="text-sm text-muted-foreground mt-1">{event.title}</p>
       </div>
       <CheckinClient
