@@ -139,17 +139,17 @@ export function CheckinClient({ eventId, initial }: Props) {
                   <li
                     key={item.id}
                     className={`flex items-center gap-2 rounded-md px-3 py-2 text-sm ${
-                      item.result.kind === "ok" ? "bg-green-50" : "bg-red-50"
+                      item.result.kind === "ok" ? "bg-green-50 dark:bg-green-950/60" : "bg-red-50 dark:bg-red-950/60"
                     }`}
                   >
                     {item.result.kind === "ok" ? (
                       item.result.firstTime ? (
-                        <Check className="size-4 text-green-700" />
+                        <Check className="size-4 text-green-700 dark:text-green-400" />
                       ) : (
-                        <AlertCircle className="size-4 text-amber-700" />
+                        <AlertCircle className="size-4 text-amber-700 dark:text-amber-400" />
                       )
                     ) : (
-                      <X className="size-4 text-red-700" />
+                      <X className="size-4 text-red-700 dark:text-red-400" />
                     )}
                     <div className="flex-1 min-w-0">
                       <div className="font-medium truncate">
@@ -241,7 +241,7 @@ function CountTile({ label, value, highlight }: { label: string; value: number; 
   return (
     <div
       className={`rounded-md p-3 ${
-        highlight ? "bg-green-100 text-green-900" : "bg-muted text-foreground"
+        highlight ? "bg-green-100 text-green-900 dark:bg-green-950 dark:text-green-200" : "bg-muted text-foreground"
       }`}
     >
       <div className="text-2xl font-semibold">{value}</div>

@@ -81,7 +81,7 @@ export default async function EventDetailPage({ params }: { params: Promise<Para
         </div>
       </div>
 
-      <div className="grid gap-4 sm:grid-cols-5">
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-5">
         <Stat label="Confirmed" value={counts.yes} />
         <Stat label="Declined" value={counts.no} />
         <Stat label="Maybe" value={counts.maybe} />
@@ -89,7 +89,7 @@ export default async function EventDetailPage({ params }: { params: Promise<Para
         <Stat label="Checked in" value={counts.checkedIn} />
       </div>
 
-      <div className="grid gap-4 sm:grid-cols-2">
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
         <Card>
           <CardHeader>
             <CardTitle className="text-base">Public page</CardTitle>
@@ -99,7 +99,7 @@ export default async function EventDetailPage({ params }: { params: Promise<Para
               Share this link with anyone. They see the event page and (if they are a guest) an RSVP form.
             </p>
             <div className="flex items-center gap-2 rounded-md border bg-muted px-3 py-2">
-              <code className="text-xs flex-1 truncate">{publicUrl}</code>
+              <code className="min-w-0 flex-1 truncate text-xs">{publicUrl}</code>
               <CopyButton value={publicUrl} />
             </div>
             <Button asChild variant="outline" size="sm" className="w-full">

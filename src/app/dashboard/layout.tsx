@@ -21,15 +21,16 @@ export default async function DashboardLayout({
         between the two does not feel like crossing into a different product.
       */}
       <header className="sticky top-0 z-40 border-b bg-background/80 backdrop-blur">
-        <div className="mx-auto flex h-14 max-w-6xl items-center justify-between px-6">
-          <div className="flex items-center gap-7">
-            <Link href="/" aria-label={PRODUCT}>
+        <div className="mx-auto flex h-14 max-w-6xl items-center justify-between gap-3 px-4 sm:px-6">
+          {/* min-w-0 lets the tab row shrink and scroll on phones instead of widening the page. */}
+          <div className="flex h-full min-w-0 flex-1 items-center gap-4 sm:gap-7">
+            <Link href="/" aria-label={PRODUCT} className="shrink-0">
               <Wordmark />
             </Link>
             <DashNav />
           </div>
 
-          <div className="flex items-center gap-2 text-sm">
+          <div className="flex shrink-0 items-center gap-2 text-sm">
             <span className="hidden text-muted-foreground sm:inline">
               {user.email}
             </span>

@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { ArrowLeft, Download, ExternalLink, Plus, Settings2 } from "lucide-react";
+import { Archive, ArchiveRestore, ArrowLeft, Download, ExternalLink, Plus, Settings2 } from "lucide-react";
 import { requireUser } from "@/lib/require-user";
 import { prisma } from "@/lib/db";
 import { setCardStatusAction } from "@/lib/actions/cards";
@@ -135,7 +135,15 @@ export default async function CompanyPage({ params }: PageProps) {
                         value={card.status === "archived" ? "active" : "archived"}
                       />
                       <Button type="submit" size="sm" variant="ghost">
-                        {card.status === "archived" ? "Restore" : "Archive"}
+                        {card.status === "archived" ? (
+                          <>
+                            <ArchiveRestore className="size-3.5" /> Restore
+                          </>
+                        ) : (
+                          <>
+                            <Archive className="size-3.5" /> Archive
+                          </>
+                        )}
                       </Button>
                     </form>
                     <Button asChild size="sm" variant="ghost">
@@ -143,7 +151,7 @@ export default async function CompanyPage({ params }: PageProps) {
                         <ExternalLink className="size-3.5" /> View
                       </Link>
                     </Button>
-                    <span className="inline-flex items-center gap-1 rounded-md border bg-white p-0.5">
+                    <span className="inline-flex items-center gap-0.5 rounded-md border p-0.5">
                       {(
                         [
                           ["PNG", "png"],

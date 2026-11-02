@@ -165,7 +165,7 @@ export default async function DashboardPage() {
           Named rather than hidden. An empty-looking grid would suggest the
           product is finished; it is not.
         */}
-        <div className="nf-panel flex flex-col justify-center border-dashed bg-transparent p-6">
+        <div className="nf-panel flex flex-col justify-center border-dashed! bg-transparent! p-6">
           <h2 className="font-display text-lg font-medium text-muted-foreground">
             More coming
           </h2>
