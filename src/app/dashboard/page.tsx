@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { ArrowRight, BarChart3, CalendarCheck, IdCard, Plus, QrCode } from "lucide-react";
+import { ArrowRight, BarChart3, CalendarCheck, ClipboardList, IdCard, Plus, QrCode } from "lucide-react";
 import { requireUser } from "@/lib/require-user";
 import { prisma } from "@/lib/db";
 import { Button } from "@/components/ui/button";
@@ -21,18 +21,21 @@ export const metadata = { title: "Dashboard" };
 export default async function DashboardPage() {
   const user = await requireUser();
 
-  const [companies, cards, scans, events, qrCodes, qrScans] = await Promise.all([
-    prisma.organisation.count({ where: { owner_id: user.id } }),
-    prisma.contactCard.count({
-      where: { organisation: { owner_id: user.id }, status: "active" },
-    }),
-    prisma.cardScan.count({
-      where: { card: { organisation: { owner_id: user.id } } },
-    }),
-    prisma.event.count({ where: { owner_id: user.id } }),
-    prisma.qrCode.count({ where: { owner_id: user.id, status: { not: "archived" } } }),
-    prisma.qrScan.count({ where: { qr_code: { owner_id: user.id } } }),
-  ]);
+  const [companies, cards, scans, events, qrCodes, qrScans, forms, formResponses] =
+    await Promise.all([
+      prisma.organisation.count({ where: { owner_id: user.id } }),
+      prisma.contactCard.count({
+        where: { organisation: { owner_id: user.id }, status: "active" },
+      }),
+      prisma.cardScan.count({
+        where: { card: { organisation: { owner_id: user.id } } },
+      }),
+      prisma.event.count({ where: { owner_id: user.id } }),
+      prisma.qrCode.count({ where: { owner_id: user.id, status: { not: "archived" } } }),
+      prisma.qrScan.count({ where: { qr_code: { owner_id: user.id } } }),
+      prisma.form.count({ where: { owner_id: user.id, status: { not: "archived" } } }),
+      prisma.formResponse.count({ where: { form: { owner_id: user.id } } }),
+    ]);
 
   const services = [
     {
@@ -59,6 +62,18 @@ export default async function DashboardPage() {
       ],
       href: "/dashboard/qr",
       action: { label: "New QR code", href: "/dashboard/qr/new" },
+    },
+    {
+      icon: ClipboardList,
+      name: "Forms",
+      description:
+        "Build a form, publish it on its own link, and read the answers as a table, a chart or a spreadsheet.",
+      stats: [
+        { label: forms === 1 ? "form" : "forms", value: forms },
+        { label: formResponses === 1 ? "response" : "responses", value: formResponses },
+      ],
+      href: "/dashboard/forms",
+      action: { label: "New form", href: "/dashboard/forms/new" },
     },
     {
       icon: CalendarCheck,

@@ -98,6 +98,32 @@ export function magicLinkEmail(input: { url: string }): EmailTemplate {
   return { subject: "Your NikoForm sign-in link", html, text };
 }
 
+/**
+ * Tells a form owner (or whoever they listed) that an answer arrived. Only the
+ * first ten answers are shown, so the email stays a nudge rather than a copy of
+ * the response; the button opens the full table.
+ */
+export function formResponseEmail(input: {
+  formTitle: string;
+  answers: { label: string; value: string }[];
+  responsesUrl: string;
+}): EmailTemplate {
+  const shown = input.answers.slice(0, 10);
+  const rest = input.answers.length - shown.length;
+  const body = `
+    <p style="margin:0 0 16px">Someone just answered <strong>${esc(input.formTitle)}</strong>.</p>
+    ${shown.map((answer) => row(answer.label, answer.value)).join("")}
+    ${
+      rest > 0
+        ? `<p style="color:#666;font-size:13px;margin:16px 0 0">And ${rest} more ${rest === 1 ? "answer" : "answers"}.</p>`
+        : ""
+    }
+    <div style="margin:24px 0">${button(input.responsesUrl, "Read all responses")}</div>
+  `;
+  const { html, text } = layout({ heading: `New answer: ${input.formTitle}`, body });
+  return { subject: `New answer: ${input.formTitle}`, html, text };
+}
+
 export function reminderEmail(input: {
   guestName: string;
   eventTitle: string;

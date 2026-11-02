@@ -18,6 +18,7 @@ const TABS = [
   { href: "/dashboard", label: "Services", exact: true },
   { href: "/dashboard/companies", label: "Cards", exact: false },
   { href: "/dashboard/qr", label: "QR codes", exact: false },
+  { href: "/dashboard/forms", label: "Forms", exact: false },
   { href: "/dashboard/events", label: "Events", exact: false },
   { href: "/dashboard/analytics", label: "Analytics", exact: false },
 ];
@@ -26,7 +27,12 @@ export function DashNav() {
   const pathname = usePathname();
 
   return (
-    <nav className="flex items-center gap-1">
+    <nav
+      className={cn(
+        "flex items-center gap-1 overflow-x-auto whitespace-nowrap",
+        "[scrollbar-width:none] [&::-webkit-scrollbar]:hidden",
+      )}
+    >
       {TABS.map(({ href, label, exact }) => {
         const active = exact ? pathname === href : pathname.startsWith(href);
         return (
@@ -35,7 +41,7 @@ export function DashNav() {
             href={href}
             aria-current={active ? "page" : undefined}
             className={cn(
-              "relative rounded-md px-2.5 py-1.5 text-sm transition-colors duration-200",
+              "relative shrink-0 rounded-md px-2.5 py-1.5 text-sm transition-colors duration-200",
               "after:absolute after:inset-x-2.5 after:-bottom-[0.9rem] after:h-px",
               "after:origin-left after:scale-x-0 after:bg-brand",
               "after:transition-transform after:duration-200 after:ease-[cubic-bezier(0,0,0.2,1)]",
