@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 import { ArrowLeft, Download, ExternalLink, Plus, Settings2 } from "lucide-react";
 import { requireUser } from "@/lib/require-user";
 import { prisma } from "@/lib/db";
+import { setCardStatusAction } from "@/lib/actions/cards";
 import { countScans, fullName } from "@/lib/cards/data";
 import { cardPath, shortPath, getCardsOrigin } from "@/lib/cards/links";
 import { Button } from "@/components/ui/button";
@@ -126,6 +127,17 @@ export default async function CompanyPage({ params }: PageProps) {
                         Edit
                       </Link>
                     </Button>
+                    <form action={setCardStatusAction}>
+                      <input type="hidden" name="card_id" value={card.id} />
+                      <input
+                        type="hidden"
+                        name="status"
+                        value={card.status === "archived" ? "active" : "archived"}
+                      />
+                      <Button type="submit" size="sm" variant="ghost">
+                        {card.status === "archived" ? "Restore" : "Archive"}
+                      </Button>
+                    </form>
                     <Button asChild size="sm" variant="ghost">
                       <Link href={cardPath(card.slug)} target="_blank">
                         <ExternalLink className="size-3.5" /> View
