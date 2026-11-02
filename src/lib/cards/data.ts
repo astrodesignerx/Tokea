@@ -11,55 +11,11 @@ export type CardWithOrganisation = ContactCard & { organisation: Organisation };
  * through here, so the public pages never build their own queries.
  */
 
-export async function listOrganisations(
-  ownerId?: string
-): Promise<Organisation[]> {
-  return prisma.organisation.findMany({
-    where: ownerId ? { owner_id: ownerId } : undefined,
-    orderBy: { name: "asc" },
-  });
-}
-
-export async function findOrganisation(
-  slug: string
-): Promise<Organisation | null> {
-  return prisma.organisation.findUnique({ where: { slug } });
-}
-
-export async function listCards(options?: {
-  organisationSlug?: string;
-  organisationId?: string;
-  includeArchived?: boolean;
-}): Promise<CardWithOrganisation[]> {
-  return prisma.contactCard.findMany({
-    where: {
-      ...(options?.organisationId
-        ? { organisation_id: options.organisationId }
-        : {}),
-      ...(options?.organisationSlug
-        ? { organisation: { slug: options.organisationSlug } }
-        : {}),
-      ...(options?.includeArchived ? {} : { status: "active" }),
-    },
-    include: { organisation: true },
-    orderBy: [{ last_name: "asc" }, { first_name: "asc" }],
-  });
-}
-
 export async function findCardBySlug(
   slug: string
 ): Promise<CardWithOrganisation | null> {
   return prisma.contactCard.findUnique({
     where: { slug },
-    include: { organisation: true },
-  });
-}
-
-export async function findCardById(
-  id: string
-): Promise<CardWithOrganisation | null> {
-  return prisma.contactCard.findUnique({
-    where: { id },
     include: { organisation: true },
   });
 }

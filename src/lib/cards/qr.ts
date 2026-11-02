@@ -13,8 +13,6 @@ import { BRAND_DARK } from "./qr-colour";
 
 export { ensureScannableDark } from "./qr-colour";
 
-export type CardQrLogo = Buffer | null;
-
 const LOGO_CACHE_TTL_MS = 10 * 60 * 1000;
 const logoCache = new Map<string, { bytes: Buffer; mime: string; expires: number }>();
 
@@ -123,7 +121,7 @@ export async function cardQrPdf(
     errorCorrectionLevel: "H",
     color: { dark, light: "#FFFFFF" },
   });
-  const { PDFDocument } = await import("pdf-lib");
+  const { PDFDocument, rgb } = await import("pdf-lib");
   const doc = await PDFDocument.create();
   const page = doc.addPage([size, size]);
   const qrImage = await doc.embedPng(qrPng);
@@ -135,21 +133,19 @@ export async function cardQrPdf(
       const plateSize = box;
       const plateX = (size - plateSize) / 2;
       const plateY = (size - plateSize) / 2;
-      const logoX = (size - logoSize) / 2;
-      const logoY = (size - logoSize) / 2;
       // white rounded plate — pdf-lib has no rounded rect, use square plate
       page.drawRectangle({
         x: plateX,
         y: plateY,
         width: plateSize,
         height: plateSize,
-        color: { type: "RGB", red: 1, green: 1, blue: 1 } as any,
+        color: rgb(1, 1, 1),
       });
       const isJpg = options.logo.mime === "image/jpeg";
       const logoImage = isJpg ? await doc.embedJpg(options.logo.bytes) : await doc.embedPng(options.logo.bytes);
       // contain-fit: pdf-lib drawImage with width/height will stretch; for PNG logos
       // we keep aspect by using logo's natural dims to compute fitted size
-      const { width: naturalW, height: naturalH } = logoImage as any;
+      const { width: naturalW, height: naturalH } = logoImage;
       let drawW = logoSize;
       let drawH = logoSize;
       if (naturalW && naturalH) {

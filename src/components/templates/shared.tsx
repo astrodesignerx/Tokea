@@ -1,6 +1,6 @@
 import Image from "next/image";
 import Link from "next/link";
-import { formatEventDateTime, formatEventTime, formatLocalTimezoneOffset } from "@/lib/format";
+import { formatEventDateTime, formatLocalTimezoneOffset } from "@/lib/format";
 import type { CoverMotion } from "@/lib/templates";
 import { cn } from "@/lib/utils";
 
@@ -48,10 +48,6 @@ export function formatDateLine(props: EventTemplateProps): { primary: string; se
   const primary = formatEventDateTime(props.startsAt, props.timezone);
   const local = formatLocalTimezoneOffset(props.startsAt, props.timezone);
   return { primary, secondary: local };
-}
-
-export function formatTimeOnly(props: EventTemplateProps): string {
-  return formatEventTime(props.startsAt, props.timezone);
 }
 
 export function RsvpButton({ href, label = "RSVP", isPreview }: { href: string | null; label?: string; isPreview?: boolean }) {

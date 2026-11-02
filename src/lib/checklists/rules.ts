@@ -9,8 +9,6 @@ export const ACTIONS = [
   "rename", "archive", "restore", "deleteList", "invite", "cancelInvite", "removeMember",
 ] as const;
 export type ChecklistAction = (typeof ACTIONS)[number];
-export type ChecklistRole = "owner" | "editor";
-
 const EDITOR_ACTIONS: readonly ChecklistAction[] = ["add", "edit", "tick", "untick", "assign", "due", "reorder", "deleteItem", "leave"];
 
 export function can(role: string, action: ChecklistAction): boolean {

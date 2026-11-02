@@ -10,8 +10,6 @@
  */
 
 export const PAYMENT_MODES = ["free", "paid"] as const;
-export type PaymentMode = (typeof PAYMENT_MODES)[number];
-
 export const DEFAULT_CURRENCY = "KES";
 
 /**
