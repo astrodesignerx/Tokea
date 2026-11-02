@@ -19,6 +19,28 @@ const SPACING = 26;
 const DOT = 1.1;
 const RADIUS = 130; // pointer influence, in CSS pixels
 
+function parseHexRgb(
+  raw: string,
+  fallback: [number, number, number],
+): [number, number, number] {
+  const hex = raw.trim().replace(/^#/, "");
+  if (hex.length === 3) {
+    const r = parseInt(hex[0] + hex[0], 16);
+    const g = parseInt(hex[1] + hex[1], 16);
+    const b = parseInt(hex[2] + hex[2], 16);
+    if (!Number.isNaN(r) && !Number.isNaN(g) && !Number.isNaN(b)) {
+      return [r, g, b];
+    }
+  }
+  if (hex.length === 6) {
+    const n = parseInt(hex, 16);
+    if (!Number.isNaN(n)) {
+      return [(n >> 16) & 255, (n >> 8) & 255, n & 255];
+    }
+  }
+  return fallback;
+}
+
 export function DotField() {
   const ref = useRef<HTMLCanvasElement>(null);
 
@@ -31,9 +53,15 @@ export function DotField() {
     const parent = canvas.parentElement ?? canvas;
     const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
-    const styles = getComputedStyle(canvas);
-    const base = styles.getPropertyValue("--dot-base").trim() || "150 2% 34%";
-    const lit = styles.getPropertyValue("--dot-lit").trim() || "153 60% 53%";
+    let baseRgb: [number, number, number] = [89, 88, 84];
+    let litRgb: [number, number, number] = [255, 138, 92];
+
+    const readPalette = () => {
+      const styles = getComputedStyle(canvas);
+      baseRgb = parseHexRgb(styles.getPropertyValue("--dot-base"), [89, 88, 84]);
+      litRgb = parseHexRgb(styles.getPropertyValue("--dot-lit"), [255, 138, 92]);
+    };
+    readPalette();
 
     let width = 0;
     let height = 0;
@@ -67,8 +95,8 @@ export function DotField() {
           ctx.arc(x, y, DOT + eased * 1.5, 0, Math.PI * 2);
           ctx.fillStyle =
             eased > 0.02
-              ? `hsl(${lit} / ${(0.12 + eased * 0.75).toFixed(3)})`
-              : `hsl(${base} / 0.5)`;
+              ? `rgba(${litRgb[0]}, ${litRgb[1]}, ${litRgb[2]}, ${(0.12 + eased * 0.75).toFixed(3)})`
+              : `rgba(${baseRgb[0]}, ${baseRgb[1]}, ${baseRgb[2]}, 0.5)`;
           ctx.fill();
         }
       }
@@ -111,12 +139,24 @@ export function DotField() {
       else if (onScreen) start();
     };
 
+    const themeObserver = new MutationObserver(() => {
+      readPalette();
+      draw();
+    });
+    themeObserver.observe(document.documentElement, {
+      attributes: true,
+      attributeFilter: ["class"],
+    });
+
     resize();
     draw();
     window.addEventListener("resize", onResize);
 
     if (reduced) {
-      return () => window.removeEventListener("resize", onResize);
+      return () => {
+        themeObserver.disconnect();
+        window.removeEventListener("resize", onResize);
+      };
     }
 
     parent.addEventListener("pointermove", onPointerMove);
@@ -133,6 +173,7 @@ export function DotField() {
     return () => {
       stop();
       io.disconnect();
+      themeObserver.disconnect();
       window.removeEventListener("resize", onResize);
       parent.removeEventListener("pointermove", onPointerMove);
       parent.removeEventListener("pointerleave", onPointerLeave);

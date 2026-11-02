@@ -72,7 +72,9 @@ export function ScanChart({ data }: { data: DailyCount[] }) {
                 className="absolute inset-0 rounded-sm transition-colors duration-150"
                 style={{
                   backgroundColor:
-                    hover === i ? "hsl(var(--brand) / 0.08)" : "transparent",
+                    hover === i
+                      ? "color-mix(in srgb, var(--brand) 8%, transparent)"
+                      : "transparent",
                 }}
               />
               <div
@@ -81,10 +83,10 @@ export function ScanChart({ data }: { data: DailyCount[] }) {
                   height: `max(${BAR_MIN}px, ${(d.count / max) * 100}%)`,
                   backgroundColor:
                     d.count === 0
-                      ? "hsl(var(--border))"
+                      ? "var(--border)"
                       : hover === i
-                        ? "hsl(var(--brand))"
-                        : "hsl(var(--brand) / 0.55)",
+                        ? "var(--brand)"
+                        : "color-mix(in srgb, var(--brand) 55%, transparent)",
                 }}
               />
             </div>
