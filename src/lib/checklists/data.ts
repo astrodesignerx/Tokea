@@ -1,5 +1,6 @@
 import { prisma } from "@/lib/db";
-import { requireMembership } from "./access";
+import { lockMembership, requireMembership } from "./access";
+import { resetChecklist } from "./reset";
 import { isTeam } from "./rules";
 import type { ChecklistItem, Prisma } from "@/generated/prisma/client";
 import type { SidebarList, TaskItem } from "./types";
@@ -27,8 +28,9 @@ export async function listChecklists(userId: string): Promise<SidebarList[]> {
 
 export async function getChecklist(id: string, userId: string) {
   return prisma.$transaction(async (tx) => {
-    const { checklist, member } = await requireMembership(id, userId, tx);
-    const [items, members, invites, activity] = await Promise.all([
+    const { checklist, member } = await lockMembership(tx, id, userId);
+    await resetChecklist(tx, checklist);
+    const [items, members, invites, activity, event] = await Promise.all([
       tx.checklistItem.findMany({ where: { checklist_id: id }, orderBy: [{ position: "asc" }, { id: "asc" }],
         include: { done_by: { select: { name: true, email: true } } } }),
       tx.checklistMember.findMany({ where: { checklist_id: id }, orderBy: { joined_at: "asc" },
@@ -37,12 +39,22 @@ export async function getChecklist(id: string, userId: string) {
         select: { id: true, email: true, expires_at: true }, orderBy: { created_at: "asc" } }),
       tx.checklistActivity.findMany({ where: { checklist_id: id }, orderBy: [{ created_at: "desc" }, { id: "desc" }], take: 20,
         select: { id: true, action: true, item_title: true, created_at: true, actor: { select: { name: true, email: true } } } }),
+      checklist.event_id ? tx.event.findFirst({ where: { id: checklist.event_id, owner_id: userId }, select: { id: true, title: true } }) : null,
     ]);
-    return { checklist, member, items: items.map(presentItem), members,
+    return { checklist, member, event, items: items.map(presentItem), members,
       invites: invites.map((invite) => ({ ...invite, expires_at: invite.expires_at.toISOString() })),
       activity: activity.map((row) => ({ ...row, created_at: row.created_at.toISOString() })),
       team: isTeam(members.length, invites.length) };
-  }, { isolationLevel: "RepeatableRead" });
+  });
+}
+
+export async function getEventPrepList(eventId: string, userId: string) {
+  const list = await prisma.checklist.findFirst({ where: { event_id: eventId, owner_id: userId } });
+  if (!list) return null;
+  const { items, checklist } = await getChecklist(list.id, userId);
+  const tasks = items.filter((item) => item.kind === "task");
+  return { id: list.id, title: list.title, archived: !!checklist.archived_at,
+    total: tasks.length, done: tasks.filter((item) => item.done_at).length };
 }
 
 export function myTasksWhere(userId: string): Prisma.ChecklistItemWhereInput {

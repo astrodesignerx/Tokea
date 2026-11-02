@@ -2,6 +2,7 @@ export type Person = { user_id: string; role: string; user: { name: string | nul
 export type TaskItem = {
   id: string;
   checklist_id: string;
+  parent_id: string | null;
   kind: string;
   title: string;
   notes: string | null;
