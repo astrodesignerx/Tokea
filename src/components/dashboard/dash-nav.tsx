@@ -30,7 +30,8 @@ export function DashNav() {
   return (
     <nav
       className={cn(
-        "flex items-center gap-1 overflow-x-auto whitespace-nowrap",
+        // Full header height so the underline sits inside the scroll area instead of being clipped by it.
+        "flex h-full min-w-0 items-stretch gap-1 overflow-x-auto whitespace-nowrap",
         "[scrollbar-width:none] [&::-webkit-scrollbar]:hidden",
       )}
     >
@@ -42,8 +43,8 @@ export function DashNav() {
             href={href}
             aria-current={active ? "page" : undefined}
             className={cn(
-              "relative shrink-0 rounded-md px-2.5 py-1.5 text-sm transition-colors duration-200",
-              "after:absolute after:inset-x-2.5 after:-bottom-[0.9rem] after:h-px",
+              "relative flex shrink-0 items-center rounded-md px-2.5 text-sm transition-colors duration-200",
+              "after:absolute after:inset-x-2.5 after:bottom-0 after:h-px",
               "after:origin-left after:scale-x-0 after:bg-brand",
               "after:transition-transform after:duration-200 after:ease-[cubic-bezier(0,0,0.2,1)]",
               active

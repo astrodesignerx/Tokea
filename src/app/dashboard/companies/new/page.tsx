@@ -10,10 +10,10 @@ export default async function NewCompanyPage() {
   await requireUser();
 
   return (
-    <div className="mx-auto max-w-5xl px-6 py-10">
+    <div className="mx-auto max-w-5xl px-4 py-10 sm:px-6">
       <Link
         href="/dashboard/companies"
-        className="inline-flex items-center gap-1.5 text-sm text-muted-foreground transition-colors hover:text-foreground"
+        className="inline-flex items-center gap-1.5 text-sm text-muted-foreground transition-colors duration-(--fast) ease-(--ease) motion-reduce:transition-none hover:text-foreground"
       >
         <ArrowLeft className="size-4" /> Companies
       </Link>

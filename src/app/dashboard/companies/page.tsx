@@ -30,8 +30,8 @@ export default async function CompaniesPage() {
   }));
 
   return (
-    <div className="mx-auto max-w-5xl px-6 py-10">
-      <div className="flex items-center justify-between gap-4">
+    <div className="mx-auto max-w-6xl px-4 py-10 sm:px-6">
+      <div className="flex flex-wrap items-center justify-between gap-4">
         <div>
           <p className="nf-eyebrow">Digital business cards</p>
           <h1 className="mt-3 font-display text-3xl font-medium tracking-tight">
@@ -59,7 +59,7 @@ export default async function CompaniesPage() {
               Each company holds its own branding and its team&rsquo;s cards.
             </p>
             <Button asChild className="mt-6">
-              <Link href="/dashboard/companies/new">Add your first company</Link>
+              <Link href="/dashboard/companies/new">Create your first company</Link>
             </Button>
           </CardContent>
         </Card>

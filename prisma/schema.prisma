@@ -120,6 +120,7 @@ model Event {
   owner    User      @relation(fields: [owner_id], references: [id], onDelete: Cascade)
   guests   Guest[]
   payments Payment[]
+  prep_list Checklist?
 
   @@index([owner_id])
   @@index([status, starts_at])
@@ -507,18 +508,23 @@ model FormResponse {
 
 // Personal lists become team lists when someone is invited.
 model Checklist {
-  id          String    @id @default(cuid())
-  owner_id    String
-  title       String
-  archived_at DateTime?
-  created_at  DateTime  @default(now())
-  updated_at  DateTime  @updatedAt
+  id             String    @id @default(cuid())
+  owner_id       String
+  title          String
+  archived_at    DateTime?
+  repeat         String    @default("none") // none | daily | weekly
+  repeat_weekday Int?
+  last_reset_on  DateTime? @db.Date
+  event_id       String?   @unique
+  created_at     DateTime  @default(now())
+  updated_at     DateTime  @updatedAt
 
   owner    User                @relation(fields: [owner_id], references: [id], onDelete: Cascade)
   items    ChecklistItem[]
   members  ChecklistMember[]
   invites  ChecklistInvite[]
   activity ChecklistActivity[]
+  event    Event?              @relation(fields: [event_id], references: [id], onDelete: SetNull)
 
   @@index([owner_id])
 }
@@ -526,6 +532,7 @@ model Checklist {
 model ChecklistItem {
   id            String    @id @default(cuid())
   checklist_id  String
+  parent_id     String?
   kind          String    @default("task") // task | heading
   title         String
   notes         String?
@@ -539,12 +546,15 @@ model ChecklistItem {
   updated_at    DateTime  @updatedAt
 
   checklist  Checklist @relation(fields: [checklist_id], references: [id], onDelete: Cascade)
+  parent     ChecklistItem?  @relation("ChecklistSubtasks", fields: [parent_id], references: [id], onDelete: Cascade)
+  children   ChecklistItem[] @relation("ChecklistSubtasks")
   assignee   User?     @relation("ChecklistItemAssignee", fields: [assignee_id], references: [id], onDelete: SetNull)
   done_by    User?     @relation("ChecklistItemDoneBy", fields: [done_by_id], references: [id], onDelete: SetNull)
   created_by User      @relation("ChecklistItemCreatedBy", fields: [created_by_id], references: [id], onDelete: Cascade)
 
   @@index([checklist_id, position])
   @@index([assignee_id, done_at])
+  @@index([parent_id])
 }
 
 model ChecklistMember {

@@ -6,7 +6,7 @@ export type { DueState } from "./due-state";
 export const LIMITS = { lists: 100, items: 500, people: 20, title: 200, notes: 2000, listTitle: 120 } as const;
 export const ACTIONS = [
   "add", "edit", "tick", "untick", "assign", "due", "reorder", "deleteItem", "leave",
-  "rename", "archive", "restore", "deleteList", "invite", "cancelInvite", "removeMember",
+  "rename", "repeat", "archive", "restore", "deleteList", "invite", "cancelInvite", "removeMember",
 ] as const;
 export type ChecklistAction = (typeof ACTIONS)[number];
 const EDITOR_ACTIONS: readonly ChecklistAction[] = ["add", "edit", "tick", "untick", "assign", "due", "reorder", "deleteItem", "leave"];

@@ -14,7 +14,7 @@ export default async function LoginPage({ searchParams }: { searchParams: Promis
     <main className="flex-1 flex items-center justify-center px-6 py-12">
       <div className="w-full max-w-sm space-y-6">
         <div className="space-y-2 text-center">
-          <h1 className="text-2xl font-semibold tracking-tight">Welcome back</h1>
+          <h1 className="font-display text-3xl font-medium tracking-tight">Welcome back</h1>
           <p className="text-sm text-muted-foreground">
             Sign in with the email you used for NikoForm.
           </p>

@@ -47,7 +47,7 @@ export function ScheduleChangeForm({ qrCodeId }: { qrCodeId: string }) {
         <LocalDateTimeInput id="schedule-at" name="run_at" required />
       </div>
       <Button type="submit" variant="outline" disabled={pending}>
-        {pending ? "Scheduling..." : "Schedule"}
+        {pending ? "Scheduling…" : "Schedule"}
       </Button>
       {state.error && (
         <p role="alert" className="qr-rise text-sm text-destructive sm:col-span-3">

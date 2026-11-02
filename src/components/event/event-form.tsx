@@ -8,9 +8,9 @@ import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Select } from "@/components/ui/select";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { Card, CardContent } from "@/components/ui/card";
 import { CoverUpload } from "@/components/event/cover-upload";
 import { createEvent, updateEvent } from "@/lib/actions/events";
 import { TEMPLATE_OPTIONS, hasCover } from "@/lib/templates";
@@ -186,10 +186,11 @@ export function EventForm({ initial }: EventFormProps) {
 
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="space-y-8">
-      <Card>
-        <CardContent className="p-6 space-y-4">
+      <section>
+        <h2 className="nf-eyebrow">Event details</h2>
+        <div className="nf-panel mt-4 p-6 space-y-4">
           <div className="space-y-2">
-            <Label htmlFor="title">Title</Label>
+            <Label htmlFor="title">Title<span className="text-muted-foreground"> *</span></Label>
             <Input id="title" {...register("title")} placeholder="Ada's 30th" />
             {errors.title && <p className="text-sm text-destructive">{errors.title.message}</p>}
           </div>
@@ -206,33 +207,32 @@ export function EventForm({ initial }: EventFormProps) {
               <p className="text-sm text-destructive">{errors.description.message}</p>
             )}
           </div>
-        </CardContent>
-      </Card>
+        </div>
+      </section>
 
-      <Card>
-        <CardContent className="p-6 space-y-4">
-          <h2 className="font-medium">When & where</h2>
+      <section>
+        <h2 className="nf-eyebrow">When & where</h2>
+        <div className="nf-panel mt-4 p-6 space-y-4">
           <div className="grid gap-4 sm:grid-cols-2">
             <div className="space-y-2">
-              <Label htmlFor="starts_at">Starts at</Label>
+              <Label htmlFor="starts_at">Starts at<span className="text-muted-foreground"> *</span></Label>
               <Input id="starts_at" type="datetime-local" {...register("starts_at")} />
               {errors.starts_at && (
                 <p className="text-sm text-destructive">{errors.starts_at.message}</p>
               )}
             </div>
             <div className="space-y-2">
-              <Label htmlFor="timezone">Timezone</Label>
-              <select
+              <Label htmlFor="timezone">Timezone<span className="text-muted-foreground"> *</span></Label>
+              <Select
                 id="timezone"
                 {...register("timezone")}
-                className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
               >
                 {timezones.map((tz) => (
                   <option key={tz} value={tz}>
                     {tz}
                   </option>
                 ))}
-              </select>
+              </Select>
             </div>
           </div>
           <div className="grid gap-4 sm:grid-cols-2">
@@ -245,12 +245,12 @@ export function EventForm({ initial }: EventFormProps) {
               <Input id="venue_address" {...register("venue_address")} placeholder="123 Main St" />
             </div>
           </div>
-        </CardContent>
-      </Card>
+        </div>
+      </section>
 
-      <Card>
-        <CardContent className="p-6 space-y-4">
-          <h2 className="font-medium">Cover image</h2>
+      <section>
+        <h2 className="nf-eyebrow">Cover image</h2>
+        <div className="nf-panel mt-4 p-6 space-y-4">
           <CoverUpload
             value={coverUrl}
             onChange={(url) => {
@@ -282,12 +282,12 @@ export function EventForm({ initial }: EventFormProps) {
               </label>
             </div>
           )}
-        </CardContent>
-      </Card>
+        </div>
+      </section>
 
-      <Card>
-        <CardContent className="p-6 space-y-4">
-          <h2 className="font-medium">Page design</h2>
+      <section>
+        <h2 className="nf-eyebrow">Page design</h2>
+        <div className="nf-panel mt-4 p-6 space-y-4">
           <div className="space-y-2">
             <Label htmlFor="template">Template</Label>
             <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
@@ -296,7 +296,7 @@ export function EventForm({ initial }: EventFormProps) {
                   key={t.value}
                   type="button"
                   onClick={() => setValue("template", t.value, { shouldValidate: true })}
-                  className={`text-left rounded-md border p-3 transition-colors ${
+                  className={`text-left rounded-md border p-3 transition-colors duration-(--fast) ease-(--ease) motion-reduce:transition-none ${
                     selectedTemplate === t.value
                       ? "border-foreground bg-accent"
                       : "hover:border-foreground/50"
@@ -309,12 +309,12 @@ export function EventForm({ initial }: EventFormProps) {
             </div>
             <input type="hidden" {...register("template")} />
           </div>
-        </CardContent>
-      </Card>
+        </div>
+      </section>
 
-      <Card>
-        <CardContent className="p-6 space-y-4">
-          <h2 className="font-medium">Tickets</h2>
+      <section>
+        <h2 className="nf-eyebrow">Tickets</h2>
+        <div className="nf-panel mt-4 p-6 space-y-4">
           <div className="grid gap-3 sm:grid-cols-2">
             {PAYMENT_CHOICES.map((option) => (
               <button
@@ -322,7 +322,7 @@ export function EventForm({ initial }: EventFormProps) {
                 type="button"
                 onClick={() => setValue("payment_mode", option.value, { shouldValidate: true })}
                 aria-pressed={paymentMode === option.value}
-                className={`text-left rounded-md border p-3 transition-colors ${
+                className={`text-left rounded-md border p-3 transition-colors duration-(--fast) ease-(--ease) motion-reduce:transition-none ${
                   paymentMode === option.value
                     ? "border-foreground bg-accent"
                     : "hover:border-foreground/50"
@@ -339,7 +339,7 @@ export function EventForm({ initial }: EventFormProps) {
             <div className="space-y-4 pt-4 border-t">
               <div className="grid gap-4 sm:grid-cols-2">
                 <div className="space-y-2">
-                  <Label htmlFor="price_input">Ticket price ({currency})</Label>
+                  <Label htmlFor="price_input">Ticket price ({currency})<span className="text-muted-foreground"> *</span></Label>
                   <Input
                     id="price_input"
                     inputMode="decimal"
@@ -367,12 +367,12 @@ export function EventForm({ initial }: EventFormProps) {
               </p>
             </div>
           )}
-        </CardContent>
-      </Card>
+        </div>
+      </section>
 
-      <Card>
-        <CardContent className="p-6 space-y-4">
-          <h2 className="font-medium">RSVP & reminders</h2>
+      <section>
+        <h2 className="nf-eyebrow">RSVP & reminders</h2>
+        <div className="nf-panel mt-4 p-6 space-y-4">
           <div className="space-y-2">
             <Label htmlFor="custom_question">Optional question for guests</Label>
             <Input
@@ -386,23 +386,22 @@ export function EventForm({ initial }: EventFormProps) {
           </div>
           <div className="space-y-2">
             <Label htmlFor="reminder_days_before">Reminder (days before)</Label>
-            <select
+            <Select
               id="reminder_days_before"
               {...register("reminder_days_before")}
-              className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
             >
               <option value="">No reminder</option>
               <option value="1">1 day before</option>
               <option value="3">3 days before</option>
               <option value="7">7 days before</option>
               <option value="14">14 days before</option>
-            </select>
+            </Select>
             <p className="text-xs text-muted-foreground">
               One email is sent to all guests who haven&apos;t declined.
             </p>
           </div>
-        </CardContent>
-      </Card>
+        </div>
+      </section>
 
       <div className="flex items-center gap-3">
         <Button type="submit" disabled={pending}>

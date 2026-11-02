@@ -1,3 +1,5 @@
+import Link from "next/link";
+import { ArrowLeft } from "lucide-react";
 import { notFound, redirect } from "next/navigation";
 import { requireUser } from "@/lib/require-user";
 import { prisma } from "@/lib/db";
@@ -15,8 +17,12 @@ export default async function EditEventPage({ params }: { params: Promise<Params
   if (event.owner_id !== user.id) redirect("/dashboard/events");
 
   return (
-    <div className="mx-auto max-w-3xl px-6 py-10">
-      <h1 className="text-3xl font-semibold tracking-tight">Edit event</h1>
+    <div className="mx-auto max-w-5xl px-4 py-10 sm:px-6">
+      <Link href={`/dashboard/events/${event.id}`} className="inline-flex items-center gap-1.5 text-sm text-muted-foreground transition-colors duration-(--fast) ease-(--ease) hover:text-foreground motion-reduce:transition-none">
+        <ArrowLeft className="size-4" /> {event.title}
+      </Link>
+      <p className="nf-eyebrow mt-6">Invitations and RSVPs</p>
+      <h1 className="mt-3 font-display text-3xl font-medium tracking-tight">Edit event</h1>
       <p className="text-sm text-muted-foreground mt-1">Changes appear on the public page immediately.</p>
       <div className="mt-8">
         <EventForm

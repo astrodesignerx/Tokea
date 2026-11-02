@@ -3,7 +3,6 @@ import { notFound, redirect } from "next/navigation";
 import { prisma } from "@/lib/db";
 import { requireUser } from "@/lib/require-user";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { GuestTable } from "@/components/guest/guest-table";
 import { AddGuestForm } from "@/components/guest/add-guest-form";
 import { CsvImport } from "@/components/guest/csv-import";
@@ -38,22 +37,19 @@ export default async function GuestsPage({ params }: { params: Promise<Params> }
   }));
 
   return (
-    <div className="mx-auto max-w-5xl px-6 py-10 space-y-6">
-      <div className="flex items-center gap-4">
-        <Button asChild variant="ghost" size="sm">
-          <Link href={`/dashboard/events/${eventId}`}>
-            <ArrowLeft className="size-4" /> Back
-          </Link>
-        </Button>
-      </div>
-      <div className="flex items-start justify-between">
+    <div className="mx-auto max-w-6xl px-4 py-10 sm:px-6 space-y-6">
+      <Link href={`/dashboard/events/${eventId}`} className="inline-flex items-center gap-1.5 text-sm text-muted-foreground transition-colors duration-(--fast) ease-(--ease) hover:text-foreground motion-reduce:transition-none">
+        <ArrowLeft className="size-4" /> {event.title}
+      </Link>
+      <div className="flex flex-wrap items-start justify-between gap-4">
         <div>
-          <h1 className="text-3xl font-semibold tracking-tight">Guests</h1>
+          <p className="nf-eyebrow">Invitations and RSVPs</p>
+          <h1 className="mt-3 font-display text-3xl font-medium tracking-tight">Guests</h1>
           <p className="text-sm text-muted-foreground mt-1">
             {event.title}, {guests.length} total
           </p>
         </div>
-        <div className="flex items-center gap-2">
+        <div className="flex flex-wrap items-center gap-2">
           <SendInvitesButton eventId={eventId} unsent={serialized.filter((g) => !g.invited).length} />
           <Button asChild variant="outline" size="sm">
             <a href={`/api/events/${eventId}/export`} download>
@@ -64,29 +60,23 @@ export default async function GuestsPage({ params }: { params: Promise<Params> }
       </div>
 
       <div className="grid gap-4 md:grid-cols-2">
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-base">Add a guest</CardTitle>
-          </CardHeader>
-          <CardContent>
+        <section>
+          <h2 className="nf-eyebrow">Add a guest</h2>
+          <div className="nf-panel mt-4 p-6">
             <AddGuestForm eventId={eventId} />
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-base">Import from CSV</CardTitle>
-          </CardHeader>
-          <CardContent>
+          </div>
+        </section>
+        <section>
+          <h2 className="nf-eyebrow">Import from CSV</h2>
+          <div className="nf-panel mt-4 p-6">
             <CsvImport eventId={eventId} />
-          </CardContent>
-        </Card>
+          </div>
+        </section>
       </div>
 
-      <Card>
-        <CardContent className="p-0">
-          <GuestTable eventId={eventId} guests={serialized} />
-        </CardContent>
-      </Card>
+      <div className="nf-panel overflow-hidden">
+        <GuestTable eventId={eventId} guests={serialized} />
+      </div>
     </div>
   );
 }

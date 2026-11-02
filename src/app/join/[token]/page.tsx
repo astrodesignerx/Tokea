@@ -47,7 +47,7 @@ export default async function JoinPage({ params, searchParams }: {
     <main className="mx-auto w-full max-w-lg px-6 py-16 qr-rise">
       <div className="nf-panel space-y-5 p-6">
         <p className="nf-eyebrow">Checklists</p>
-        <h1 className="font-display text-2xl">Join a list</h1>
+        <h1 className="font-display text-3xl font-medium tracking-tight">Join a list</h1>
         {unavailable ? <p>This invite is unknown, cancelled, expired or already used. Ask the owner for a new invite.</p>
           : invite.checklist.archived_at ? <p>This list is archived. Ask its owner to restore it before joining.</p>
           : !session?.user ? <>

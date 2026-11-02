@@ -141,7 +141,7 @@ export function QrDownloads({ id, shortCode, url, design }: Props) {
   return (
     <div className="mt-4 flex flex-wrap gap-2">
       <Button type="button" variant="outline" size="sm" onClick={downloadPng} disabled={busy !== null}>
-        <Download className="size-4" /> {busy === "png" ? "Making PNG..." : "PNG"}
+        <Download className="size-4" /> {busy === "png" ? "Making PNG…" : "PNG"}
       </Button>
       <Button asChild variant="outline" size="sm">
         <a href={`/api/qr/${id}?format=svg&size=2048`} download>
@@ -149,7 +149,7 @@ export function QrDownloads({ id, shortCode, url, design }: Props) {
         </a>
       </Button>
       <Button type="button" variant="outline" size="sm" onClick={downloadPdf} disabled={busy !== null}>
-        <Download className="size-4" /> {busy === "pdf" ? "Making PDF..." : "PDF"}
+        <Download className="size-4" /> {busy === "pdf" ? "Making PDF…" : "PDF"}
       </Button>
     </div>
   );
