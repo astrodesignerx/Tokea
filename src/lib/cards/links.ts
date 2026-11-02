@@ -54,6 +54,3 @@ export async function shortUrl(shortCode: string): Promise<string> {
   return `${await getCardsOrigin()}${shortPath(shortCode)}`;
 }
 
-export async function cardUrl(slug: string): Promise<string> {
-  return `${await getCardsOrigin()}${cardPath(slug)}`;
-}
