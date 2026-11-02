@@ -55,6 +55,8 @@ export async function acceptInvite(token: string, user: { id: string; email: str
       await tx.checklistActivity.create({ data: { checklist_id: invite.checklist_id, actor_id: user.id, action: "joined" } });
     }
     await tx.checklistInvite.update({ where: { id: invite.id }, data: { accepted_at: new Date() } });
+    // Clear any duplicate pending invites for this address so they cannot be reused later.
+    await tx.checklistInvite.deleteMany({ where: { checklist_id: invite.checklist_id, email: invite.email, accepted_at: null, id: { not: invite.id } } });
     await requireMembership(invite.checklist_id, user.id, tx);
     return invite.checklist_id;
   });
