@@ -4,6 +4,15 @@ export type EmailTemplate = {
   text: string;
 };
 
+export function checklistInviteEmail(input: { inviterName: string; listTitle: string; joinUrl: string }): EmailTemplate {
+  const body = `<p>${esc(input.inviterName)} invited you to <strong>${esc(input.listTitle)}</strong>.</p>
+    <p>Join to add, assign and tick tasks together. Sign in with the email address this invite was sent to.</p>
+    <div style="margin:24px 0">${button(input.joinUrl, "Join list")}</div>
+    <p style="color:#666;font-size:13px">This invite expires in 7 days. If you were not expecting it, you can ignore this email.</p>`;
+  const { html, text } = layout({ heading: "You're invited to a checklist", body });
+  return { subject: `${input.inviterName} invited you to ${input.listTitle}`, html, text: `${text}\n\nJoin list: ${input.joinUrl}` };
+}
+
 function esc(s: string): string {
   return s
     .replace(/&/g, "&amp;")

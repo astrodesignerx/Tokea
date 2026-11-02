@@ -1,12 +1,15 @@
 import { auth } from "@/lib/auth";
 import { redirect } from "next/navigation";
 import { AuthForm } from "@/components/auth/auth-form";
+import { safeNext } from "@/lib/checklists/redirect";
 
 export const metadata = { title: "Sign in" };
 
-export default async function LoginPage() {
+export default async function LoginPage({ searchParams }: { searchParams: Promise<{ next?: string }> }) {
+  const requested = (await searchParams).next;
+  const next = safeNext(requested);
   const session = await auth();
-  if (session?.user) redirect("/dashboard");
+  if (session?.user) redirect(next);
   return (
     <main className="flex-1 flex items-center justify-center px-6 py-12">
       <div className="w-full max-w-sm space-y-6">
@@ -16,7 +19,7 @@ export default async function LoginPage() {
             Sign in with the email you used for NikoForm.
           </p>
         </div>
-        <AuthForm mode="signin" />
+        <AuthForm mode="signin" next={next} />
       </div>
     </main>
   );

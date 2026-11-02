@@ -9,6 +9,7 @@ import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
 import { signInLinkExpiryLabel } from "@/lib/sign-in-link";
 import { toast } from "sonner";
+import { safeNext } from "@/lib/checklists/redirect";
 
 type Mode = "signin" | "signup";
 
@@ -47,7 +48,8 @@ const COPY: Record<
   },
 };
 
-export function AuthForm({ mode }: { mode: Mode }) {
+export function AuthForm({ mode, next = "/dashboard" }: { mode: Mode; next?: string }) {
+  const redirectTo = safeNext(next);
   const copy = COPY[mode];
   const [email, setEmail] = useState("");
   const [pending, startTransition] = useTransition();
@@ -60,7 +62,7 @@ export function AuthForm({ mode }: { mode: Mode }) {
     e.preventDefault();
     if (!email) return;
     startTransition(async () => {
-      const result = await signIn("resend", { email, redirect: false });
+      const result = await signIn("resend", { email, redirect: false, redirectTo });
       if (result?.error) {
         toast.error("We couldn't send your sign-in link. Please try again in a moment.");
         return;
@@ -82,7 +84,7 @@ export function AuthForm({ mode }: { mode: Mode }) {
 
   function onGoogle() {
     startTransition(async () => {
-      await signIn("google", { redirectTo: "/dashboard" });
+      await signIn("google", { redirectTo });
     });
   }
 
