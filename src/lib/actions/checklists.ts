@@ -12,6 +12,9 @@ import { ChecklistError, createInvite, cancelInvite, cancelUndeliveredInvite } f
 import { checklistInviteEmail } from "@/lib/emails";
 import { sendEmail } from "@/lib/email";
 import { getCardsOrigin } from "@/lib/cards/links";
+import { canHaveSubtasks } from "@/lib/checklists/hierarchy";
+import { repeatPeriodStart, repeatSettings } from "@/lib/checklists/repeat";
+import { resetChecklist } from "@/lib/checklists/reset";
 
 /** Every body id is attacker-controlled. Lock, re-check membership and scope child ids to that list. */
 export type ChecklistState = { error: string | null; errorAt?: number; savedAt?: number };
@@ -35,16 +38,18 @@ function title(form: FormData, key: string, max: number) {
   return text;
 }
 
-function refresh(id?: string) {
+function refresh(id?: string, eventId?: string | null) {
   revalidatePath(PATH, "layout");
   revalidatePath("/dashboard");
   if (id) revalidatePath(`${PATH}/${id}`);
+  if (eventId) revalidatePath(`/dashboard/events/${eventId}`);
 }
 
 type Context = { tx: Prisma.TransactionClient; id: string; user: Awaited<ReturnType<typeof requireUser>>; form: FormData };
 async function change(action: ChecklistAction, form: FormData, write: (context: Context) => Promise<void>): Promise<ChecklistState> {
   const user = await requireUser();
   const id = value(form, "checklist_id");
+  let eventId: string | null = null;
   try {
     await prisma.$transaction(async (tx) => {
       // Create and restore share the owner's row lock for the active-list limit.
@@ -52,13 +57,15 @@ async function change(action: ChecklistAction, form: FormData, write: (context: 
       const { checklist, member } = await lockMembership(tx, id, user.id);
       if (!can(member.role, action)) throw new ChecklistError("You do not have permission to do that.");
       if (checklist.archived_at && TASK_ACTIONS.has(action)) throw new ChecklistError("Restore this list before changing its tasks.");
+      eventId = checklist.event_id;
+      await resetChecklist(tx, checklist);
       await write({ tx, id, user, form });
     });
   } catch (error) {
     if (error instanceof ChecklistError) return failed(error.message);
     throw error;
   }
-  refresh(id);
+  refresh(id, eventId);
   return { error: null, savedAt: Date.now() };
 }
 
@@ -73,8 +80,8 @@ async function item(context: Context, taskOnly = false) {
   return row;
 }
 
-async function position(context: Context, movingId?: string) {
-  const rows = await context.tx.checklistItem.findMany({ where: { checklist_id: context.id }, orderBy: [{ position: "asc" }, { id: "asc" }], select: { id: true, position: true } });
+async function position(context: Context, parentId: string | null, movingId?: string) {
+  const rows = await context.tx.checklistItem.findMany({ where: { checklist_id: context.id, parent_id: parentId }, orderBy: [{ position: "asc" }, { id: "asc" }], select: { id: true, position: true } });
   const remaining = rows.filter((row) => row.id !== movingId);
   const beforeId = value(context.form, "before_id");
   const afterId = value(context.form, "after_id");
@@ -90,7 +97,7 @@ async function position(context: Context, movingId?: string) {
     await context.tx.$executeRaw`
       WITH positions AS (
         SELECT id, ROW_NUMBER() OVER (ORDER BY position, id) * 1024 AS next_position
-        FROM "ChecklistItem" WHERE checklist_id = ${context.id}
+        FROM "ChecklistItem" WHERE checklist_id = ${context.id} AND parent_id IS NOT DISTINCT FROM ${parentId}
       )
       UPDATE "ChecklistItem" AS item SET position = positions.next_position, updated_at = NOW()
       FROM positions WHERE item.id = positions.id
@@ -133,6 +140,58 @@ export async function renameChecklistAction(_prev: ChecklistState, form: FormDat
   });
 }
 
+export async function setChecklistRepeatAction(_prev: ChecklistState, form: FormData) {
+  return change("repeat", form, async (c) => {
+    const settings = repeatSettings(value(form, "repeat"), value(form, "repeat_weekday"));
+    if (!settings) throw new ChecklistError("Choose a valid repeat schedule and weekday.");
+    const list = await c.tx.checklist.findUniqueOrThrow({ where: { id: c.id } });
+    if (list.repeat === settings.repeat && list.repeat_weekday === settings.repeat_weekday) return;
+    // Enabling or changing the schedule starts this period without clearing completed work.
+    await c.tx.checklist.update({ where: { id: c.id }, data: {
+      ...settings, last_reset_on: repeatPeriodStart(settings.repeat, settings.repeat_weekday),
+    } });
+    await log(c, "edited", "List repeat schedule");
+  });
+}
+
+export async function createEventPrepListAction(_prev: ChecklistState, form: FormData): Promise<ChecklistState> {
+  const user = await requireUser();
+  const eventId = value(form, "event_id");
+  let id: string;
+  try {
+    id = await prisma.$transaction(async (tx) => {
+      await tx.$queryRaw`SELECT id FROM "Event" WHERE id = ${eventId} FOR UPDATE`;
+      const event = await tx.event.findFirst({ where: { id: eventId, owner_id: user.id } });
+      if (!event) throw new ChecklistError("That event is unavailable.");
+      const existing = await tx.checklist.findUnique({ where: { event_id: eventId } });
+      if (existing) {
+        const { member } = await lockMembership(tx, existing.id, user.id);
+        if (existing.owner_id !== user.id || !can(member.role, "rename")) throw new ChecklistError("You do not have permission to do that.");
+        return existing.id;
+      }
+      // Existing prep lists do not need the owner's creation-limit lock.
+      await tx.$queryRaw`SELECT id FROM "User" WHERE id = ${user.id} FOR UPDATE`;
+      if (await tx.checklist.count({ where: { owner_id: user.id, archived_at: null } }) >= LIMITS.lists) throw new ChecklistError("You can own at most 100 active lists. Archive one first.");
+      const list = await tx.checklist.create({ data: {
+        owner_id: user.id, event_id: eventId, title: `${event.title} prep`,
+        members: { create: { user_id: user.id, role: "owner" } },
+        items: { create: ["Confirm venue", "Send invites", "Order refreshments", "Print QR codes", "Assign check-in"].map((name, index) => ({
+          title: name, kind: "task", position: (index + 1) * POSITION_STEP, created_by_id: user.id,
+        })) },
+        activity: { create: { actor_id: user.id, action: "added", item_title: "Event prep list" } },
+      } });
+      await requireMembership(list.id, user.id, tx);
+      return list.id;
+    });
+  } catch (error) {
+    if (error instanceof ChecklistError) return failed(error.message);
+    throw error;
+  }
+  refresh(id);
+  revalidatePath(`/dashboard/events/${eventId}`);
+  redirect(`${PATH}/${id}`);
+}
+
 export async function archiveChecklistAction(_prev: ChecklistState, form: FormData) {
   return change("archive", form, async (c) => {
     await c.tx.checklist.update({ where: { id: c.id }, data: { archived_at: new Date() } });
@@ -163,8 +222,13 @@ export async function addChecklistItemAction(_prev: ChecklistState, form: FormDa
     if (await c.tx.checklistItem.count({ where: { checklist_id: c.id } }) >= LIMITS.items) throw new ChecklistError("A list can have at most 500 items, including headings.");
     const kind = value(form, "kind") || "task";
     if (kind !== "task" && kind !== "heading") throw new ChecklistError("Choose a task or heading.");
+    const parentId = value(form, "parent_id") || null;
+    if (parentId) {
+      const parent = await c.tx.checklistItem.findFirst({ where: { id: parentId, checklist_id: c.id } });
+      if (!parent || !canHaveSubtasks(parent) || kind !== "task") throw new ChecklistError("Sub-tasks need a top-level task in this list as their parent.");
+    }
     const name = title(form, "title", LIMITS.title);
-    await c.tx.checklistItem.create({ data: { checklist_id: c.id, kind, title: name, position: await position(c), created_by_id: c.user.id } });
+    await c.tx.checklistItem.create({ data: { checklist_id: c.id, parent_id: parentId, kind, title: name, position: await position(c, parentId), created_by_id: c.user.id } });
     await log(c, "added", name);
   });
 }
@@ -183,6 +247,8 @@ export async function editChecklistItemAction(_prev: ChecklistState, form: FormD
 export async function deleteChecklistItemAction(_prev: ChecklistState, form: FormData) {
   return change("deleteItem", form, async (c) => {
     const row = await item(c);
+    const childCount = await c.tx.checklistItem.count({ where: { checklist_id: c.id, parent_id: row.id } });
+    if (value(form, "subtask_count") !== String(childCount)) throw new ChecklistError("The sub-task count changed. Refresh the list and confirm the new count before deleting.");
     await c.tx.checklistItem.delete({ where: { id: row.id } });
     await log(c, "removed", row.title);
   });
@@ -227,7 +293,7 @@ export async function setChecklistDueAction(_prev: ChecklistState, form: FormDat
 export async function reorderChecklistItemAction(_prev: ChecklistState, form: FormData) {
   return change("reorder", form, async (c) => {
     const row = await item(c);
-    await c.tx.checklistItem.update({ where: { id: row.id }, data: { position: await position(c, row.id) } });
+    await c.tx.checklistItem.update({ where: { id: row.id }, data: { position: await position(c, row.parent_id, row.id) } });
     await log(c, "edited", `${row.title} (moved)`);
   });
 }

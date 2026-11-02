@@ -13,6 +13,8 @@ import { eventPricing, formatMoney } from "@/lib/money";
 import { ArrowLeft, Pencil, Users, ScanLine, ExternalLink, Trash2 } from "lucide-react";
 import { CopyButton } from "@/components/ui/copy-button";
 import { HoldToConfirm } from "@/components/ui/hold-to-confirm";
+import { getEventPrepList } from "@/lib/checklists/data";
+import { PrepListPanel } from "@/components/checklists/prep-list-panel";
 
 type Params = { eventId: string };
 
@@ -24,6 +26,7 @@ export default async function EventDetailPage({ params }: { params: Promise<Para
   if (event.owner_id !== user.id) redirect("/dashboard/events");
 
   const counts = await getEventCounts(eventId);
+  const prepList = await getEventPrepList(eventId, user.id);
   const pricing = eventPricing(event);
   const publicUrl = `${process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3012"}/e/${event.slug}`;
 
@@ -95,6 +98,7 @@ export default async function EventDetailPage({ params }: { params: Promise<Para
       </div>
 
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+        <PrepListPanel eventId={event.id} list={prepList} />
         <section>
           <h2 className="nf-eyebrow">Public page</h2>
           <div className="nf-panel mt-4 p-6 space-y-3">

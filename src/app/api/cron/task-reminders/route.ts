@@ -6,6 +6,7 @@ import { getCardsOrigin } from "@/lib/cards/links";
 import { myTasksWhere } from "@/lib/checklists/data";
 import { nairobiToday, pickDueTasks } from "@/lib/checklists/reminders";
 import { dueState } from "@/lib/checklists/due-state";
+import { resetChecklist } from "@/lib/checklists/reset";
 
 export async function GET(req: Request) {
   const provided = req.headers.get("authorization");
@@ -15,6 +16,37 @@ export async function GET(req: Request) {
   }
 
   const now = new Date();
+  // Reset first so newly reopened tasks qualify for this morning's email.
+  // Isolate the step and each list so a reset failure cannot stop reminders.
+  let reset = 0;
+  let resetFailed = 0;
+  try {
+    let resetAfter: string | undefined;
+    for (;;) {
+      const lists = await prisma.checklist.findMany({
+        where: { archived_at: null, repeat: { in: ["daily", "weekly"] }, ...(resetAfter ? { id: { gt: resetAfter } } : {}) },
+        select: { id: true }, orderBy: { id: "asc" }, take: 100,
+      });
+      if (!lists.length) break;
+      resetAfter = lists[lists.length - 1].id;
+      for (const candidate of lists) {
+        try {
+          const changed = await prisma.$transaction(async (tx) => {
+            await tx.$queryRaw`SELECT id FROM "Checklist" WHERE id = ${candidate.id} FOR UPDATE`;
+            const list = await tx.checklist.findUnique({ where: { id: candidate.id } });
+            return list ? resetChecklist(tx, list, now) : false;
+          });
+          if (changed) reset++;
+        } catch (error) {
+          resetFailed++;
+          console.error("[task-reminders] list reset failed", candidate.id, error);
+        }
+      }
+    }
+  } catch (error) {
+    resetFailed++;
+    console.error("[task-reminders] reset step failed", error);
+  }
   const today = new Date(`${nairobiToday(now)}T00:00:00Z`);
   const origin = await getCardsOrigin();
   const counts = { users: 0, sent: 0, skipped: 0, failed: 0 };
@@ -75,5 +107,5 @@ export async function GET(req: Request) {
     }
   }
 
-  return NextResponse.json(counts);
+  return NextResponse.json({ ...counts, reset, resetFailed });
 }
