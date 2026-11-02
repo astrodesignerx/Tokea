@@ -152,7 +152,7 @@ export function HoldToConfirm({
       className={cn(
         "relative isolate w-full h-9 overflow-hidden rounded-md select-none",
         "text-sm font-medium text-destructive",
-        "transition-colors hover:bg-accent",
+        "transition-colors duration-(--fast) ease-(--ease) hover:bg-accent motion-reduce:transition-none",
         "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2",
         "disabled:pointer-events-none disabled:opacity-50",
         "[touch-action:none]",

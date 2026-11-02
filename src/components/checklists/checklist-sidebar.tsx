@@ -49,8 +49,8 @@ export function ChecklistSidebar({ lists, taskCount }: { lists: SidebarList[]; t
       <label htmlFor="new-list-title" className="text-sm font-medium">New list title</label>
       <Input id="new-list-title" name="title" required minLength={1} maxLength={120} autoFocus placeholder="Weekly admin" />
       {state.error && <p role="alert" className="text-sm text-destructive">{state.error}</p>}
-      <div className="flex flex-wrap gap-2"><Button size="sm" disabled={pending}>{pending ? "Creating..." : "Create list"}</Button>
+      <div className="flex flex-wrap gap-2"><Button size="sm" disabled={pending}>{pending ? "Creating…" : "Create list"}</Button>
         <Button size="sm" variant="ghost" type="button" onClick={() => router.replace(pathname)}>Cancel</Button></div>
-    </form> : <Button variant="outline" size="sm" onClick={() => router.push(`${pathname}?new=1`)}><Plus className="size-4" />New list</Button>}
+    </form> : <Button onClick={() => router.push(`${pathname}?new=1`)}><Plus className="size-4" />New list</Button>}
   </aside>;
 }

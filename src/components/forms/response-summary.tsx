@@ -2,10 +2,11 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { Download, Trash2 } from "lucide-react";
+import { ClipboardList, Download, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { HoldToConfirm } from "@/components/ui/hold-to-confirm";
+import { Card, CardContent } from "@/components/ui/card";
 import { LocalTime } from "@/components/qr-codes/local-time";
 import { deleteAllResponsesAction, deleteResponseAction } from "@/lib/actions/forms";
 import type { SummaryQuestion } from "@/lib/forms/data";
@@ -68,7 +69,7 @@ export function ResponseSummary({
             {summary.total === 1 ? "response" : "responses"}
           </p>
         </div>
-        <Button asChild variant="outline">
+        <Button asChild variant="outline" size="sm">
           <a href={`/api/forms/${formId}/export`}>
             <Download className="size-4" /> Download CSV
           </a>
@@ -84,12 +85,15 @@ export function ResponseSummary({
       )}
 
       {total === 0 ? (
-        <div className="rounded-lg border border-dashed px-5 py-10 text-center">
-          <p className="text-sm font-medium">No responses yet</p>
-          <p className="mt-1 text-sm text-muted-foreground">
-            Share the form and answers will appear here, newest first.
-          </p>
-        </div>
+        <Card className="border-dashed bg-transparent">
+          <CardContent className="p-12 text-center">
+            <ClipboardList className="mx-auto size-8 text-brand" />
+            <h2 className="mt-4 font-display text-lg font-medium">No responses yet</h2>
+            <p className="mt-1 text-sm text-muted-foreground">
+              Share the form and answers will appear here, newest first.
+            </p>
+          </CardContent>
+        </Card>
       ) : (
         <>
           <div className="nf-panel overflow-hidden">
@@ -121,7 +125,7 @@ export function ResponseSummary({
                     return (
                       <tr
                         key={response.id}
-                        className="align-top transition-colors duration-200 hover:bg-muted/40"
+                        className="align-top transition-colors duration-(--fast) ease-(--ease) motion-reduce:transition-none hover:bg-muted/40"
                       >
                         <td className="whitespace-nowrap px-4 py-3 text-muted-foreground">
                           <LocalTime iso={response.submitted_at} />
@@ -144,20 +148,17 @@ export function ResponseSummary({
                           );
                         })}
                         <td className="px-4 py-3">
-                          <form action={deleteResponseAction}>
-                            <input type="hidden" name="form_id" value={formId} />
-                            <input type="hidden" name="response_id" value={response.id} />
-                            <Button
-                              type="submit"
-                              variant="ghost"
-                              size="icon"
-                              className="size-8"
-                              aria-label="Delete response"
-                              title="Delete response"
-                            >
-                              <Trash2 className="size-4" />
-                            </Button>
-                          </form>
+                          <HoldToConfirm
+                            label="Hold to delete response"
+                            icon={<Trash2 className="size-4" />}
+                            className="w-auto whitespace-nowrap"
+                            onConfirm={async () => {
+                              const data = new FormData();
+                              data.set("form_id", formId);
+                              data.set("response_id", response.id);
+                              await deleteResponseAction(data);
+                            }}
+                          />
                         </td>
                       </tr>
                     );

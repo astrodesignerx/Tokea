@@ -34,14 +34,15 @@ export default async function NewQrCodePage() {
   const placeholder = `${await getCardsOrigin()}${qrPath("xxxxxxxx")}`;
 
   return (
-    <div className="mx-auto max-w-5xl px-6 py-10">
+    <div className="mx-auto max-w-5xl px-4 py-10 sm:px-6">
       <Link
         href="/dashboard/qr"
-        className="inline-flex items-center gap-1.5 text-sm text-muted-foreground transition-colors hover:text-foreground"
+        className="inline-flex items-center gap-1.5 text-sm text-muted-foreground transition-colors duration-(--fast) ease-(--ease) motion-reduce:transition-none hover:text-foreground"
       >
         <ArrowLeft className="size-4" /> QR codes
       </Link>
-      <h1 className="mt-4 font-display text-3xl font-medium tracking-tight">
+      <p className="nf-eyebrow mt-6">Dynamic QR codes</p>
+      <h1 className="mt-3 font-display text-3xl font-medium tracking-tight">
         New QR code
       </h1>
 

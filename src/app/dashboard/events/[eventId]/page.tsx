@@ -5,12 +5,12 @@ import { prisma } from "@/lib/db";
 import { getEventCounts } from "@/lib/queries/events";
 import { publishEvent, unpublishEvent, deleteEvent } from "@/lib/actions/events";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { formatEventDateTime } from "@/lib/format";
 import { eventPricing, formatMoney } from "@/lib/money";
-import { Users, ScanLine, ExternalLink, Trash2 } from "lucide-react";
+import { ArrowLeft, Pencil, Users, ScanLine, ExternalLink, Trash2 } from "lucide-react";
 import { CopyButton } from "@/components/ui/copy-button";
 import { HoldToConfirm } from "@/components/ui/hold-to-confirm";
 
@@ -28,12 +28,17 @@ export default async function EventDetailPage({ params }: { params: Promise<Para
   const publicUrl = `${process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3012"}/e/${event.slug}`;
 
   return (
-    <div className="mx-auto max-w-5xl px-6 py-10 space-y-8">
-      <div className="flex items-start justify-between gap-4">
+    <div className="mx-auto max-w-6xl px-4 py-10 sm:px-6 space-y-8">
+      <Link href="/dashboard/events" className="inline-flex items-center gap-1.5 text-sm text-muted-foreground transition-colors duration-(--fast) ease-(--ease) hover:text-foreground motion-reduce:transition-none">
+        <ArrowLeft className="size-4" /> Events
+      </Link>
+      <div className="flex flex-wrap items-start justify-between gap-4">
         <div className="min-w-0 flex-1">
           <div className="flex items-center gap-2 mb-1">
-            <h1 className="text-3xl font-semibold tracking-tight truncate">{event.title}</h1>
-            <Badge variant={event.status === "published" ? "success" : "muted"}>{event.status}</Badge>
+            <h1 className="font-display text-3xl font-medium tracking-tight truncate">{event.title}</h1>
+            <Badge variant={event.status === "published" ? "success" : "secondary"}>
+              {event.status.charAt(0).toUpperCase() + event.status.slice(1)}
+            </Badge>
           </div>
           <p className="text-sm text-muted-foreground">{formatEventDateTime(event.starts_at, event.timezone)}</p>
           {pricing && (
@@ -52,8 +57,8 @@ export default async function EventDetailPage({ params }: { params: Promise<Para
           )}
         </div>
         <div className="flex items-center gap-2">
-          <Button asChild variant="outline" size="sm">
-            <Link href={`/dashboard/events/${event.id}/edit`}>Edit</Link>
+          <Button asChild variant="outline">
+            <Link href={`/dashboard/events/${event.id}/edit`}><Pencil className="size-4" /> Edit</Link>
           </Button>
           {event.status === "published" ? (
             <form
@@ -62,7 +67,7 @@ export default async function EventDetailPage({ params }: { params: Promise<Para
                 await unpublishEvent(event.id);
               }}
             >
-              <Button type="submit" variant="outline" size="sm">
+              <Button type="submit" variant="outline">
                 Unpublish
               </Button>
             </form>
@@ -73,7 +78,7 @@ export default async function EventDetailPage({ params }: { params: Promise<Para
                 await publishEvent(event.id);
               }}
             >
-              <Button type="submit" size="sm">
+              <Button type="submit">
                 Publish
               </Button>
             </form>
@@ -81,7 +86,7 @@ export default async function EventDetailPage({ params }: { params: Promise<Para
         </div>
       </div>
 
-      <div className="grid gap-4 sm:grid-cols-5">
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-5">
         <Stat label="Confirmed" value={counts.yes} />
         <Stat label="Declined" value={counts.no} />
         <Stat label="Maybe" value={counts.maybe} />
@@ -89,17 +94,15 @@ export default async function EventDetailPage({ params }: { params: Promise<Para
         <Stat label="Checked in" value={counts.checkedIn} />
       </div>
 
-      <div className="grid gap-4 sm:grid-cols-2">
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-base">Public page</CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-3">
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+        <section>
+          <h2 className="nf-eyebrow">Public page</h2>
+          <div className="nf-panel mt-4 p-6 space-y-3">
             <p className="text-sm text-muted-foreground">
               Share this link with anyone. They see the event page and (if they are a guest) an RSVP form.
             </p>
             <div className="flex items-center gap-2 rounded-md border bg-muted px-3 py-2">
-              <code className="text-xs flex-1 truncate">{publicUrl}</code>
+              <code className="min-w-0 flex-1 truncate text-xs">{publicUrl}</code>
               <CopyButton value={publicUrl} />
             </div>
             <Button asChild variant="outline" size="sm" className="w-full">
@@ -107,14 +110,12 @@ export default async function EventDetailPage({ params }: { params: Promise<Para
                 <ExternalLink className="size-4" /> Open public page
               </Link>
             </Button>
-          </CardContent>
-        </Card>
+          </div>
+        </section>
 
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-base">Quick actions</CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-2">
+        <section>
+          <h2 className="nf-eyebrow">Quick actions</h2>
+          <div className="nf-panel mt-4 p-6 space-y-2">
             <Button asChild variant="outline" className="w-full justify-start">
               <Link href={`/dashboard/events/${event.id}/guests`}>
                 <Users className="size-4" /> Manage guests
@@ -137,8 +138,8 @@ export default async function EventDetailPage({ params }: { params: Promise<Para
               />
               <p className="px-3 text-xs text-muted-foreground">{deleteWarning(counts.total)}</p>
             </div>
-          </CardContent>
-        </Card>
+          </div>
+        </section>
       </div>
     </div>
   );
@@ -157,10 +158,10 @@ function deleteWarning(guestCount: number): string {
 
 function Stat({ label, value }: { label: string; value: number }) {
   return (
-    <Card>
+    <Card className="nf-panel">
       <CardContent className="p-5">
-        <p className="text-sm text-muted-foreground">{label}</p>
-        <p className="text-3xl font-semibold mt-1">{value}</p>
+        <p className="font-display text-3xl font-medium tabular-nums">{value}</p>
+        <p className="mt-1 text-sm text-muted-foreground">{label}</p>
       </CardContent>
     </Card>
   );

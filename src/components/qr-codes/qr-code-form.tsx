@@ -4,6 +4,7 @@ import { startTransition, useActionState, useEffect, useMemo, useState } from "r
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Select } from "@/components/ui/select";
 import { Label } from "@/components/ui/label";
 import { BRAND_DARK, ensureScannableDark } from "@/lib/cards/qr-colour";
 import { normaliseLogoUrl } from "@/lib/qr-codes/links";
@@ -231,10 +232,9 @@ export function QrCodeForm({ action, initial, brands, encodedUrl, submitLabel }:
           >
             {brands.length > 0 && (
               <Field label="Start from a company brand">
-                <select
+                <Select
                   value=""
                   onChange={(e) => applyBrand(e.target.value)}
-                  className="h-9 w-full rounded-md border border-input bg-transparent px-3 text-sm shadow-xs outline-none transition-colors focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50"
                 >
                   <option value="">Choose a company...</option>
                   {brands.map((b) => (
@@ -242,7 +242,7 @@ export function QrCodeForm({ action, initial, brands, encodedUrl, submitLabel }:
                       {b.name}
                     </option>
                   ))}
-                </select>
+                </Select>
               </Field>
             )}
 
@@ -480,7 +480,7 @@ export function QrCodeForm({ action, initial, brands, encodedUrl, submitLabel }:
         {/* Stays in reach while scrolling through open sections. */}
         <div className="sticky bottom-0 z-10 -mx-3 mt-6 flex flex-wrap items-center gap-x-4 gap-y-2 border-t bg-background/85 px-3 py-3 backdrop-blur">
           <Button type="submit" disabled={pending}>
-            {pending ? "Saving..." : submitLabel}
+            {pending ? "Saving…" : submitLabel}
           </Button>
           {state.error && (
             <p key={state.errorAt} role="alert" className="qr-rise text-sm text-destructive">
@@ -552,7 +552,7 @@ function PasswordSection({
       </p>
       <div
         className={cn(
-          "transition-opacity duration-200",
+          "transition-opacity duration-(--fast) ease-(--ease) motion-reduce:transition-none",
           removePassword && "pointer-events-none opacity-40"
         )}
       >
@@ -648,7 +648,7 @@ function ColourInput({
   return (
     <div
       className={cn(
-        "flex items-center gap-2 transition-opacity duration-200",
+        "flex items-center gap-2 transition-opacity duration-(--fast) ease-(--ease) motion-reduce:transition-none",
         disabled && "opacity-40"
       )}
     >

@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { formatEventDateTime } from "@/lib/format";
-import { Plus } from "lucide-react";
+import { CalendarDays, Plus } from "lucide-react";
 
 export const metadata = { title: "Events" };
 
@@ -14,8 +14,8 @@ export default async function EventsPage() {
   const events = await listEventsByOwner(user.id);
 
   return (
-    <div className="mx-auto max-w-5xl px-6 py-10">
-      <div className="flex items-center justify-between">
+    <div className="mx-auto max-w-6xl px-4 py-10 sm:px-6">
+      <div className="flex flex-wrap items-center justify-between gap-4">
         <div>
           <p className="nf-eyebrow">Invitations and RSVPs</p>
           <h1 className="mt-3 font-display text-3xl font-medium tracking-tight">
@@ -35,13 +35,16 @@ export default async function EventsPage() {
       </div>
 
       {events.length === 0 ? (
-        <div className="mt-12 rounded-lg border border-dashed p-12 text-center">
-          <h2 className="font-display text-lg font-medium">No events yet</h2>
-          <p className="text-sm text-muted-foreground mt-1">Create one and you can invite guests in minutes.</p>
-          <Button asChild className="mt-6">
-            <Link href="/dashboard/events/new">Create your first event</Link>
-          </Button>
-        </div>
+        <Card className="mt-12 border-dashed bg-transparent">
+          <CardContent className="p-12 text-center">
+            <CalendarDays className="mx-auto size-8 text-brand" />
+            <h2 className="mt-4 font-display text-lg font-medium">No events yet</h2>
+            <p className="text-sm text-muted-foreground mt-1">Create one and you can invite guests in minutes.</p>
+            <Button asChild className="mt-6">
+              <Link href="/dashboard/events/new">Create your first event</Link>
+            </Button>
+          </CardContent>
+        </Card>
       ) : (
         <div className="mt-8 grid gap-4 sm:grid-cols-2">
           {events.map((event) => (
@@ -61,8 +64,8 @@ export default async function EventsPage() {
                         {formatEventDateTime(event.starts_at, "UTC")}
                       </p>
                     </div>
-                    <Badge variant={event.status === "published" ? "success" : "muted"}>
-                      {event.status}
+                    <Badge variant={event.status === "published" ? "success" : "secondary"}>
+                      {event.status.charAt(0).toUpperCase() + event.status.slice(1)}
                     </Badge>
                   </div>
                 </CardContent>

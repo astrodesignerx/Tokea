@@ -77,15 +77,16 @@ export default async function FormPage({ params, searchParams }: PageProps) {
   ] as const;
 
   return (
-    <div className="mx-auto max-w-6xl px-6 py-10">
+    <div className="mx-auto max-w-6xl px-4 py-10 sm:px-6">
       <Link
         href="/dashboard/forms"
-        className="inline-flex items-center gap-1.5 text-sm text-muted-foreground transition-colors hover:text-foreground"
+        className="inline-flex items-center gap-1.5 text-sm text-muted-foreground transition-colors duration-(--fast) ease-(--ease) motion-reduce:transition-none hover:text-foreground"
       >
         <ArrowLeft className="size-4" /> Forms
       </Link>
 
-      <div className="mt-4 flex flex-wrap items-center gap-3">
+      <p className="nf-eyebrow mt-6">Forms</p>
+      <div className="mt-3 flex flex-wrap items-center gap-3">
         <h1 className="font-display text-3xl font-medium tracking-tight">{form.title}</h1>
         <Badge variant={form.status === "open" ? "success" : "secondary"} className="whitespace-nowrap">
           {statusBadge(form)}
@@ -101,9 +102,9 @@ export default async function FormPage({ params, searchParams }: PageProps) {
               href={`/dashboard/forms/${form.id}?tab=${item.key}`}
               aria-current={active ? "page" : undefined}
               className={cn(
-                "relative shrink-0 px-3 py-2 text-sm transition-colors duration-200",
+                "relative shrink-0 px-3 py-2 text-sm transition-colors duration-(--fast) ease-(--ease) motion-reduce:transition-none",
                 "after:absolute after:inset-x-3 after:-bottom-px after:h-px after:origin-left after:scale-x-0 after:bg-brand",
-                "after:transition-transform after:duration-200 after:ease-[cubic-bezier(0,0,0.2,1)]",
+                "after:transition-transform after:duration-(--fast) after:ease-(--ease) motion-reduce:after:transition-none",
                 active
                   ? "text-foreground after:scale-x-100"
                   : "text-muted-foreground hover:text-foreground",

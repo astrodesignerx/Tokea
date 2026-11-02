@@ -1,5 +1,6 @@
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Select } from "@/components/ui/select";
 import { Label } from "@/components/ui/label";
 import {
   CARD_TEMPLATE_OPTIONS,
@@ -84,7 +85,7 @@ export function CardForm({
           {CARD_TEMPLATE_OPTIONS.map((t) => (
             <label
               key={t.value}
-              className="flex cursor-pointer items-start gap-3 rounded-lg border p-3 transition-colors has-checked:border-foreground has-checked:bg-accent"
+              className="flex cursor-pointer items-start gap-3 rounded-lg border p-3 transition-colors duration-(--fast) ease-(--ease) motion-reduce:transition-none has-checked:border-foreground has-checked:bg-accent"
             >
               <input
                 type="radio"
@@ -161,14 +162,13 @@ export function CardForm({
             label="Status"
             hint="Archiving retires the card without freeing its link, so an old card explains itself rather than breaking."
           >
-            <select
+            <Select
               name="status"
               defaultValue={initial.status}
-              className="h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-xs outline-none focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50"
             >
               <option value="active">Active</option>
               <option value="archived">Archived</option>
-            </select>
+            </Select>
           </Field>
         </>
       )}

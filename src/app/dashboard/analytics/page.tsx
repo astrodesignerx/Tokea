@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { ExternalLink } from "lucide-react";
+import { Pencil } from "lucide-react";
 import { requireUser } from "@/lib/require-user";
 import { getAnalytics } from "@/lib/cards/analytics";
 import { getCardsOrigin, shortPath } from "@/lib/cards/links";
@@ -32,7 +32,7 @@ export default async function AnalyticsPage() {
   ];
 
   return (
-    <div className="mx-auto max-w-6xl px-6 py-10">
+    <div className="mx-auto max-w-6xl px-4 py-10 sm:px-6">
       <p className="nf-eyebrow">Activity</p>
       <h1 className="mt-3 font-display text-3xl font-medium tracking-tight">
         Analytics
@@ -119,10 +119,10 @@ export default async function AnalyticsPage() {
                           <CopyButton value={`${origin}${shortPath(row.shortCode)}`} />
                           <Link
                             href={`/dashboard/companies/${row.companySlug}/cards/${row.cardId}`}
-                            className="rounded-md p-2 text-muted-foreground transition-colors hover:text-foreground"
+                            className="rounded-md p-2 text-muted-foreground transition-colors duration-(--fast) ease-(--ease) motion-reduce:transition-none hover:text-foreground"
                             aria-label={`Edit ${row.name}`}
                           >
-                            <ExternalLink className="size-4" />
+                            <Pencil className="size-4" />
                           </Link>
                         </div>
                       </td>
@@ -157,8 +157,8 @@ export default async function AnalyticsPage() {
                       <td className="px-5 py-3">
                         <span className="font-medium">{row.name}</span>
                         {row.status !== "active" && (
-                          <Badge variant="secondary" className="ml-2 capitalize">
-                            {row.status}
+                          <Badge variant="secondary" className="ml-2">
+                            {row.status.charAt(0).toUpperCase() + row.status.slice(1)}
                           </Badge>
                         )}
                       </td>
@@ -179,10 +179,10 @@ export default async function AnalyticsPage() {
                           <CopyButton value={`${origin}/q/${row.shortCode}`} />
                           <Link
                             href={`/dashboard/qr/${row.qrCodeId}`}
-                            className="rounded-md p-2 text-muted-foreground transition-colors hover:text-foreground"
+                            className="rounded-md p-2 text-muted-foreground transition-colors duration-(--fast) ease-(--ease) motion-reduce:transition-none hover:text-foreground"
                             aria-label={`Edit ${row.name}`}
                           >
-                            <ExternalLink className="size-4" />
+                            <Pencil className="size-4" />
                           </Link>
                         </div>
                       </td>

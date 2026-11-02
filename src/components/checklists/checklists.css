@@ -32,7 +32,7 @@
 .cl-grip:active { cursor: grabbing; }
 .cl-tick { position: relative; flex-shrink: 0; display: grid; place-items: center; width: 24px; height: 24px; margin-top: 1px; border: 1px solid hsl(var(--border)); border-radius: 50%; overflow: hidden; }
 .cl-tick-fill { position: absolute; inset: 0; border-radius: inherit; background: hsl(var(--brand)); transform: scale(0); transition: transform var(--cl-fast) var(--cl-ease); }
-.cl-check { position: relative; color: white; opacity: 0; transform: scale(0); transition: transform var(--cl-fast) var(--cl-ease), opacity var(--cl-fast) var(--cl-ease); }
+.cl-check { position: relative; color: hsl(var(--brand-foreground)); opacity: 0; transform: scale(0); transition: transform var(--cl-fast) var(--cl-ease), opacity var(--cl-fast) var(--cl-ease); }
 [data-done="true"] .cl-tick-fill, [data-done="true"] .cl-check { transform: scale(1); }
 [data-done="true"] .cl-check { opacity: 1; }
 .cl-title { font-size: 14px; line-height: 1.6; overflow-wrap: anywhere; transition: opacity var(--cl-duration) var(--cl-ease); }
@@ -44,6 +44,9 @@
 .cl-due-overdue { color: #a51c30; background: #fff0f2; }
 .cl-due-today { color: #854d0e; background: #fef3c7; }
 .cl-due-soon { color: #176248; background: #e8f7f0; }
+.dark .cl-due-overdue { color: #fda4af; background: #4c0519; }
+.dark .cl-due-today { color: #fcd34d; background: #422006; }
+.dark .cl-due-soon { color: #86efac; background: #052e16; }
 .cl-due-later { color: hsl(var(--muted-foreground)); background: hsl(var(--muted)); }
 .cl-avatar { display: inline-grid; place-items: center; width: 22px; height: 22px; border-radius: 50%; background: hsl(var(--muted)); font-size: 9px; font-weight: 600; }
 .cl-icon-button { display: grid; place-items: center; width: 32px; height: 32px; border-radius: 6px; }

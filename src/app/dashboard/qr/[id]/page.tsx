@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { ArrowLeft, ExternalLink, Lock, RotateCcw, X } from "lucide-react";
+import { Archive, ArrowLeft, ExternalLink, Lock, Pause, RotateCcw, X } from "lucide-react";
 import { requireUser } from "@/lib/require-user";
 import { prisma } from "@/lib/db";
 import {
@@ -21,6 +21,7 @@ import { ScanChart } from "@/components/dashboard/scan-chart";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { CopyButton } from "@/components/ui/copy-button";
+import { HoldToConfirm } from "@/components/ui/hold-to-confirm";
 
 type PageProps = { params: Promise<{ id: string }> };
 
@@ -64,19 +65,20 @@ export default async function EditQrCodePage({ params }: PageProps) {
   const expired = isExpired(code);
 
   return (
-    <div className="mx-auto max-w-5xl px-6 py-10">
+    <div className="mx-auto max-w-6xl px-4 py-10 sm:px-6">
       <Link
         href="/dashboard/qr"
-        className="inline-flex items-center gap-1.5 text-sm text-muted-foreground transition-colors hover:text-foreground"
+        className="inline-flex items-center gap-1.5 text-sm text-muted-foreground transition-colors duration-(--fast) ease-(--ease) motion-reduce:transition-none hover:text-foreground"
       >
         <ArrowLeft className="size-4" /> QR codes
       </Link>
 
-      <div className="mt-4 flex flex-wrap items-center gap-3">
+      <p className="nf-eyebrow mt-6">Dynamic QR codes</p>
+      <div className="mt-3 flex flex-wrap items-center gap-3">
         <h1 className="font-display text-3xl font-medium tracking-tight">{code.name}</h1>
         {code.status !== "active" && (
-          <Badge variant="secondary" className="capitalize">
-            {code.status}
+          <Badge variant="secondary">
+            {code.status.charAt(0).toUpperCase() + code.status.slice(1)}
           </Badge>
         )}
         {expired && <Badge variant="secondary">Expired</Badge>}
@@ -151,7 +153,7 @@ export default async function EditQrCodePage({ params }: PageProps) {
           )}
         </p>
         <div className="mt-4 flex flex-wrap gap-2">
-          {code.status !== "active" && <StatusButton id={code.id} status="active" label="Resume" />}
+          {code.status !== "active" && <StatusButton id={code.id} status="active" label={code.status === "archived" ? "Restore" : "Resume"} />}
           {code.status === "active" && <StatusButton id={code.id} status="paused" label="Pause" />}
           {code.status !== "archived" && (
             <StatusButton id={code.id} status="archived" label="Archive" />
@@ -235,13 +237,18 @@ export default async function EditQrCodePage({ params }: PageProps) {
                     From <LocalTime iso={change.run_at.toISOString()} />
                   </p>
                 </div>
-                <form action={cancelScheduledQrChangeAction}>
-                  <input type="hidden" name="qr_code_id" value={code.id} />
-                  <input type="hidden" name="change_id" value={change.id} />
-                  <Button type="submit" variant="ghost" size="sm">
-                    <X className="size-4" /> Cancel
-                  </Button>
-                </form>
+                <HoldToConfirm
+                  label="Hold to cancel change"
+                  icon={<X className="size-4" />}
+                  className="w-auto shrink-0"
+                  onConfirm={async () => {
+                    "use server";
+                    const data = new FormData();
+                    data.set("qr_code_id", code.id);
+                    data.set("change_id", change.id);
+                    await cancelScheduledQrChangeAction(data);
+                  }}
+                />
               </li>
             ))}
           </ul>
@@ -269,7 +276,7 @@ export default async function EditQrCodePage({ params }: PageProps) {
                   <form action={restoreQrLinkAction}>
                     <input type="hidden" name="qr_code_id" value={code.id} />
                     <input type="hidden" name="change_id" value={change.id} />
-                    <Button type="submit" variant="ghost" size="sm">
+                    <Button type="submit" variant="outline" size="sm">
                       <RotateCcw className="size-4" /> Restore
                     </Button>
                   </form>
@@ -288,7 +295,8 @@ function StatusButton({ id, status, label }: { id: string; status: string; label
     <form action={setQrStatusAction}>
       <input type="hidden" name="qr_code_id" value={id} />
       <input type="hidden" name="status" value={status} />
-      <Button type="submit" variant={status === "active" ? "default" : "outline"} size="sm">
+      <Button type="submit" variant="outline" size="sm">
+        {status === "archived" ? <Archive className="size-4" /> : status === "paused" ? <Pause className="size-4" /> : <RotateCcw className="size-4" />}
         {label}
       </Button>
     </form>

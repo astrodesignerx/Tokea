@@ -1,3 +1,4 @@
+import { ListChecks, Plus } from "lucide-react";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { requireUser } from "@/lib/require-user";
@@ -15,7 +16,7 @@ export default async function MyTasksPage({ searchParams }: { searchParams: Prom
   return <div className="cl-workspace">
     <section className="cl-main qr-rise">
       <p className="nf-eyebrow">Across your lists</p>
-      <h1 className="mt-2 font-display text-2xl font-medium">My tasks</h1>
+      <h1 className="mt-3 font-display text-3xl font-medium tracking-tight">My tasks</h1>
       <p className="mb-6 mt-2 text-sm text-muted-foreground">{tasks.length} open {tasks.length === 1 ? "task" : "tasks"}, ordered by due date.</p>
       <form id="task-reminders" className={`nf-panel relative mb-6 scroll-mt-24 p-4${showReminders ? " qr-fade" : ""}`} action={async (form) => {
         "use server";
@@ -43,10 +44,11 @@ export default async function MyTasksPage({ searchParams }: { searchParams: Prom
       {tasks.length ? <div className="space-y-3">{tasks.map((item) => <div key={item.id} className="nf-panel">
         <Link className="block px-4 pt-3 text-xs font-medium text-brand hover:underline" href={`/dashboard/checklists/${item.checklist_id}`}>{item.list_title}</Link>
         <TaskList checklistId={item.checklist_id} items={[item]} members={[]} userId={user.id} compact />
-      </div>)}</div> : <Card><CardContent className="space-y-4 pt-6">
-        <h2 className="font-display text-lg">Nothing waiting for you</h2>
-        <p className="text-sm text-muted-foreground">Tasks assigned to you and unassigned tasks in your personal lists appear here.</p>
-        <Button asChild size="sm"><Link href="/dashboard/checklists?new=1">New list</Link></Button>
+      </div>)}</div> : <Card className="border-dashed bg-transparent"><CardContent className="p-12 text-center">
+        <ListChecks className="mx-auto size-8 text-brand" />
+        <h2 className="mt-4 font-display text-lg font-medium">Nothing waiting for you</h2>
+        <p className="mt-1 text-sm text-muted-foreground">Tasks assigned to you and unassigned tasks in your personal lists appear here.</p>
+        <Button asChild className="mt-6"><Link href="/dashboard/checklists?new=1"><Plus className="size-4" /> Create your first list</Link></Button>
       </CardContent></Card>}
     </section>
     <aside className="cl-people space-y-3 text-sm text-muted-foreground">

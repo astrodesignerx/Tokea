@@ -114,7 +114,7 @@ export default async function DashboardPage() {
   ];
 
   return (
-    <div className="mx-auto max-w-6xl px-6 py-10">
+    <div className="mx-auto max-w-6xl px-4 py-10 sm:px-6">
       <p className="nf-eyebrow">{PRODUCT}</p>
       <h1 className="mt-3 font-display text-3xl font-medium tracking-tight">
         Your services
@@ -165,7 +165,7 @@ export default async function DashboardPage() {
           Named rather than hidden. An empty-looking grid would suggest the
           product is finished; it is not.
         */}
-        <div className="nf-panel flex flex-col justify-center border-dashed bg-transparent p-6">
+        <div className="nf-panel flex flex-col justify-center border-dashed! bg-transparent! p-6">
           <h2 className="font-display text-lg font-medium text-muted-foreground">
             More coming
           </h2>

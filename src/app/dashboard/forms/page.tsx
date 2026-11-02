@@ -40,7 +40,7 @@ export default async function FormsPage({ searchParams }: PageProps) {
   ]);
 
   return (
-    <div className="mx-auto max-w-6xl px-6 py-10">
+    <div className="mx-auto max-w-6xl px-4 py-10 sm:px-6">
       <div className="flex flex-wrap items-center justify-between gap-4">
         <div>
           <p className="nf-eyebrow">Forms</p>
@@ -90,7 +90,7 @@ export default async function FormsPage({ searchParams }: PageProps) {
                   return (
                     <tr
                       key={form.id}
-                      className="align-middle transition-colors duration-200 hover:bg-muted/40"
+                      className="align-middle transition-colors duration-(--fast) ease-(--ease) motion-reduce:transition-none hover:bg-muted/40"
                     >
                       <td className="px-5 py-3">
                         <Link
@@ -149,7 +149,7 @@ export default async function FormsPage({ searchParams }: PageProps) {
         <p className="mt-4 text-sm">
           <Link
             href={showArchived ? "/dashboard/forms" : "/dashboard/forms?archived=1"}
-            className="text-muted-foreground underline-offset-4 transition-colors hover:text-foreground hover:underline"
+            className="text-muted-foreground underline-offset-4 transition-colors duration-(--fast) ease-(--ease) motion-reduce:transition-none hover:text-foreground hover:underline"
           >
             {showArchived ? "Hide archived" : `Show ${archivedCount} archived`}
           </Link>

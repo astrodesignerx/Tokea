@@ -104,7 +104,7 @@ export function CheckinClient({ eventId, initial }: Props) {
 
   return (
     <div className="grid gap-4 md:grid-cols-2">
-      <Card>
+      <Card className="nf-panel">
         <CardContent className="p-4 space-y-3">
           <div className="aspect-square w-full overflow-hidden rounded-md bg-black">
             <Scanner
@@ -128,9 +128,9 @@ export function CheckinClient({ eventId, initial }: Props) {
           <CountTile label="Confirmed" value={counts.yes} />
           <CountTile label="Total" value={counts.total} />
         </div>
-        <Card>
+        <Card className="nf-panel">
           <CardContent className="p-3">
-            <p className="text-xs uppercase tracking-wide text-muted-foreground px-1 pb-2">Recent</p>
+            <h2 className="nf-eyebrow px-1 pb-2">Recent</h2>
             {feed.length === 0 ? (
               <p className="text-sm text-muted-foreground text-center py-8">No scans yet.</p>
             ) : (
@@ -139,17 +139,17 @@ export function CheckinClient({ eventId, initial }: Props) {
                   <li
                     key={item.id}
                     className={`flex items-center gap-2 rounded-md px-3 py-2 text-sm ${
-                      item.result.kind === "ok" ? "bg-green-50" : "bg-red-50"
+                      item.result.kind === "ok" ? "bg-green-50 dark:bg-green-950/60" : "bg-red-50 dark:bg-red-950/60"
                     }`}
                   >
                     {item.result.kind === "ok" ? (
                       item.result.firstTime ? (
-                        <Check className="size-4 text-green-700" />
+                        <Check className="size-4 text-green-700 dark:text-green-400" />
                       ) : (
-                        <AlertCircle className="size-4 text-amber-700" />
+                        <AlertCircle className="size-4 text-amber-700 dark:text-amber-400" />
                       )
                     ) : (
-                      <X className="size-4 text-red-700" />
+                      <X className="size-4 text-red-700 dark:text-red-400" />
                     )}
                     <div className="flex-1 min-w-0">
                       <div className="font-medium truncate">
@@ -240,11 +240,11 @@ function LastScan({ item }: { item: FeedItem }) {
 function CountTile({ label, value, highlight }: { label: string; value: number; highlight?: boolean }) {
   return (
     <div
-      className={`rounded-md p-3 ${
-        highlight ? "bg-green-100 text-green-900" : "bg-muted text-foreground"
+      className={`nf-panel p-3 ${
+        highlight ? "border-brand/30 text-brand" : "text-foreground"
       }`}
     >
-      <div className="text-2xl font-semibold">{value}</div>
+      <div className="font-display text-3xl font-medium tabular-nums">{value}</div>
       <div className="text-xs">{label}</div>
     </div>
   );
