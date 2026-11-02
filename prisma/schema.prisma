@@ -23,6 +23,11 @@ model User {
   // the organiser connects payout details; payments then go unsplit.
   paystack_subaccount String?
 
+  // Morning email of checklist tasks due today or overdue. On by default.
+  task_reminders        Boolean   @default(true)
+  // Nairobi date of the last reminder email, so a re-run the same day sends nothing.
+  task_reminder_sent_on DateTime? @db.Date
+
   accounts                 Account[]
   sessions                 Session[]
   events                   Event[]

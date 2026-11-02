@@ -7,6 +7,13 @@
       "runtimeArgs": ["dev"],
       "port": 3012,
       "autoPort": false
+    },
+    {
+      "name": "nikoform-start",
+      "runtimeExecutable": "pnpm",
+      "runtimeArgs": ["exec", "next", "start", "-p", "3012"],
+      "port": 3012,
+      "autoPort": false
     }
   ]
 }
