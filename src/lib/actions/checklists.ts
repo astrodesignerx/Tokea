@@ -20,6 +20,15 @@ const TASK_ACTIONS = new Set<ChecklistAction>(["add", "edit", "tick", "untick", 
 const value = (form: FormData, key: string) => String(form.get(key) ?? "").trim();
 const failed = (error: string): ChecklistState => ({ error, errorAt: Date.now() });
 
+export async function setTaskRemindersAction(form: FormData): Promise<ChecklistState> {
+  const user = await requireUser();
+  const enabled = value(form, "task_reminders");
+  if (enabled !== "true" && enabled !== "false") return failed("Choose whether to receive morning emails.");
+  await prisma.user.update({ where: { id: user.id }, data: { task_reminders: enabled === "true" } });
+  refresh();
+  return { error: null, savedAt: Date.now() };
+}
+
 function title(form: FormData, key: string, max: number) {
   const text = value(form, key);
   if (!text || text.length > max) throw new ChecklistError(`Use 1 to ${max} characters for the title.`);

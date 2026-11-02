@@ -45,7 +45,7 @@ export async function getChecklist(id: string, userId: string) {
   }, { isolationLevel: "RepeatableRead" });
 }
 
-function myTasksWhere(userId: string): Prisma.ChecklistItemWhereInput {
+export function myTasksWhere(userId: string): Prisma.ChecklistItemWhereInput {
   return {
     kind: "task", done_at: null,
     checklist: { archived_at: null, members: { some: { user_id: userId } } },

@@ -1,8 +1,47 @@
+import type { ReminderTask } from "./checklists/reminders";
+
 export type EmailTemplate = {
   subject: string;
   html: string;
   text: string;
 };
+
+export function taskReminderEmail(input: {
+  name: string | null;
+  overdue: ReminderTask[];
+  today: ReminderTask[];
+  more: number;
+  myTasksUrl: string;
+  settingsUrl: string;
+}): EmailTemplate {
+  const todayCount = input.today.length;
+  const subject = [
+    input.overdue.length ? `${input.overdue.length} overdue` : "",
+    todayCount ? `${todayCount}${input.overdue.length ? "" : todayCount === 1 ? " task" : " tasks"} due today` : "",
+  ].filter(Boolean).join(", ");
+  const detail = (task: ReminderTask, overdue: boolean) => {
+    const day = task.due_on instanceof Date ? task.due_on.toISOString().slice(0, 10) : task.due_on?.slice(0, 10);
+    return `${task.list_title}${overdue && day ? ` (due ${day})` : ""}`;
+  };
+  const body = `
+    <p>Hi ${esc(input.name || "there")},</p>
+    ${input.overdue.length ? `<h2 style="font-size:16px">Overdue</h2>${input.overdue.map((task) => row(task.title, detail(task, true))).join("")}` : ""}
+    ${todayCount ? `<h2 style="font-size:16px">Due today</h2>${input.today.map((task) => row(task.title, detail(task, false))).join("")}` : ""}
+    ${input.more > 0 ? `<p>And ${input.more} more ${input.more === 1 ? "task" : "tasks"} in My tasks.</p>` : ""}
+    <div style="margin:24px 0">${button(input.myTasksUrl, "View My tasks")}</div>
+    <p style="font-size:13px"><a href="${esc(input.settingsUrl)}" style="color:#666">Turn these emails off</a></p>
+  `;
+  const { html } = layout({ heading: subject, body });
+  // Plain text keeps line breaks and links that the shared HTML stripper cannot preserve.
+  const line = (task: ReminderTask, overdue: boolean) => `${task.title}: ${detail(task, overdue)}`;
+  const text = [subject, `Hi ${input.name || "there"},`,
+    ...(input.overdue.length ? ["Overdue", ...input.overdue.map((task) => line(task, true))] : []),
+    ...(todayCount ? ["Due today", ...input.today.map((task) => line(task, false))] : []),
+    ...(input.more > 0 ? [`And ${input.more} more ${input.more === 1 ? "task" : "tasks"} in My tasks.`] : []),
+    `View My tasks: ${input.myTasksUrl}`, `Turn these emails off: ${input.settingsUrl}`, "Sent by NikoForm",
+  ].join("\n\n");
+  return { subject, html, text };
+}
 
 export function checklistInviteEmail(input: { inviterName: string; listTitle: string; joinUrl: string }): EmailTemplate {
   const body = `<p>${esc(input.inviterName)} invited you to <strong>${esc(input.listTitle)}</strong>.</p>
