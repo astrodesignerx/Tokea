@@ -246,7 +246,7 @@ function Chart({ question }: { question: SummaryQuestion }) {
               />
             </span>
             <span className="w-24 shrink-0 text-right text-xs tabular-nums text-muted-foreground">
-              {question.type === "todo" ? row.count + " picks, " + row.quantity + " total quantity" : row.count + " (" + Math.round(row.share * 100) + "%)"}
+              {question.type === "todo" ? row.count + (row.count === 1 ? " pick, " : " picks, ") + row.quantity + " total quantity" : row.count + " (" + Math.round(row.share * 100) + "%)"}
             </span>
           </div>
         ))}

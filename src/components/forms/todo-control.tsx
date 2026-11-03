@@ -20,7 +20,7 @@ export function TodoControl({ field, answer, onChange }: {
     <fieldset aria-describedby={field.help ? "f-" + field.id + "-help" : undefined}>
       <legend className="text-sm font-medium">{field.label}{field.required ? " (required)" : ""}</legend>
       {field.help && <p id={"f-" + field.id + "-help"} className="mt-1 text-xs text-muted-foreground">{field.help}</p>}
-      <div className="-mx-4 mt-2 grid grid-cols-[repeat(auto-fill,minmax(160px,1fr))] gap-2 sm:mx-0">
+      <div className="-mx-4 mt-2 grid grid-cols-[repeat(auto-fill,minmax(140px,1fr))] gap-2 sm:mx-0">
         {(field.services ?? []).map((service) => {
           const count = answer[service.id] ?? 0;
           return (
@@ -28,8 +28,8 @@ export function TodoControl({ field, answer, onChange }: {
               <input type="hidden" name={field.id + "." + service.id} value={count} />
               <button type="button" aria-pressed={count > 0} onClick={() => quantity(service.id, count > 0 ? 0 : 1)}
                 className={cn("relative flex w-full flex-col overflow-hidden rounded-panel border bg-background text-left transition-[transform,box-shadow] duration-(--dur-2) ease-(--ease-out) active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 motion-reduce:transform-none motion-reduce:transition-none", count > 0 && "ring-2 ring-primary")}>
-                {service.image_url ? <Image src={service.image_url} alt="" width={320} height={320} unoptimized className="aspect-square w-full object-cover" />
-                  : <span aria-hidden="true" className="flex aspect-square w-full items-center justify-center bg-muted text-3xl text-muted-foreground">{service.name.charAt(0)}</span>}
+                {service.image_url ? <Image src={service.image_url} alt="" width={320} height={240} unoptimized className="aspect-[4/3] w-full object-cover" />
+                  : <span aria-hidden="true" className="flex aspect-[4/3] w-full items-center justify-center bg-muted text-2xl text-muted-foreground">{service.name.charAt(0)}</span>}
                 {count > 0 && <Badge className="absolute right-2 top-2 bg-primary text-primary-foreground"><Check aria-hidden="true" className="size-4" /><span className="sr-only">Picked</span></Badge>}
                 <span className="flex w-full flex-1 flex-col gap-1 p-3">
                   <span className="break-words text-sm font-medium">{service.name}</span>
