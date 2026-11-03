@@ -64,7 +64,7 @@
 - Motion classes `qr-rise` and `qr-fade` at the end of `src/app/globals.css`.
 
 ## Open questions
-- Quote builder (new `quote` field type in Forms: client picks services with optional quantity and KES prices, owner turns a response into a Checklist). Approved 2026-11-03. Build not started: on 2026-11-03 OpenCode Go returned "Unexpected server error" for every model and the Zen key had expired (401). Brief: `.claude/handoffs/20261103-quote-builder-brief.md`. Branch `ds/quote-builder` from `ds/redesign-r1` at `4fd7ef7`, builder deepseek, review glmflash. Deposits via Paystack are out of scope for now.
+- To-do (new `todo` field type in Forms: client ticks services with optional quantity and KES prices, owner turns a response into a Checklist). Approved 2026-11-03; name "To-do" is provisional (owner: "for now"). Brief: `.claude/handoffs/20261103-todo-brief.md`. Branch `ds/todo` from `ds/redesign-r1` at `4fd7ef7`. Builder: Codex (gpt-6.1-sol) via T3 Code, because OpenCode Go returned server errors and the Zen key expired on 2026-11-03. Deposits via Paystack are out of scope for now.
 - After each deploy, check production: `https://nikoform.co.ke/q/zzzzzzzz` should redirect (307) to `/q`; a 500 means production uses a different database that still needs `prisma migrate deploy`.
 - Owner signs in and checks the dashboard pages and the unlock form in the browser.
 - Before printing client codes: set `CARDS_URL` in Vercel if a custom domain is planned, since QR codes encode the origin and a domain change breaks printed codes.
