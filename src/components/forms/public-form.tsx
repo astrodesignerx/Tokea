@@ -3,7 +3,10 @@
 import { startTransition, useActionState, useState } from "react";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import type { FormField } from "@/lib/forms/fields";
+import { todoPicks, todoTotal, type FormField } from "@/lib/forms/fields";
+import { TodoControl } from "@/components/forms/todo-control";
+import { Button } from "@/components/ui/button";
+import { formatMoney } from "@/lib/money";
 import type { SubmitState } from "@/lib/actions/form-submit";
 import { cn } from "@/lib/utils";
 
@@ -32,6 +35,11 @@ const HINT = "placeholder:text-muted-foreground/50";
 export function PublicForm({ action, versionId, fields, brand }: Props) {
   const [state, formAction, pending] = useActionState(action, { error: null });
   const [startedAt] = useState(() => Date.now());
+  const [todoAnswers, setTodoAnswers] = useState<Record<string, Record<string, number>>>({});
+  const todoFields = fields.filter((field) => field.type === "todo");
+  const pickedCount = todoFields.reduce((count, field) => count + todoPicks(field, todoAnswers[field.id]).length, 0);
+  const totals = todoFields.map((field) => todoTotal(field, todoAnswers[field.id])).filter((total): total is number => total !== null);
+  const estimated = totals.reduce((total, amount) => total + amount, 0);
 
   function onSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -40,7 +48,7 @@ export function PublicForm({ action, versionId, fields, brand }: Props) {
   }
 
   return (
-    <form onSubmit={onSubmit} className="space-y-6">
+    <form onSubmit={onSubmit} className={cn("space-y-6", todoFields.length > 0 && "pb-28")}>
       <input type="hidden" name="version_id" value={versionId} />
       <input type="hidden" name="started_at" value={startedAt} />
 
@@ -56,7 +64,9 @@ export function PublicForm({ action, versionId, fields, brand }: Props) {
       </div>
 
       {fields.map((field) => (
-        <FieldBlock key={field.id} field={field} brand={brand} />
+        field.type === "todo"
+          ? <TodoControl key={field.id} field={field} answer={todoAnswers[field.id] ?? {}} onChange={(answer) => setTodoAnswers((current) => ({ ...current, [field.id]: answer }))} />
+          : <FieldBlock key={field.id} field={field} brand={brand} />
       ))}
 
       {state.error && (
@@ -81,6 +91,12 @@ export function PublicForm({ action, versionId, fields, brand }: Props) {
       >
         {pending ? "Sending…" : "Send"}
       </button>
+      {todoFields.length > 0 && <div aria-hidden={pickedCount === 0} inert={pickedCount === 0} className={cn("fixed inset-x-0 bottom-0 z-30 border-t bg-background p-4 pb-[max(1rem,env(safe-area-inset-bottom))] transition-[transform,opacity] duration-(--dur-3) ease-(--ease-out) motion-reduce:transition-none", pickedCount > 0 ? "translate-y-0 opacity-100" : "pointer-events-none translate-y-full opacity-0")}>
+        <div className="mx-auto flex max-w-xl items-center justify-between gap-3">
+          <p aria-live="polite" className="nums text-sm">{pickedCount} {pickedCount === 1 ? "service" : "services"}{totals.length > 0 ? " | Estimated " + formatMoney(estimated) : ""}</p>
+          <Button type="submit" disabled={pending} className="min-h-11" style={brand ? { backgroundColor: brand.primary, color: brand.ink } : undefined}>{pending ? "Sending..." : "Send"}</Button>
+        </div>
+      </div>}
     </form>
   );
 }

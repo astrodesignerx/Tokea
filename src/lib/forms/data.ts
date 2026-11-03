@@ -5,7 +5,7 @@ import type {
   Organisation,
 } from "@/generated/prisma/client";
 import { prisma } from "@/lib/db";
-import { parseFields, type FormField } from "@/lib/forms/fields";
+import { parseFields, todoPicks, type FormField } from "@/lib/forms/fields";
 
 /**
  * Read side of forms. Every owner-facing query takes the owner id, so one
@@ -121,12 +121,12 @@ export async function listResponses(formId: string, page = 1) {
   };
 }
 
-export type SummaryRow = { label: string; count: number; share: number };
+export type SummaryRow = { label: string; count: number; share: number; quantity?: number };
 
 export type SummaryQuestion = {
   id: string;
   label: string;
-  type: "single_choice" | "dropdown" | "yes_no" | "rating";
+  type: "single_choice" | "dropdown" | "yes_no" | "rating" | "todo";
   /** How many responses answered this question. */
   answered: number;
   /** Ratings only. */
@@ -135,6 +135,7 @@ export type SummaryQuestion = {
 };
 
 const SUMMARY_TYPES: SummaryQuestion["type"][] = [
+  "todo",
   "single_choice",
   "dropdown",
   "yes_no",
@@ -181,9 +182,38 @@ export async function getResponseSummary(
 
   const questions: SummaryQuestion[] = [];
 
-  for (const field of parsedNewest.fields) {
+  const summaryFields = [...parsedNewest.fields];
+  for (const fields of fieldsByVersion.values()) {
+    for (const field of fields) {
+      if (field.type === "todo" && !summaryFields.some((item) => item.id === field.id)) summaryFields.push(field);
+    }
+  }
+  for (const field of summaryFields) {
     if (!SUMMARY_TYPES.includes(field.type as SummaryQuestion["type"])) continue;
     const type = field.type as SummaryQuestion["type"];
+
+    if (type === "todo") {
+      const counts = new Map<string, { label: string; count: number; quantity: number }>();
+      for (const service of field.services ?? []) counts.set(service.id, { label: service.name, count: 0, quantity: 0 });
+      let answered = 0;
+      for (const response of responses) {
+        const frozen = fieldsByVersion.get(response.version_id)?.find((item) => item.id === field.id && item.type === "todo");
+        if (!frozen) continue;
+        const answers = response.answers && typeof response.answers === "object" && !Array.isArray(response.answers) ? response.answers as Record<string, unknown> : {};
+        const picks = todoPicks(frozen, answers[field.id]);
+        if (picks.length > 0) answered++;
+        for (const { service, quantity } of picks) {
+          const row = counts.get(service.id) ?? { label: service.name, count: 0, quantity: 0 };
+          row.count++;
+          row.quantity += quantity;
+          counts.set(service.id, row);
+        }
+      }
+      questions.push({ id: field.id, label: field.label, type, answered,
+        rows: [...counts.values()].sort((first, second) => second.count - first.count).map((row) => ({ ...row, share: answered ? row.count / answered : 0 })),
+      });
+      continue;
+    }
 
     const values: unknown[] = [];
     for (const response of responses) {

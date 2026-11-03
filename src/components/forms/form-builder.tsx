@@ -58,6 +58,7 @@ import {
   type FormState,
 } from "@/lib/actions/forms";
 import { cn } from "@/lib/utils";
+import { TodoEditor } from "@/components/forms/todo-editor";
 
 /**
  * Form builder, its settings rows, and the create form. All three edit one
@@ -74,6 +75,7 @@ const TYPE_ICONS: Record<FieldType, LucideIcon> = {
   phone: Phone,
   number: Hash,
   date: CalendarDays,
+  todo: CheckSquare,
   single_choice: CircleDot,
   multi_choice: CheckSquare,
   dropdown: ListFilter,
@@ -242,6 +244,7 @@ export function FormBuilder({
       ...fields[index],
       id: newFieldId(),
       options: fields[index].options ? [...fields[index].options] : undefined,
+      services: fields[index].services?.map((service) => ({ ...service, id: newFieldId() })),
     };
     setFields((current) => {
       const next = [...current];
@@ -469,6 +472,8 @@ export function FormBuilder({
                   onChange={(options) => update(selected.id, { options })}
                 />
               )}
+
+              {selected.type === "todo" && <TodoEditor key={selected.id} field={selected} onChange={(patch) => update(selected.id, patch)} />}
 
               {selected.type === "rating" && (
                 <>
@@ -845,6 +850,9 @@ function ChoiceSettings({
 }
 
 function Preview({ field }: { field: FormField }) {
+  if (field.type === "todo") {
+    return <p className="text-xs text-muted-foreground">{field.services?.length ?? 0} services</p>;
+  }
   if (field.type === "heading") return null;
 
   if (field.type === "long_text") {
@@ -971,6 +979,8 @@ function canonical(field: FormField): string {
     options: field.options ?? [],
     low: field.low_label ?? "",
     high: field.high_label ?? "",
+    price_display: field.price_display ?? "exact",
+    services: field.services ?? [],
   });
 }
 
@@ -983,6 +993,10 @@ function blankField(type: FieldType): FormField {
   };
 
   if (CHOICE_TYPES.includes(type)) field.options = ["Option 1", "Option 2"];
+  if (type === "todo") {
+    field.price_display = "exact";
+    field.services = [{ id: newFieldId(), name: "Service 1", max_qty: 1 }];
+  }
   if (type === "rating") {
     field.low_label = "Poor";
     field.high_label = "Excellent";

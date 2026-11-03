@@ -13,6 +13,7 @@ export const FIELD_TYPES = [
   "phone",
   "number",
   "date",
+  "todo",
   "single_choice",
   "multi_choice",
   "dropdown",
@@ -32,6 +33,7 @@ export const FIELD_TYPE_LABELS: Record<FieldType, string> = {
   phone: "Phone (+254)",
   number: "Number",
   date: "Date",
+  todo: "To-do",
   single_choice: "One choice",
   multi_choice: "Several choices",
   dropdown: "Dropdown",
@@ -44,11 +46,20 @@ export const FIELD_TYPE_LABELS: Record<FieldType, string> = {
 /** The palette's three groups, in the order they are drawn. */
 export const FIELD_GROUPS: { label: string; types: FieldType[] }[] = [
   { label: "Text", types: ["short_text", "long_text", "email", "phone"] },
-  { label: "Choice", types: ["single_choice", "multi_choice", "dropdown", "yes_no", "rating"] },
+  { label: "Choice", types: ["todo", "single_choice", "multi_choice", "dropdown", "yes_no", "rating"] },
   { label: "Other", types: ["date", "number", "heading", "consent"] },
 ];
 
 export const CHOICE_TYPES: FieldType[] = ["single_choice", "multi_choice", "dropdown"];
+
+export type ServiceItem = {
+  id: string;
+  name: string;
+  note?: string;
+  image_url?: string;
+  price?: number;
+  max_qty: number;
+};
 
 export type FormField = {
   id: string;
@@ -60,9 +71,12 @@ export type FormField = {
   /** Rating only: the words at each end of the 1 to 5 scale. */
   low_label?: string;
   high_label?: string;
+  price_display?: "exact" | "from" | "hidden";
+  services?: ServiceItem[];
 };
 
 export const MAX_FIELDS = 50;
+export const MAX_SERVICES = 30;
 export const MAX_LABEL_LENGTH = 200;
 export const MAX_HELP_LENGTH = 300;
 export const MAX_OPTIONS = 30;
@@ -148,6 +162,61 @@ export function parseFields(json: unknown): ParseFieldsResult {
 
     const field: FormField = { id, type: fieldType, label, required };
     if (help) field.help = help;
+
+    if (fieldType === "todo") {
+      const display = raw.price_display === undefined ? "exact" : raw.price_display;
+      if (display !== "exact" && display !== "from" && display !== "hidden") {
+        return { error: position + " needs a valid pricing display." };
+      }
+      if (!Array.isArray(raw.services) || raw.services.length === 0) {
+        return { error: position + " needs at least one service." };
+      }
+      if (raw.services.length > MAX_SERVICES) {
+        return { error: position + " can have at most 30 services." };
+      }
+      const services: ServiceItem[] = [];
+      const serviceIds = new Set<string>();
+      const names = new Set<string>();
+      for (const entry of raw.services) {
+        if (!entry || typeof entry !== "object" || Array.isArray(entry)) {
+          return { error: position + " has a service that could not be read." };
+        }
+        const service = entry as Record<string, unknown>;
+        const serviceId = typeof service.id === "string" ? service.id : "";
+        if (!ID_PATTERN.test(serviceId)) return { error: position + " has an invalid service id." };
+        if (serviceIds.has(serviceId)) return { error: position + " has the same service id twice." };
+        serviceIds.add(serviceId);
+        const name = typeof service.name === "string" ? service.name.trim() : "";
+        if (!name) return { error: position + " needs a name for every service." };
+        if (name.length > 80) return { error: "Service names must be 80 characters or fewer." };
+        if (names.has(name)) return { error: position + " has the same service name twice." };
+        names.add(name);
+        if (service.note !== undefined && typeof service.note !== "string") {
+          return { error: position + " has a service note that could not be read." };
+        }
+        const note = typeof service.note === "string" ? service.note.trim() : "";
+        if (note.length > 200) return { error: "Service notes must be 200 characters or fewer." };
+        const maxQty = service.max_qty === undefined ? 1 : service.max_qty;
+        if (typeof maxQty !== "number" || !Number.isInteger(maxQty) || maxQty < 1 || maxQty > 20) {
+          return { error: position + " needs service quantities from 1 to 20." };
+        }
+        if (service.price !== undefined && (typeof service.price !== "number" ||
+          !Number.isInteger(service.price) || service.price < 0 || service.price > 1_000_000_000)) {
+          return { error: position + " needs valid service prices." };
+        }
+        if (service.image_url !== undefined && (typeof service.image_url !== "string" ||
+          !service.image_url.startsWith("https://") || service.image_url.length > 500)) {
+          return { error: position + " needs HTTPS service images of 500 characters or fewer." };
+        }
+        services.push({ id: serviceId, name, max_qty: maxQty,
+          ...(note ? { note } : {}),
+          ...(service.price !== undefined ? { price: service.price as number } : {}),
+          ...(service.image_url !== undefined ? { image_url: service.image_url as string } : {}),
+        });
+      }
+      field.price_display = display;
+      field.services = services;
+    }
 
     if (CHOICE_TYPES.includes(fieldType)) {
       if (!Array.isArray(raw.options)) return { error: `${position} needs at least one option.` };
@@ -249,6 +318,25 @@ function fieldSchema(field: FormField): z.ZodTypeAny {
   const required = field.required;
 
   switch (field.type) {
+    case "todo":
+      return z.preprocess((value) => value ?? {}, z.record(
+        z.string().refine((serviceId) => field.services?.some((service) => service.id === serviceId) ?? false, "Choose a valid service."),
+        z.number(),
+      ).superRefine((answer, context) => {
+        for (const [serviceId, quantity] of Object.entries(answer)) {
+          const service = field.services?.find((item) => item.id === serviceId);
+          if (!service || !Number.isInteger(quantity) || quantity < 0 || quantity > service.max_qty) {
+            context.addIssue({ code: z.ZodIssueCode.custom, message: "Choose a valid service quantity." });
+          }
+        }
+        if (required && !Object.values(answer).some((quantity) => quantity > 0)) {
+          context.addIssue({ code: z.ZodIssueCode.custom, message: "Choose at least one service." });
+        }
+      }).transform((answer) => {
+        const picked = Object.fromEntries(Object.entries(answer).filter(([, quantity]) => quantity > 0));
+        return Object.keys(picked).length > 0 ? picked : undefined;
+      }));
+
     case "short_text":
     case "long_text": {
       const max = field.type === "short_text" ? 300 : 5000;
@@ -414,6 +502,17 @@ export function readAnswers(
   for (const field of fields) {
     if (field.type === "heading") continue;
 
+    if (field.type === "todo") {
+      const answer: Record<string, number> = Object.create(null);
+      for (const [key, value] of formData.entries()) {
+        if (!key.startsWith(field.id + ".")) continue;
+        const serviceId = key.slice(field.id.length + 1);
+        answer[serviceId] = typeof value === "string" && value.trim() !== "" ? Number(value) : NaN;
+      }
+      answers[field.id] = answer;
+      continue;
+    }
+
     if (field.type === "multi_choice") {
       answers[field.id] = formData.getAll(field.id).map(String);
       continue;
@@ -436,4 +535,20 @@ export function readAnswers(
   }
 
   return answers;
+}
+
+export function todoPicks(field: FormField, answer: unknown): { service: ServiceItem; quantity: number }[] {
+  if (!answer || typeof answer !== "object" || Array.isArray(answer)) return [];
+  const quantities = answer as Record<string, unknown>;
+  return (field.services ?? []).flatMap((service) => {
+    const quantity = quantities[service.id];
+    return typeof quantity === "number" && Number.isInteger(quantity) && quantity > 0 && quantity <= service.max_qty
+      ? [{ service, quantity }] : [];
+  });
+}
+
+export function todoTotal(field: FormField, answer: unknown): number | null {
+  if (field.price_display === "hidden") return null;
+  const priced = todoPicks(field, answer).filter(({ service }) => service.price !== undefined);
+  return priced.length === 0 ? null : priced.reduce((total, { service, quantity }) => total + service.price! * quantity, 0);
 }
