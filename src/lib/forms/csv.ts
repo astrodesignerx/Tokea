@@ -1,4 +1,5 @@
-import { parseFields, type FormField } from "./fields";
+import { parseFields, todoPicks, todoTotal, type FormField } from "./fields";
+import { toMajorUnitsInput } from "../money";
 
 /**
  * CSV export, kept pure so the same file can be checked without a database.
@@ -22,7 +23,20 @@ export type CsvResponse = {
   submitted_at: Date;
 };
 
-export type ResponseColumn = { id: string; label: string };
+export type ResponseColumn = { id: string; label: string; totalFor?: string };
+
+export function responseValue(column: ResponseColumn, fields: FormField[], answers: Record<string, unknown>): unknown {
+  const field = fields.find((item) => item.id === (column.totalFor ?? column.id));
+  if (!field) return undefined;
+  if (column.totalFor) {
+    const total = todoTotal(field, answers[field.id]);
+    return total === null ? undefined : toMajorUnitsInput(total);
+  }
+  if (field.type === "todo") {
+    return todoPicks(field, answers[field.id]).map(({ service, quantity }) => service.name + " x" + quantity).join("; ");
+  }
+  return answers[field.id];
+}
 
 /** RFC 4180: quote when the value contains a delimiter, a quote or a newline. */
 function quote(value: string): string {
@@ -65,9 +79,16 @@ export function responseColumns(versions: CsvVersion[]): ResponseColumn[] {
     if ("error" in parsed) continue;
     for (const field of parsed.fields) {
       // Headings are labels on a group, not questions with answers.
-      if (field.type === "heading" || seen.has(field.id)) continue;
-      seen.add(field.id);
-      columns.push({ id: field.id, label: field.label });
+      if (field.type === "heading") continue;
+      if (!seen.has(field.id)) {
+        seen.add(field.id);
+        columns.push({ id: field.id, label: field.label });
+      }
+      if (field.type === "todo" && field.price_display !== "hidden" && !seen.has(field.id + ".total")) {
+        seen.add(field.id + ".total");
+        const index = columns.findIndex((column) => column.id === field.id);
+        columns.splice(index + 1, 0, { id: field.id + ".total", totalFor: field.id, label: columns[index].label + " total (KES)" });
+      }
     }
   }
 
@@ -94,7 +115,6 @@ export function responsesToCsv(
 
   for (const response of responses) {
     const fields = fieldsByVersion.get(response.version_id) ?? [];
-    const present = new Set(fields.map((field) => field.id));
     const answers =
       response.answers && typeof response.answers === "object" && !Array.isArray(response.answers)
         ? (response.answers as Record<string, unknown>)
@@ -103,7 +123,7 @@ export function responsesToCsv(
     const row = [
       response.submitted_at.toISOString(),
       numberByVersion.get(response.version_id)?.toString() ?? "",
-      ...columns.map((column) => (present.has(column.id) ? answers[column.id] : undefined)),
+      ...columns.map((column) => responseValue(column, fields, answers)),
     ];
     lines.push(row.map(cell).join(","));
   }

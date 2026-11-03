@@ -11,7 +11,8 @@ import { LocalTime } from "@/components/qr-codes/local-time";
 import { deleteAllResponsesAction, deleteResponseAction } from "@/lib/actions/forms";
 import type { SummaryQuestion } from "@/lib/forms/data";
 import { parseFields } from "@/lib/forms/fields";
-import { answerText, responseColumns } from "@/lib/forms/csv";
+import { answerText, responseColumns, responseValue } from "@/lib/forms/csv";
+import { ResponseDetail } from "@/components/forms/response-detail";
 
 /**
  * Responses tab: totals, a chart per choice or rating question, then the table.
@@ -55,7 +56,7 @@ export function ResponseSummary({
       const parsed = parseFields(version.fields);
       return [
         version.id,
-        "error" in parsed ? [] : parsed.fields.map((field) => field.id),
+        "error" in parsed ? [] : parsed.fields,
       ];
     }),
   );
@@ -134,9 +135,7 @@ export function ResponseSummary({
                           {version?.number ?? ""}
                         </td>
                         {columns.map((column) => {
-                          const shown = present.includes(column.id)
-                            ? answerText(answers[column.id])
-                            : "";
+                          const shown = answerText(responseValue(column, present, answers));
                           return (
                             <td key={column.id} className="max-w-[18rem] px-4 py-3">
                               {shown ? (
@@ -148,6 +147,7 @@ export function ResponseSummary({
                           );
                         })}
                         <td className="px-4 py-3">
+                          <ResponseDetail response={response} fields={present} />
                           <HoldToConfirm
                             label="Hold to delete response"
                             icon={<Trash2 className="size-4" />}
@@ -232,7 +232,7 @@ function Chart({ question }: { question: SummaryQuestion }) {
 
       <div className="mt-4 space-y-2">
         {question.rows.map((row, index) => (
-          <div key={row.label} className="flex items-center gap-3 text-sm">
+          <div key={row.label + ":" + index} className="flex items-center gap-3 text-sm">
             <span className="w-24 shrink-0 truncate text-muted-foreground" title={row.label}>
               {row.label}
             </span>
@@ -246,7 +246,7 @@ function Chart({ question }: { question: SummaryQuestion }) {
               />
             </span>
             <span className="w-24 shrink-0 text-right text-xs tabular-nums text-muted-foreground">
-              {row.count} ({Math.round(row.share * 100)}%)
+              {question.type === "todo" ? row.count + " picks, " + row.quantity + " total quantity" : row.count + " (" + Math.round(row.share * 100) + "%)"}
             </span>
           </div>
         ))}
