@@ -1,0 +1,149 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Palette card</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&amp;family=Geist+Mono:wght@400;500&amp;display=swap">
+<style>body{margin:0}</style>
+</helmet>
+<div style="width: 560px; height: 840px; box-sizing: border-box; display: flex; flex-direction: column; font-family: Geist, system-ui, sans-serif; font-size: 13px; line-height: 1.45; border-radius: 16px; overflow: hidden; background: {{l.bg}}">
+
+  <section style="position: relative; height: 300px; box-sizing: border-box; padding: 26px 28px; background: {{l.primary}}; color: {{l.onPrimary}}; display: flex; flex-direction: column; justify-content: space-between; overflow: hidden">
+    <span aria-hidden="true" style="position: absolute; right: -14px; bottom: -70px; font-size: 300px; font-weight: 700; letter-spacing: -0.06em; line-height: 1; opacity: 0.14">{{letter}}</span>
+    <div style="display: flex; justify-content: space-between; align-items: center; position: relative">
+      <span style="font-size: 12px; font-weight: 600; letter-spacing: 0.06em">OPTION {{letter}}</span>
+      <span style="display: flex; gap: 6px">
+        <span style="width: 18px; height: 18px; border-radius: 5px; background: {{l.signal}}; box-shadow: 0 0 0 2px {{l.onPrimary}}"></span>
+        <span style="width: 18px; height: 18px; border-radius: 5px; background: {{d.bg}}; box-shadow: 0 0 0 2px {{l.onPrimary}}"></span>
+        <span style="width: 18px; height: 18px; border-radius: 5px; background: {{l.bg}}; box-shadow: 0 0 0 2px {{l.onPrimary}}"></span>
+      </span>
+    </div>
+    <div style="display: flex; flex-direction: column; gap: 6px; position: relative; max-width: 400px">
+      <h2 style="margin: 0; font-size: 44px; font-weight: 700; letter-spacing: -0.045em; line-height: 1">{{name}}</h2>
+      <p style="margin: 0; font-size: 14px; opacity: 0.94">{{mood}}</p>
+    </div>
+  </section>
+
+  <section style="padding: 18px 28px 20px; color: {{l.text}}; display: flex; flex-direction: column; gap: 12px">
+    <div style="display: flex; height: 56px; border-radius: 10px; overflow: hidden; box-shadow: 0 0 0 1px {{l.border}}">
+      <sc-for list="{{lightSw}}" as="s" hint-placeholder-count="8">
+        <span style="flex: 1; background: {{s.hex}}"></span>
+      </sc-for>
+    </div>
+    <div style="display: grid; grid-template-columns: repeat(8, minmax(0, 1fr)); gap: 2px; margin-top: -4px">
+      <sc-for list="{{lightSw}}" as="s" hint-placeholder-count="8">
+        <div style="display: flex; flex-direction: column">
+          <span style="font-size: 10px; font-weight: 600">{{s.k}}</span>
+          <span style="font-size: 10px; font-family: 'Geist Mono', monospace; color: {{l.muted}}">{{s.hex}}</span>
+        </div>
+      </sc-for>
+    </div>
+    <div style="display: flex; flex-wrap: wrap; gap: 8px; align-items: center">
+      <button type="button" style="height: 32px; padding: 0 12px; border-radius: 6px; border: 0; background: {{l.primary}}; color: {{l.onPrimary}}; font: inherit; font-weight: 600">New QR code</button>
+      <button type="button" style="height: 32px; padding: 0 12px; border-radius: 6px; border: 0; background: {{l.text}}; color: {{l.bg}}; font: inherit; font-weight: 600">New</button>
+      <button type="button" style="height: 32px; padding: 0 12px; border-radius: 6px; border: 1px solid {{l.border}}; background: {{l.surface}}; color: {{l.text}}; font: inherit; font-weight: 500">Export</button>
+      <span style="font-size: 11px; font-weight: 600; padding: 2px 8px; border-radius: 20px; background: {{l.tint}}; color: {{l.accentText}}">Scheduled</span>
+      <span style="font-size: 11px; font-weight: 600; padding: 2px 8px; border-radius: 20px; background: {{l.successTint}}; color: {{l.success}}">Active</span>
+    </div>
+    <div style="display: flex; gap: 14px; font-size: 11px; color: {{l.muted}}; font-family: 'Geist Mono', monospace">
+      <span>text {{lc.text}}:1</span><span>muted {{lc.muted}}:1</span><span>button {{lc.button}}:1</span><span>link {{lc.link}}:1</span>
+    </div>
+  </section>
+
+  <section style="flex: 1; padding: 20px 28px 22px; background: {{d.bg}}; color: {{d.text}}; display: flex; flex-direction: column; gap: 12px">
+    <div style="display: flex; justify-content: space-between; align-items: baseline">
+      <span style="font-size: 12px; font-weight: 600; letter-spacing: 0.06em; color: {{d.muted}}">DARK</span>
+      <span style="font-size: 30px; font-weight: 700; letter-spacing: -0.04em; color: {{d.primary}}; line-height: 1">4,694</span>
+    </div>
+    <div style="display: flex; height: 56px; border-radius: 10px; overflow: hidden; box-shadow: 0 0 0 1px {{d.border}}">
+      <sc-for list="{{darkSw}}" as="s" hint-placeholder-count="8">
+        <span style="flex: 1; background: {{s.hex}}"></span>
+      </sc-for>
+    </div>
+    <div style="display: grid; grid-template-columns: repeat(8, minmax(0, 1fr)); gap: 2px; margin-top: -4px">
+      <sc-for list="{{darkSw}}" as="s" hint-placeholder-count="8">
+        <div style="display: flex; flex-direction: column">
+          <span style="font-size: 10px; font-weight: 600">{{s.k}}</span>
+          <span style="font-size: 10px; font-family: 'Geist Mono', monospace; color: {{d.muted}}">{{s.hex}}</span>
+        </div>
+      </sc-for>
+    </div>
+    <div style="display: flex; flex-wrap: wrap; gap: 8px; align-items: center">
+      <button type="button" style="height: 32px; padding: 0 12px; border-radius: 6px; border: 0; background: {{d.primary}}; color: {{d.onPrimary}}; font: inherit; font-weight: 600">New QR code</button>
+      <button type="button" style="height: 32px; padding: 0 12px; border-radius: 6px; border: 1px solid {{d.border}}; background: {{d.surface}}; color: {{d.text}}; font: inherit; font-weight: 500">Export</button>
+      <span style="font-size: 11px; font-weight: 600; padding: 2px 8px; border-radius: 20px; background: {{d.tint}}; color: {{d.accentText}}">Scheduled</span>
+      <span style="font-size: 11px; font-weight: 600; padding: 2px 8px; border-radius: 20px; background: {{d.successTint}}; color: {{d.success}}">Active</span>
+    </div>
+    <div style="display: flex; gap: 14px; font-size: 11px; color: {{d.muted}}; font-family: 'Geist Mono', monospace; margin-top: auto">
+      <span>text {{dk.text}}:1</span><span>muted {{dk.muted}}:1</span><span>button {{dk.button}}:1</span><span>link {{dk.link}}:1</span>
+    </div>
+  </section>
+
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"palette":{"editor":"enum","options":["ember","cobalt","evergreen"],"default":"ember"},"$preview":{"width":560,"height":840}}'>
+class Component extends DCLogic {
+  palettes() {
+    return {
+      ember: {
+        letter: 'A', name: 'Ink & Ember', mood: 'Technical and sharp. Near-black ink, one hot ember accent.',
+        light: { bg: '#FAFAF9', surface: '#FFFFFF', subtle: '#F3F3F1', border: '#E5E4E0', text: '#111110', muted: '#66655F', primary: '#C4401A', onPrimary: '#FFFFFF', signal: '#E8501C', accentText: '#B93C17', tint: '#FCEDE7', success: '#1A6B43', successTint: '#E6F4EC', danger: '#B4232A' },
+        dark: { bg: '#0E0E0D', surface: '#161615', subtle: '#232320', border: '#2B2B28', text: '#EDEDEA', muted: '#9C9B95', primary: '#FF6A33', onPrimary: '#170A04', signal: '#FF6A33', accentText: '#FF8A5C', tint: '#2A1A12', success: '#5CC98F', successTint: '#14261C', danger: '#FF6B6B' }
+      },
+      cobalt: {
+        letter: 'B', name: 'Midnight Cobalt', mood: 'Calm and trustworthy. Cool slate greys with a cobalt blue.',
+        light: { bg: '#F6F7F9', surface: '#FFFFFF', subtle: '#EFF1F5', border: '#E0E4EB', text: '#0E1526', muted: '#586275', primary: '#2B4FD8', onPrimary: '#FFFFFF', signal: '#2B4FD8', accentText: '#2443BD', tint: '#E9EEFE', success: '#17734F', successTint: '#E5F4EE', danger: '#C42B3B' },
+        dark: { bg: '#0A0F1D', surface: '#10172A', subtle: '#1A2440', border: '#222C44', text: '#E5E9F2', muted: '#8F9AB0', primary: '#6A87FF', onPrimary: '#0A0F1D', signal: '#6A87FF', accentText: '#8EA4FF', tint: '#18224A', success: '#4CC79A', successTint: '#10261F', danger: '#FF7A85' }
+      },
+      evergreen: {
+        letter: 'C', name: 'Evergreen & Sand', mood: 'Warm and grounded. Stone neutrals, deep green, an ochre highlight.',
+        light: { bg: '#F5F3EE', surface: '#FFFEFB', subtle: '#EEEBE4', border: '#E1DDD3', text: '#1A1916', muted: '#67625A', primary: '#135A45', onPrimary: '#FFFFFF', signal: '#B7791F', accentText: '#8A5A12', tint: '#F6ECDC', success: '#135A45', successTint: '#E3EFE9', danger: '#B42318' },
+        dark: { bg: '#11120F', surface: '#181915', subtle: '#25281F', border: '#2E3129', text: '#ECE9E1', muted: '#A39E92', primary: '#5CC79F', onPrimary: '#0B241B', signal: '#E3A94F', accentText: '#E8B567', tint: '#2B2416', success: '#5CC79F', successTint: '#15271F', danger: '#FF8070' }
+      }
+    };
+  }
+  lum(h) {
+    var n = parseInt(h.slice(1), 16);
+    var c = [(n >> 16) & 255, (n >> 8) & 255, n & 255].map(function (v) {
+      v = v / 255;
+      return v <= 0.03928 ? v / 12.92 : Math.pow((v + 0.055) / 1.055, 2.4);
+    });
+    return 0.2126 * c[0] + 0.7152 * c[1] + 0.0722 * c[2];
+  }
+  cr(a, b) {
+    var x = this.lum(a), y = this.lum(b);
+    return ((Math.max(x, y) + 0.05) / (Math.min(x, y) + 0.05)).toFixed(1);
+  }
+  checks(t) {
+    return {
+      text: this.cr(t.text, t.bg),
+      muted: this.cr(t.muted, t.surface),
+      button: this.cr(t.onPrimary, t.primary),
+      link: this.cr(t.accentText, t.bg)
+    };
+  }
+  swatches(t) {
+    return [
+      { k: 'Ground', hex: t.bg }, { k: 'Surface', hex: t.surface }, { k: 'Subtle', hex: t.subtle }, { k: 'Border', hex: t.border },
+      { k: 'Muted', hex: t.muted }, { k: 'Text', hex: t.text }, { k: 'Primary', hex: t.primary }, { k: 'Signal', hex: t.signal }
+    ];
+  }
+  renderVals() {
+    var all = this.palettes();
+    var p = all[this.props.palette] || all.ember;
+    return {
+      letter: p.letter, name: p.name, mood: p.mood,
+      l: p.light, d: p.dark,
+      lightSw: this.swatches(p.light), darkSw: this.swatches(p.dark),
+      lc: this.checks(p.light), dk: this.checks(p.dark)
+    };
+  }
+}
+</script>
+</body>
+</html>

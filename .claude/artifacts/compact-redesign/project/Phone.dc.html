@@ -1,0 +1,150 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Overview, phone</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&amp;family=Geist+Mono:wght@400;500&amp;display=swap">
+<style>body{margin:0}</style>
+</helmet>
+<div style="width: 390px; height: 844px; box-sizing: border-box; display: flex; flex-direction: column; background: {{t.bg}}; color: {{t.text}}; font-family: Geist, system-ui, sans-serif; font-size: 14px; line-height: 1.45; overflow: hidden">
+
+  <header style="display: flex; align-items: center; gap: 4px; height: 52px; padding: 0 6px 0 16px">
+    <span style="width: 22px; height: 22px; border-radius: 6px; background: {{t.signal}}; display: flex; align-items: center; justify-content: center; color: {{t.onPrimary}}; font-weight: 700; font-size: 13px">n</span>
+    <span style="flex: 1; margin-left: 8px; font-weight: 700; font-size: 16px; letter-spacing: -0.03em">nikoform</span>
+    <button type="button" aria-label="Search" style="width: 44px; height: 44px; padding: 0; border: 0; background: transparent; color: {{t.muted}}; display: flex; align-items: center; justify-content: center"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="6.5"></circle><path d="M20 20l-4-4"></path></svg></button>
+    <button type="button" aria-label="Create new" style="width: 44px; height: 44px; padding: 0; border: 0; background: transparent; display: flex; align-items: center; justify-content: center"><span style="width: 32px; height: 32px; border-radius: 9px; background: {{t.text}}; color: {{t.bg}}; display: flex; align-items: center; justify-content: center"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"></path></svg></span></button>
+  </header>
+
+  <div style="flex: 1; overflow: hidden; padding: 4px 16px 14px; display: flex; flex-direction: column; gap: 12px">
+    <div style="display: flex; flex-direction: column">
+      <span style="font-size: 12px; font-weight: 500; color: {{t.muted}}">Monday, 2 November</span>
+      <h1 style="margin: 0; font-size: 28px; font-weight: 700; letter-spacing: -0.04em; line-height: 1.1">Overview</h1>
+    </div>
+
+    <section style="border-radius: 16px; background: {{t.primary}}; color: {{t.onPrimary}}; padding: 16px 16px 14px; display: flex; flex-direction: column; gap: 10px">
+      <div style="display: flex; justify-content: space-between; align-items: center">
+        <h2 style="margin: 0; font-size: 13px; font-weight: 500; opacity: 0.94">Scans, 14 days</h2>
+        <span style="font-size: 11px; font-weight: 600; padding: 2px 8px; border-radius: 20px; background: {{chip}}">+18%</span>
+      </div>
+      <span style="font-size: 48px; font-weight: 700; letter-spacing: -0.05em; line-height: 1; font-variant-numeric: tabular-nums">4,694</span>
+      <div role="img" aria-label="Daily scans over the last 14 days, rising to 412 today" style="display: flex; align-items: flex-end; gap: 4px; height: 64px">
+        <sc-for list="{{bars}}" as="b" hint-placeholder-count="14">
+          <span style="flex: 1; height: {{b.h}}px; border-radius: 3px 3px 1px 1px; background: {{t.onPrimary}}; opacity: {{b.op}}"></span>
+        </sc-for>
+      </div>
+    </section>
+
+    <section aria-label="Key numbers" style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 1px; background: {{t.border}}; border: 1px solid {{t.border}}; border-radius: 12px; overflow: hidden">
+      <sc-for list="{{kpis}}" as="k" hint-placeholder-count="4">
+        <div style="background: {{t.surface}}; padding: 10px 12px; display: flex; flex-direction: column; gap: 2px">
+          <div style="display: flex; align-items: center; gap: 6px"><span style="width: 7px; height: 7px; border-radius: 2px; background: {{k.dot}}"></span><span style="font-size: 12px; color: {{t.muted}}">{{k.label}}</span></div>
+          <span style="font-size: 24px; font-weight: 700; letter-spacing: -0.035em; font-variant-numeric: tabular-nums">{{k.value}}</span>
+        </div>
+      </sc-for>
+    </section>
+
+    <section style="border: 1px solid {{t.border}}; border-radius: 12px; background: {{t.surface}}; padding: 12px; display: flex; gap: 12px; align-items: center">
+      <div style="width: 54px; height: 58px; flex-shrink: 0; border-radius: 10px; background: {{t.text}}; color: {{t.bg}}; display: flex; flex-direction: column; align-items: center; justify-content: center; line-height: 1">
+        <span style="font-size: 10px; font-weight: 600; letter-spacing: 0.08em; color: {{t.signalOnText}}">NOV</span>
+        <span style="font-size: 26px; font-weight: 700; letter-spacing: -0.04em">14</span>
+      </div>
+      <div style="flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 4px">
+        <div style="display: flex; justify-content: space-between; align-items: baseline"><span style="font-weight: 700; letter-spacing: -0.02em">Product launch</span><span style="font-size: 12px; color: {{t.muted}}">42 / 60</span></div>
+        <div style="height: 6px; border-radius: 3px; background: {{t.subtle}}; overflow: hidden"><div style="width: 70%; height: 6px; border-radius: 3px; background: {{t.primary}}"></div></div>
+        <span style="font-size: 12px; color: {{t.muted}}">Saturday, 18:00</span>
+      </div>
+    </section>
+
+    <section style="border: 1px solid {{t.border}}; border-radius: 12px; background: {{t.surface}}; overflow: hidden">
+      <div style="display: flex; justify-content: space-between; align-items: center; height: 40px; padding: 0 12px">
+        <h2 style="margin: 0; font-size: 13px; font-weight: 600">Recent</h2>
+        <a href="#" style="font-size: 12px; font-weight: 500; color: {{t.accentText}}; text-decoration: none; padding: 12px 0">View all</a>
+      </div>
+      <sc-for list="{{activity}}" as="a" hint-placeholder-count="3">
+        <div style="display: flex; align-items: center; gap: 10px; min-height: 48px; padding: 0 12px; border-top: 1px solid {{t.border}}">
+          <span style="width: 28px; height: 28px; flex-shrink: 0; border-radius: 8px; background: {{a.chipBg}}; color: {{a.chipFg}}; display: flex; align-items: center; justify-content: center; font-size: 10px; font-weight: 700">{{a.short}}</span>
+          <div style="flex: 1; min-width: 0; display: flex; flex-direction: column">
+            <span style="font-weight: 600; font-size: 13px">{{a.what}}</span>
+            <span style="font-size: 12px; color: {{t.muted}}; white-space: nowrap; overflow: hidden; text-overflow: ellipsis">{{a.where}}</span>
+          </div>
+          <span style="font-size: 12px; color: {{t.muted}}">{{a.time}}</span>
+        </div>
+      </sc-for>
+    </section>
+  </div>
+
+  <nav aria-label="Main" style="display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); height: 62px; border-top: 1px solid {{t.border}}; background: {{t.surface}}">
+    <a href="#" aria-current="page" style="display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px; color: {{t.text}}; text-decoration: none; font-size: 11px; font-weight: 600">
+      <span style="display: flex; padding: 3px 14px; border-radius: 12px; background: {{t.tint}}; color: {{t.primary}}"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3.5" y="3.5" width="7" height="7" rx="1.5"></rect><rect x="13.5" y="3.5" width="7" height="7" rx="1.5"></rect><rect x="3.5" y="13.5" width="7" height="7" rx="1.5"></rect><rect x="13.5" y="13.5" width="7" height="7" rx="1.5"></rect></svg></span>Home
+    </a>
+    <a href="#" style="display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px; color: {{t.muted}}; text-decoration: none; font-size: 11px">
+      <span style="display: flex; padding: 3px 14px"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="5" width="18" height="14" rx="2"></rect><circle cx="9" cy="11" r="2"></circle><path d="M6.5 16c.6-1.3 1.5-2 2.5-2s1.9.7 2.5 2"></path><path d="M14.5 10h4M14.5 13.5h3"></path></svg></span>Cards
+    </a>
+    <a href="#" style="display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px; color: {{t.muted}}; text-decoration: none; font-size: 11px">
+      <span style="display: flex; padding: 3px 14px"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3.5" y="3.5" width="6.5" height="6.5" rx="1"></rect><rect x="14" y="3.5" width="6.5" height="6.5" rx="1"></rect><rect x="3.5" y="14" width="6.5" height="6.5" rx="1"></rect><path d="M14 14h3v3M20.5 14v6.5H14M17 20.5V20"></path></svg></span>QR
+    </a>
+    <a href="#" style="display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px; color: {{t.muted}}; text-decoration: none; font-size: 11px">
+      <span style="display: flex; padding: 3px 14px"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3.5" y="5" width="17" height="15.5" rx="2"></rect><path d="M3.5 10h17M8 3v4M16 3v4"></path></svg></span>Events
+    </a>
+    <a href="#" style="display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px; color: {{t.muted}}; text-decoration: none; font-size: 11px">
+      <span style="display: flex; padding: 3px 14px"><svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><circle cx="5" cy="12" r="1.8"></circle><circle cx="12" cy="12" r="1.8"></circle><circle cx="19" cy="12" r="1.8"></circle></svg></span>More
+    </a>
+  </nav>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"palette":{"editor":"enum","options":["ember","cobalt","evergreen"],"default":"ember"},"mode":{"editor":"enum","options":["light","dark"],"default":"dark"},"$preview":{"width":390,"height":844}}'>
+class Component extends DCLogic {
+  palettes() {
+    return {
+      ember: {
+        light: { bg: '#FAFAF9', surface: '#FFFFFF', subtle: '#F3F3F1', border: '#E5E4E0', text: '#111110', muted: '#66655F', primary: '#C4401A', onPrimary: '#FFFFFF', signal: '#E8501C', accentText: '#B93C17', tint: '#FCEDE7', success: '#1A6B43', successTint: '#E6F4EC', signalOnText: '#FF6A33' },
+        dark: { bg: '#0E0E0D', surface: '#161615', subtle: '#232320', border: '#2B2B28', text: '#EDEDEA', muted: '#9C9B95', primary: '#FF6A33', onPrimary: '#170A04', signal: '#FF6A33', accentText: '#FF8A5C', tint: '#2A1A12', success: '#5CC98F', successTint: '#14261C', signalOnText: '#B93C17' }
+      },
+      cobalt: {
+        light: { bg: '#F6F7F9', surface: '#FFFFFF', subtle: '#EFF1F5', border: '#E0E4EB', text: '#0E1526', muted: '#586275', primary: '#2B4FD8', onPrimary: '#FFFFFF', signal: '#2B4FD8', accentText: '#2443BD', tint: '#E9EEFE', success: '#17734F', successTint: '#E5F4EE', signalOnText: '#8EA4FF' },
+        dark: { bg: '#0A0F1D', surface: '#10172A', subtle: '#1A2440', border: '#222C44', text: '#E5E9F2', muted: '#8F9AB0', primary: '#6A87FF', onPrimary: '#0A0F1D', signal: '#6A87FF', accentText: '#8EA4FF', tint: '#18224A', success: '#4CC79A', successTint: '#10261F', signalOnText: '#2443BD' }
+      },
+      evergreen: {
+        light: { bg: '#F5F3EE', surface: '#FFFEFB', subtle: '#EEEBE4', border: '#E1DDD3', text: '#1A1916', muted: '#67625A', primary: '#135A45', onPrimary: '#FFFFFF', signal: '#B7791F', accentText: '#8A5A12', tint: '#F6ECDC', success: '#135A45', successTint: '#E3EFE9', signalOnText: '#E3A94F' },
+        dark: { bg: '#11120F', surface: '#181915', subtle: '#25281F', border: '#2E3129', text: '#ECE9E1', muted: '#A39E92', primary: '#5CC79F', onPrimary: '#0B241B', signal: '#E3A94F', accentText: '#E8B567', tint: '#2B2416', success: '#5CC79F', successTint: '#15271F', signalOnText: '#8A5A12' }
+      }
+    };
+  }
+  renderVals() {
+    var all = this.palettes();
+    var p = all[this.props.palette] || all.ember;
+    var dark = (this.props.mode || 'dark') !== 'light';
+    var t = dark ? p.dark : p.light;
+    var raw = [180, 236, 214, 288, 331, 262, 198, 305, 352, 371, 344, 398, 401, 412];
+    var bars = raw.map(function (v, i) { return { h: Math.round((v / 412) * 62), op: i === raw.length - 1 ? 1 : 0.3 }; });
+    var kpis = [
+      { label: 'Active cards', value: '24', dot: t.primary },
+      { label: 'QR codes', value: '9', dot: t.signal },
+      { label: 'Responses', value: '186', dot: t.success },
+      { label: 'Events', value: '3', dot: t.text }
+    ];
+    var chips = {
+      Card: { short: 'CD', bg: t.primary, fg: t.onPrimary },
+      Event: { short: 'EV', bg: t.text, fg: t.bg },
+      Form: { short: 'FM', bg: t.successTint, fg: t.success }
+    };
+    var activity = [
+      { what: 'Card scanned', where: 'Sales team / Amina Otieno', type: 'Card', time: '2m' },
+      { what: 'New RSVP, 2 guests', where: 'Product launch, 14 Nov', type: 'Event', time: '18m' },
+      { what: 'Response received', where: 'Client intake form', type: 'Form', time: '1h' }
+    ].map(function (a) {
+      var c = chips[a.type];
+      return Object.assign({}, a, { short: c.short, chipBg: c.bg, chipFg: c.fg });
+    });
+    var chip = dark ? 'rgba(0,0,0,0.16)' : 'rgba(255,255,255,0.18)';
+    return { t: t, chip: chip, bars: bars, kpis: kpis, activity: activity };
+  }
+}
+</script>
+</body>
+</html>

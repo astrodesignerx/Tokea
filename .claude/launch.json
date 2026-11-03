@@ -14,6 +14,13 @@
       "runtimeArgs": ["exec", "next", "start", "-p", "3012"],
       "port": 3012,
       "autoPort": false
+    },
+    {
+      "name": "redesign-r1-start",
+      "runtimeExecutable": "pnpm",
+      "runtimeArgs": ["--dir", "C:/Users/ether/.t3/worktrees/NikoForm/ds-redesign-r1", "exec", "next", "start", "-p", "3015"],
+      "port": 3015,
+      "autoPort": false
     }
   ]
 }

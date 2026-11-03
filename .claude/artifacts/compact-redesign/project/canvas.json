@@ -1,0 +1,38 @@
+{
+  "v": 3,
+  "createdOnFiles": { "v": 1, "at": "2026-11-02T20:40:00Z" },
+  "title": "NikoForm Compact Redesign",
+  "launch": { "view": "canvas" },
+  "pages": [],
+  "boards": {
+    "Main.dc.html": { "x": 0, "y": 0, "w": 1280, "h": 980, "title": "Compact system: tokens and components" },
+
+    "Palette.dc.html": { "x": 0, "y": 1400, "w": 560, "h": 840, "title": "A / Ink & Ember: palette" },
+    "Overview.dc.html": { "x": 640, "y": 1400, "w": 1280, "h": 840, "title": "A / Overview, desktop", "expand": "fill" },
+    "Phone.dc.html": { "x": 2000, "y": 1400, "w": 390, "h": 844, "title": "A / Overview, phone, dark" },
+    "List.dc.html": { "x": 2470, "y": 1400, "w": 1280, "h": 840, "title": "A / QR codes list", "expand": "fill" },
+
+    "Palette-Cobalt.dc.html": { "x": 0, "y": 2620, "w": 560, "h": 840, "title": "B / Midnight Cobalt: palette" },
+    "Overview-Cobalt.dc.html": { "x": 640, "y": 2620, "w": 1280, "h": 840, "title": "B / Overview, desktop", "expand": "fill" },
+    "Phone-Cobalt.dc.html": { "x": 2000, "y": 2620, "w": 390, "h": 844, "title": "B / Overview, phone, dark" },
+    "List-Cobalt.dc.html": { "x": 2470, "y": 2620, "w": 1280, "h": 840, "title": "B / QR codes list", "expand": "fill" },
+
+    "Palette-Evergreen.dc.html": { "x": 0, "y": 3840, "w": 560, "h": 840, "title": "C / Evergreen & Sand: palette" },
+    "Overview-Evergreen.dc.html": { "x": 640, "y": 3840, "w": 1280, "h": 840, "title": "C / Overview, desktop", "expand": "fill" },
+    "Phone-Evergreen.dc.html": { "x": 2000, "y": 3840, "w": 390, "h": 844, "title": "C / Overview, phone, dark" },
+    "List-Evergreen.dc.html": { "x": 2470, "y": 3840, "w": 1280, "h": 840, "title": "C / QR codes list", "expand": "fill" }
+  },
+  "order": [
+    "Main.dc.html",
+    "Palette.dc.html", "Overview.dc.html", "Phone.dc.html", "List.dc.html",
+    "Palette-Cobalt.dc.html", "Overview-Cobalt.dc.html", "Phone-Cobalt.dc.html", "List-Cobalt.dc.html",
+    "Palette-Evergreen.dc.html", "Overview-Evergreen.dc.html", "Phone-Evergreen.dc.html", "List-Evergreen.dc.html"
+  ],
+  "notes": {
+    "t0": { "x": 0, "y": -300, "text": "Compact system: one layout for every palette", "kind": "title1", "maxW": 1280 },
+    "tA": { "x": 0, "y": 1140, "text": "A / Ink & Ember", "kind": "title1", "maxW": 3750 },
+    "tB": { "x": 0, "y": 2360, "text": "B / Midnight Cobalt", "kind": "title1", "maxW": 3750 },
+    "tC": { "x": 0, "y": 3580, "text": "C / Evergreen & Sand", "kind": "title1", "maxW": 3750 }
+  },
+  "designSystems": []
+}
