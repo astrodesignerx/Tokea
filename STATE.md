@@ -65,6 +65,7 @@
 
 ## Open questions
 - To-do (new `todo` field type in Forms: client ticks services with optional quantity and KES prices, owner turns a response into a Checklist). Approved 2026-11-03; name "To-do" is provisional (owner: "for now"). Brief: `.claude/handoffs/20261103-todo-brief.md`. Branch `ds/todo` from `ds/redesign-r1` at `4fd7ef7`. Builder: Codex (gpt-6.1-sol) via T3 Code, because OpenCode Go returned server errors and the Zen key expired on 2026-11-03. Deposits via Paystack are out of scope for now.
+  - Implementation complete on 2026-11-03 in this checkout. Adds service editing and thumbnail uploads, public selection cards and estimates, frozen-version response reporting and CSV, and owner-only checklist conversion with title reuse under the owner row lock. All acceptance checks pass. Evidence: `.claude/artifacts/20261103-todo-checks.md`. Separate review and signed-in browser/database audit remain pending. No database access, Prisma commands, push, merge, or publication performed.
 - After each deploy, check production: `https://nikoform.co.ke/q/zzzzzzzz` should redirect (307) to `/q`; a 500 means production uses a different database that still needs `prisma migrate deploy`.
 - Owner signs in and checks the dashboard pages and the unlock form in the browser.
 - Before printing client codes: set `CARDS_URL` in Vercel if a custom domain is planned, since QR codes encode the origin and a domain change breaks printed codes.

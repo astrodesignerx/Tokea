@@ -70,7 +70,7 @@ No schema change: form fields already live in JSON (`Form.draft_fields`, `FormVe
 - `pnpm typecheck`, `pnpm exec eslint src scripts`, `pnpm exec next build` pass.
 - `pnpm exec tsx scripts/check-forms.ts` passes, including the new cases.
 - `git diff --stat 4fd7ef7` touches nothing under `prisma/`, `src/app/api/`, `src/components/templates/`.
-- No banned characters in the diff: `git diff 4fd7ef7 | python -c "import sys;d=sys.stdin.buffer.read().decode('utf-8');print([c for c in d if c in '–—·•'])"` prints `[]`.
+- No banned characters in the diff: `git diff 4fd7ef7 | python -c "import sys;d=sys.stdin.buffer.read().decode('utf-8');print([c for c in d if c in '\u2013\u2014\u00b7\u2022'])"` prints `[]`.
 - Existing form field types behave exactly as before (the existing check-forms cases still pass).
 
 ## After the builder (Claude does this, not the builder)
