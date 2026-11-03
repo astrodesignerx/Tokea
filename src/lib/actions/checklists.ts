@@ -151,7 +151,7 @@ export async function createChecklistFromResponseAction(_prev: ChecklistState, f
       if (picks.length === 0) throw new ChecklistError("This response has no picked services.");
       const identifier = parsed.fields.filter((field) => field.type === "short_text" || field.type === "email")
         .map((field) => answers[field.id]).find((answer) => typeof answer === "string" && answer.trim() !== "");
-      const name = response.form.title + ": " + (typeof identifier === "string" ? identifier.trim() : response.submitted_at.toISOString().slice(0, 10));
+      const name = response.form.title + ": " + (typeof identifier === "string" ? identifier.trim() : response.submitted_at.toISOString().slice(0, 10)).slice(0, LIMITS.listTitle).trim();
       await tx.$queryRaw`SELECT id FROM "User" WHERE id = ${user.id} FOR UPDATE`;
       const existing = await tx.checklist.findFirst({ where: { owner_id: user.id, title: name }, orderBy: { created_at: "asc" } });
       if (existing) return existing.id;
