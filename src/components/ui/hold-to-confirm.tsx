@@ -150,9 +150,9 @@ export function HoldToConfirm({
       disabled={disabled}
       aria-label={`${label}. Press and hold to confirm.`}
       className={cn(
-        "relative isolate w-full h-9 overflow-hidden rounded-md select-none",
-        "text-sm font-medium text-destructive",
-        "transition-colors duration-(--fast) ease-(--ease) hover:bg-accent motion-reduce:transition-none",
+        "relative isolate w-full h-8 overflow-hidden rounded-md select-none",
+        "text-[13px] font-medium text-destructive ring-offset-background",
+        "transition-colors duration-[var(--dur-1)] ease-[var(--ease-out)] hover:bg-accent motion-reduce:transition-none",
         "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2",
         "disabled:pointer-events-none disabled:opacity-50",
         "[touch-action:none]",
