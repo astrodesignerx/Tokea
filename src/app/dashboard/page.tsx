@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { ArrowRight, BarChart3, CalendarCheck, ClipboardList, IdCard, ListChecks, Plus, QrCode } from "lucide-react";
+import { ArrowRight, BarChart3, CalendarCheck, ClipboardList, IdCard, ListChecks, Plus, QrCode, Receipt } from "lucide-react";
 import { requireUser } from "@/lib/require-user";
 import { prisma } from "@/lib/db";
 import { Button } from "@/components/ui/button";
@@ -23,7 +23,7 @@ export default async function DashboardPage() {
   const user = await requireUser();
   const checklists = await checklistCounts(user.id);
 
-  const [companies, cards, scans, events, qrCodes, qrScans, forms, formResponses] =
+  const [companies, cards, scans, events, qrCodes, qrScans, forms, formResponses, quotes, invoices] =
     await Promise.all([
       prisma.organisation.count({ where: { owner_id: user.id } }),
       prisma.contactCard.count({
@@ -37,6 +37,8 @@ export default async function DashboardPage() {
       prisma.qrScan.count({ where: { qr_code: { owner_id: user.id } } }),
       prisma.form.count({ where: { owner_id: user.id, status: { not: "archived" } } }),
       prisma.formResponse.count({ where: { form: { owner_id: user.id } } }),
+      prisma.billingDocument.count({ where: { owner_id: user.id, type: "quote" } }),
+      prisma.billingDocument.count({ where: { owner_id: user.id, type: "invoice" } }),
     ]);
 
   const services = [
@@ -76,6 +78,17 @@ export default async function DashboardPage() {
       ],
       href: "/dashboard/forms",
       action: { label: "New form", href: "/dashboard/forms/new" },
+    },
+    {
+      icon: Receipt,
+      name: "Billing",
+      description: "Create quotes and invoices, keep customer details and turn an accepted quote into an invoice.",
+      stats: [
+        { label: quotes === 1 ? "quote" : "quotes", value: quotes },
+        { label: invoices === 1 ? "invoice" : "invoices", value: invoices },
+      ],
+      href: "/dashboard/billing",
+      action: { label: "New invoice", href: "/dashboard/billing/new?type=invoice" },
     },
     {
       icon: ListChecks,

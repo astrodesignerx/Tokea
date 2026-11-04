@@ -383,3 +383,29 @@
   background-size: 16px 16px;
   background-position: 0 0, 0 8px, 8px -8px, -8px 0;
 }
+
+/* Billing reuses QR entrance motion. Exits only composite opacity and transform. */
+.billing-item {
+  transition: opacity 160ms var(--ease-out, var(--ease)), transform 160ms var(--ease-out, var(--ease));
+}
+
+.billing-item.billing-item-removing {
+  animation: none;
+  opacity: 0;
+  transform: translate3d(0, -4px, 0);
+}
+
+@keyframes billing-fade-out {
+  from { opacity: 1; }
+  to { opacity: 0; }
+}
+
+.billing-fade-out {
+  animation: billing-fade-out 160ms var(--ease) both;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .billing-item { transition: none; }
+  .billing-item.billing-item-removing { transform: none; }
+  .billing-fade-out { display: none; animation: none; }
+}
