@@ -30,6 +30,8 @@ export default async function DocumentPage({ params }: { params: Promise<{ id: s
   return <>
     <div className="flex flex-wrap items-center gap-3"><h1 className="min-w-0 break-words font-display text-3xl font-medium tracking-tight">{doc.number}</h1><StatusBadge status={displayStatus(doc, billingToday())} /></div>
     <div className="mt-5 flex flex-wrap gap-2" aria-label="Document actions">
+      <Button asChild size="sm" variant="outline"><a href={`/api/billing/${doc.id}/pdf`} target="_blank" rel="noopener noreferrer">View PDF</a></Button>
+      <Button asChild size="sm" variant="outline"><a href={`/api/billing/${doc.id}/pdf?download=1`}>Download PDF</a></Button>
       {canEditDocument(doc) && <Button asChild size="sm"><Link href={`/dashboard/billing/${doc.id}/edit`}>Edit</Link></Button>}
       {STATUS_ACTIONS.filter((a) => canTransition(doc.type, doc.status, a.status)).map((a) => <ActionButton key={a.status} action={setDocumentStatusAction} id={doc.id} fields={{ status: a.status }} label={a.label} destructive={a.status === "void"} confirm={a.status === "void" ? "Void this document? Its number will remain reserved." : undefined} />)}
       {doc.type === "quote" && doc.status === "accepted" && invoices.length === 0 && <ActionButton action={convertQuoteToInvoiceAction} id={doc.id} label="Convert to invoice" />}

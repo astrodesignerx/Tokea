@@ -1,13 +1,16 @@
 "use client";
 
+import { useState } from "react";
 import { saveBillingProfileAction } from "@/lib/actions/billing";
 import type { ProfileInput } from "@/lib/billing/schemas";
 import { FormSection } from "@/components/qr-codes/form-section";
 import { BillingInput, BillingSelect, BillingTextarea, Field, SaveBar, useBillingAction } from "./form-fields";
+import { TemplateSwatches } from "./template-swatches";
 
 type Template = { value: string; label: string; description: string };
 export function ProfileForm({ initial, templates }: { initial: ProfileInput; templates: Template[] }) {
   const { state, pending, onSubmit, open, toggle } = useBillingAction(saveBillingProfileAction, { business: true });
+  const [template, setTemplate] = useState(initial.default_template);
   const input = (key: keyof ProfileInput, label: string, type = "text", hint?: string) => <Field key={key} label={label} hint={hint}><BillingInput name={key} type={type} defaultValue={String(initial[key])} required={key === "business_name"} /></Field>;
   const area = (key: keyof ProfileInput, label: string) => <Field key={key} label={label}><BillingTextarea name={key} defaultValue={String(initial[key])} /></Field>;
   const section = (id: string, title: string, summary: string, body: React.ReactNode) => <FormSection key={id} id={`billing-${id}`} title={title} summary={summary} open={Boolean(open[id])} onToggle={() => toggle(id)}>{body}</FormSection>;
@@ -37,7 +40,8 @@ export function ProfileForm({ initial, templates }: { initial: ProfileInput; tem
       {section("defaults", "Defaults", `${initial.default_currency} / ${initial.default_template}`, <>
         <div className="grid gap-4 sm:grid-cols-2">{input("default_currency", "Currency")}{input("default_quote_validity_days", "Quote validity (days)", "number")}{input("default_invoice_due_days", "Invoice due (days)", "number")}</div>
         {area("default_payment_terms", "Payment terms")}{area("default_terms", "Terms")}
-        <Field label="Default template"><BillingSelect name="default_template" defaultValue={initial.default_template}>{templates.map((t) => <option key={t.value} value={t.value}>{t.label}</option>)}</BillingSelect></Field>
+        <Field label="Default template"><BillingSelect name="default_template" value={template} onChange={(e) => setTemplate(e.target.value)}>{templates.map((t) => <option key={t.value} value={t.value}>{t.label}</option>)}</BillingSelect></Field>
+        <TemplateSwatches templates={templates} value={template} onChange={setTemplate} />
         <ul className="space-y-1 text-xs text-muted-foreground">{templates.map((t) => <li key={t.value}>{t.label}: {t.description}</li>)}</ul>
       </>)}
     </fieldset>

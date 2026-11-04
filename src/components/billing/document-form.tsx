@@ -9,6 +9,7 @@ import { EMPTY_CUSTOMER, quantityMilli, vatRateSchema, type DocumentInput } from
 import { documentTotals, lineTotal } from "@/lib/billing/totals";
 import { formatMoney, toMinorUnits } from "@/lib/money";
 import { CustomerFields } from "./customer-form";
+import { TemplateSwatches } from "./template-swatches";
 import { BillingInput, BillingSelect, BillingTextarea, Field, SaveBar, useBillingAction, type BillingAction } from "./form-fields";
 
 type Item = DocumentInput["items"][number] & { key: string };
@@ -141,6 +142,7 @@ export function DocumentForm({ id, type, initial, customers, templates, action, 
           <Field label="Notes"><BillingTextarea name="notes" defaultValue={initial.notes} maxLength={10000} /></Field>
           <Field label="Terms"><BillingTextarea name="terms" defaultValue={initial.terms} maxLength={10000} /></Field>
           <Field label="Template"><BillingSelect name="template" value={template} onChange={(e) => setTemplate(e.target.value)}>{templates.map((t) => <option key={t.value} value={t.value}>{t.label}</option>)}</BillingSelect></Field>
+          <TemplateSwatches templates={templates} value={template} onChange={setTemplate} />
           <p className="text-xs text-muted-foreground">{templates.find((t) => t.value === template)?.description}</p>
         </FormSection>
       </fieldset>
