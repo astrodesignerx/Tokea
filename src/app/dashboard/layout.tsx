@@ -1,11 +1,10 @@
-import Link from "next/link";
 import { requireUser } from "@/lib/require-user";
-import { signOutAction } from "@/lib/actions/auth";
-import { ThemeToggle } from "@/components/theme/theme-toggle";
-import { Button } from "@/components/ui/button";
-import { Wordmark } from "@/components/marketing/wordmark";
-import { DashNav } from "@/components/dashboard/dash-nav";
-import { PRODUCT } from "@/lib/brand";
+import { prisma } from "@/lib/db";
+import { AppSidebar } from "@/components/dashboard/app-sidebar";
+import { CommandMenuProvider } from "@/components/dashboard/command-menu";
+import { MobileTabbar } from "@/components/dashboard/mobile-tabbar";
+import { MobileTopbar } from "@/components/dashboard/mobile-topbar";
+import "@/components/dashboard/shell.css";
 
 export default async function DashboardLayout({
   children,
@@ -13,38 +12,30 @@ export default async function DashboardLayout({
   children: React.ReactNode;
 }) {
   const user = await requireUser();
+  const [cards, qrCodes] = await Promise.all([
+    prisma.contactCard.count({
+      where: { organisation: { owner_id: user.id }, status: "active" },
+    }),
+    prisma.qrCode.count({
+      where: { owner_id: user.id, status: { not: "archived" } },
+    }),
+  ]);
 
   return (
-    <div className="flex min-h-full flex-col">
-      {/*
-        Sticky and translucent, matching the marketing header, so moving
-        between the two does not feel like crossing into a different product.
-      */}
-      <header className="sticky top-0 z-40 border-b bg-background/80 backdrop-blur">
-        <div className="mx-auto flex h-14 max-w-6xl items-center justify-between gap-3 px-4 sm:px-6">
-          {/* min-w-0 lets the tab row shrink and scroll on phones instead of widening the page. */}
-          <div className="flex h-full min-w-0 flex-1 items-center gap-4 sm:gap-7">
-            <Link href="/" aria-label={PRODUCT} className="shrink-0">
-              <Wordmark />
-            </Link>
-            <DashNav />
-          </div>
-
-          <div className="flex shrink-0 items-center gap-2 text-sm">
-            <span className="hidden text-muted-foreground sm:inline">
-              {user.email}
-            </span>
-            <ThemeToggle />
-            <form action={signOutAction}>
-              <Button type="submit" variant="ghost" size="sm">
-                Sign out
-              </Button>
-            </form>
-          </div>
+    <CommandMenuProvider>
+      <a href="#main" className="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-2 focus:z-[100] focus:rounded-md focus:bg-card focus:px-4 focus:py-3 focus:text-foreground focus:ring-2 focus:ring-ring">
+        Skip to content
+      </a>
+      <div className="flex min-h-dvh">
+        <AppSidebar user={{ name: user.name, email: user.email }} counts={{ cards, qrCodes }} />
+        <div className="flex min-w-0 flex-1 flex-col">
+          <MobileTopbar />
+          <main id="main" tabIndex={-1} className="flex-1 pb-[calc(62px+env(safe-area-inset-bottom))] md:pb-0">
+            {children}
+          </main>
         </div>
-      </header>
-
-      <main className="flex-1">{children}</main>
-    </div>
+        <MobileTabbar email={user.email} />
+      </div>
+    </CommandMenuProvider>
   );
 }

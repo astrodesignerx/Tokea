@@ -11,7 +11,7 @@ const OPTIONS: { value: Theme; label: string; Icon: typeof Sun }[] = [
   { value: "dark", label: "Dark", Icon: Moon },
 ];
 
-export function ThemeToggle() {
+export function ThemeToggle({ tone = "default" }: { tone?: "default" | "sidebar" }) {
   const { theme, setTheme } = useTheme();
   const index = Math.max(
     0,
@@ -22,13 +22,21 @@ export function ThemeToggle() {
     <div
       role="group"
       aria-label="Colour theme"
-      className="relative inline-flex items-center rounded-md border bg-background p-0.5"
+      className={cn(
+        "relative inline-flex items-center rounded-md border p-0.5",
+        tone === "sidebar" ? "border-sidebar-border bg-transparent" : "bg-background",
+      )}
     >
       {/* Selection slides between options rather than blinking from one to the
           next. Transform only, so it composites. */}
       <span
         aria-hidden
-        className="absolute left-0.5 top-0.5 size-7 rounded-sm bg-accent transition-transform duration-200 ease-out motion-reduce:transition-none"
+        className={cn(
+          "absolute left-0.5 top-0.5 size-7 rounded-sm transition-transform motion-reduce:transition-none",
+          tone === "sidebar"
+            ? "bg-sidebar-active duration-[var(--dur-2)] ease-[var(--ease-out)]"
+            : "bg-accent duration-200 ease-out",
+        )}
         style={{ transform: `translateX(${index * 100}%)` }}
       />
       {OPTIONS.map(({ value, label, Icon }) => {
@@ -42,9 +50,14 @@ export function ThemeToggle() {
             title={label}
             className={cn(
               "relative z-10 grid size-7 place-items-center rounded-sm",
-              "transition-colors duration-150 ease-out motion-reduce:transition-none",
+              "transition-colors motion-reduce:transition-none",
+              tone === "sidebar"
+                ? "duration-[var(--dur-1)] ease-[var(--ease-out)]"
+                : "duration-150 ease-out",
               "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
-              selected ? "text-foreground" : "text-muted-foreground hover:text-foreground",
+              tone === "sidebar"
+                ? selected ? "text-sidebar-foreground" : "text-sidebar-muted hover:text-sidebar-foreground"
+                : selected ? "text-foreground" : "text-muted-foreground hover:text-foreground",
             )}
           >
             <Icon className="size-3.5" />

@@ -1,0 +1,69 @@
+/* Dashboard controls share R1's timing and easing tokens. */
+.nf-shell-control {
+  transition: color var(--dur-1) var(--ease-out), background-color var(--dur-1) var(--ease-out);
+}
+
+.nf-shell-control:focus-visible {
+  outline: 2px solid var(--ring);
+  outline-offset: -2px;
+}
+
+.nf-shell-scrim[data-state="open"] {
+  animation: nf-shell-fade var(--dur-2) var(--ease-out) both;
+}
+
+.nf-shell-scrim[data-state="closed"] {
+  animation: nf-shell-fade var(--dur-2) var(--ease-out) reverse both;
+}
+
+.nf-command-content[data-state="open"] {
+  animation: nf-command-in var(--dur-2) var(--ease-out) both;
+}
+
+.nf-command-content[data-state="closed"] {
+  animation: nf-command-in var(--dur-2) var(--ease-out) reverse both;
+}
+
+.nf-more-sheet[data-state="open"] {
+  animation: nf-sheet-in var(--dur-3) var(--ease-out) both;
+}
+
+.nf-more-sheet[data-state="closed"] {
+  animation: nf-sheet-in var(--dur-3) var(--ease-out) reverse both;
+}
+
+.nf-new-menu[data-state="open"] {
+  animation: nf-menu-in var(--dur-2) var(--ease-out) both;
+}
+
+.nf-new-menu[data-state="closed"] {
+  animation: nf-menu-in var(--dur-2) var(--ease-out) reverse both;
+}
+
+@keyframes nf-shell-fade {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes nf-command-in {
+  from { opacity: 0; transform: scale(0.98); }
+  to { opacity: 1; transform: scale(1); }
+}
+
+@keyframes nf-sheet-in {
+  from { transform: translateY(100%); }
+  to { transform: translateY(0); }
+}
+
+@keyframes nf-menu-in {
+  from { opacity: 0; transform: translateY(4px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .nf-shell-control { transition: none; }
+  .nf-shell-scrim,
+  .nf-command-content,
+  .nf-more-sheet,
+  .nf-new-menu { animation: none !important; }
+}
