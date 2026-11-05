@@ -8,9 +8,12 @@
 
     Drawn on a 32 unit grid with a 3 unit stroke throughout, so every edge
     lands on a whole pixel at 16px and 32px.
+
+    Colours are the Ink & Ember primary (#C4401A) with its paired foreground
+    (#FFFFFF), the same pair the primary buttons use.
   -->
-  <rect width="32" height="32" rx="7" fill="#3ECF8E"/>
-  <g fill="#131413">
+  <rect width="32" height="32" rx="7" fill="#C4401A"/>
+  <g fill="#FFFFFF">
     <!-- N: left stem, diagonal, shared spine -->
     <rect x="7" y="9" width="3" height="14"/>
     <path d="M7 9 L10 9 L18 23 L15 23 Z"/>

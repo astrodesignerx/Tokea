@@ -3,7 +3,7 @@ import { PRODUCT, WORDMARK } from "@/lib/brand";
 
 /**
  * The NF mark, drawn as inline SVG so it inherits currentColor and stays
- * crisp. Same geometry as app/icon.svg, minus the green plate: on a page the
+ * crisp. Same geometry as app/icon.svg, minus the ember plate: on a page the
  * mark sits directly on the background, while a favicon needs its own field
  * to survive whatever browser chrome is behind it.
  */
@@ -31,7 +31,7 @@ export function NFMark({ className }: { className?: string }) {
  *
  * The exclamation mark carries the accent while the letters stay in text
  * colour. Colouring the whole word would put the wordmark in competition with
- * every other green thing on the page; one glyph is enough to make it a mark.
+ * every other accent on the page; one glyph is enough to make it a mark.
  *
  * aria-label restores the ordinary spelling, so a screen reader says
  * "NikoForm" rather than shouting an acronym.
