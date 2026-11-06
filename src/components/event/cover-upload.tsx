@@ -57,6 +57,7 @@ export function CoverUpload({ value, onChange }: Props) {
             type="button"
             variant="destructive"
             size="icon"
+            aria-label="Remove image"
             className="absolute top-2 right-2"
             onClick={() => onChange(null)}
           >

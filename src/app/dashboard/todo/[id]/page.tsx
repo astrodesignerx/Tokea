@@ -7,6 +7,7 @@ import { TodoEditor } from "@/components/todo/todo-editor";
 import { TodoShare } from "@/components/todo/todo-share";
 import { getCardsOrigin } from "@/lib/cards/links";
 import type { TodoEditorValue } from "@/lib/todo/validation";
+import { brandColours } from "@/lib/todo/data";
 
 export const metadata = { title: "To-do list" };
 
@@ -18,7 +19,7 @@ export default async function TodoEditorPage({ params, searchParams }: {
   const list = await prisma.todoList.findFirst({ where: { id, owner_id: user.id }, include: { sections: { orderBy: { position: "asc" } }, items: { orderBy: { position: "asc" } } } });
   if (!list) notFound();
   const [organisations, origin, search] = await Promise.all([
-    prisma.organisation.findMany({ where: { owner_id: user.id }, select: { id: true, name: true }, orderBy: { name: "asc" } }),
+    prisma.organisation.findMany({ where: { owner_id: user.id }, select: { id: true, name: true, logo_url: true, brand_primary: true, brand_ink: true }, orderBy: { name: "asc" } }),
     getCardsOrigin(), searchParams,
   ]);
   const initial: TodoEditorValue = {
@@ -29,10 +30,9 @@ export default async function TodoEditorPage({ params, searchParams }: {
     sections: list.sections.map((s) => ({ id: s.id, title: s.title })),
     items: list.items.map((i) => ({ id: i.id, section_id: i.section_id ?? "", name: i.name, note: i.note ?? "", image_url: i.image_url ?? "", price: i.price === null ? "" : toMajorUnitsInput(i.price), per_unit: i.per_unit, unit_label: i.unit_label ?? "", max_quantity: i.max_quantity, active: i.active })),
   };
-  return <div className="mx-auto max-w-3xl px-4 py-10 sm:px-6">
-    <Link href="/dashboard/todo" className="text-sm text-muted-foreground">Back to To-do</Link>
-    <div className="mt-5 flex items-center gap-3"><h1 className="text-3xl font-medium">{list.title}</h1><span className="rounded-full bg-muted px-3 py-1 text-xs capitalize">{list.status}</span></div>
+  return <div className="mx-auto max-w-[1440px] px-4 py-7 sm:px-6">
+    <Link href="/dashboard/todo" className="inline-flex min-h-11 items-center text-sm text-muted-foreground">Back to To-do</Link>
+    <TodoEditor key={list.updated_at.toISOString()} id={id} initial={initial} businessName={user.name ?? "NikoForm"} publicUrl={origin + "/t/" + list.slug} organisations={organisations.map((org) => ({ id: org.id, name: org.name, logo_url: org.logo_url, brand: brandColours(org.brand_primary, org.brand_ink) }))} saved={search.saved === "1"} />
     <TodoShare url={`${origin}/t/${list.slug}`} slug={list.slug} />
-    <TodoEditor key={list.updated_at.toISOString()} id={id} initial={initial} organisations={organisations} saved={search.saved === "1"} />
   </div>;
 }
