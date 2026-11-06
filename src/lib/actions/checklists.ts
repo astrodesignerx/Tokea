@@ -15,6 +15,7 @@ import { getCardsOrigin } from "@/lib/cards/links";
 import { canHaveSubtasks } from "@/lib/checklists/hierarchy";
 import { repeatPeriodStart, repeatSettings } from "@/lib/checklists/repeat";
 import { resetChecklist } from "@/lib/checklists/reset";
+import { parseFields, todoPicks } from "@/lib/forms/fields";
 
 /** Every body id is attacker-controlled. Lock, re-check membership and scope child ids to that list. */
 export type ChecklistState = { error: string | null; errorAt?: number; savedAt?: number };
@@ -130,6 +131,49 @@ export async function createChecklistAction(_prev: ChecklistState, form: FormDat
   }
   refresh();
   redirect(`${PATH}/${id}`);
+}
+
+export async function createChecklistFromResponseAction(_prev: ChecklistState, form: FormData): Promise<ChecklistState> {
+  const user = await requireUser();
+  let id: string;
+  try {
+    id = await prisma.$transaction(async (tx) => {
+      const response = await tx.formResponse.findFirst({
+        where: { id: value(form, "response_id"), form: { owner_id: user.id } },
+        include: { form: true, version: true },
+      });
+      if (!response) throw new ChecklistError("Response not found.");
+      const parsed = parseFields(response.version.fields);
+      if ("error" in parsed) throw new ChecklistError("This response's questions could not be read.");
+      const answers = response.answers && typeof response.answers === "object" && !Array.isArray(response.answers)
+        ? response.answers as Record<string, unknown> : {};
+      const picks = parsed.fields.filter((field) => field.type === "todo").flatMap((field) => todoPicks(field, answers[field.id]));
+      if (picks.length === 0) throw new ChecklistError("This response has no picked services.");
+      const identifier = parsed.fields.filter((field) => field.type === "short_text" || field.type === "email")
+        .map((field) => answers[field.id]).find((answer) => typeof answer === "string" && answer.trim() !== "");
+      const name = response.form.title + ": " + (typeof identifier === "string" ? identifier.trim() : response.submitted_at.toISOString().slice(0, 10)).slice(0, LIMITS.listTitle).trim();
+      await tx.$queryRaw`SELECT id FROM "User" WHERE id = ${user.id} FOR UPDATE`;
+      const existing = await tx.checklist.findFirst({ where: { owner_id: user.id, title: name }, orderBy: { created_at: "asc" } });
+      if (existing) return existing.id;
+      if (picks.length > LIMITS.items) throw new ChecklistError("A list can have at most 500 items, including headings.");
+      if (await tx.checklist.count({ where: { owner_id: user.id, archived_at: null } }) >= LIMITS.lists) throw new ChecklistError("You can own at most 100 active lists. Archive one first.");
+      const list = await tx.checklist.create({ data: {
+        owner_id: user.id, title: name,
+        members: { create: { user_id: user.id, role: "owner" } },
+        items: { create: picks.map(({ service, quantity }, index) => ({
+          title: service.name + (quantity > 1 ? " x " + quantity : ""), notes: service.note ?? null,
+          kind: "task", position: (index + 1) * POSITION_STEP, created_by_id: user.id,
+        })) },
+        activity: { create: { actor_id: user.id, action: "added", item_title: "List from form response" } },
+      } });
+      return list.id;
+    });
+  } catch (error) {
+    if (error instanceof ChecklistError) return failed(error.message);
+    throw error;
+  }
+  refresh();
+  redirect(PATH + "/" + id);
 }
 
 export async function renameChecklistAction(_prev: ChecklistState, form: FormData) {

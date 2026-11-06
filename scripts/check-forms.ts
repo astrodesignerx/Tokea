@@ -12,6 +12,9 @@ import {
   normaliseKenyanPhone,
   parseFields,
   readAnswers,
+  todoPicks,
+  todoTotal,
+  MAX_SERVICES,
   type FieldType,
   type FormField,
 } from "../src/lib/forms/fields.js";
@@ -181,6 +184,7 @@ for (const type of types) {
     type,
     required: type !== "heading",
     options: ["One", "Two"],
+    services: [{ id: "serv0001", name: "Logo concepts", max_qty: 3, price: 1_500_000 }],
   });
   const parsed = parseFields([base]);
   check(`${type} parses`, "fields" in parsed, "error" in parsed ? parsed.error : "");
@@ -193,6 +197,7 @@ for (const type of types) {
       phone: "0712 345 678",
       number: "42.5",
       date: "2026-10-27",
+      todo: { serv0001: 2 },
       single_choice: "One",
       multi_choice: ["One", "Two"],
       dropdown: "Two",
@@ -425,6 +430,84 @@ const empty = responsesToCsv([], []);
 check("empty export has a header", empty.slice(1).startsWith("Submitted,Version\r\n"), JSON.stringify(empty));
 
 // ---------------------------------------------------------------------------
+section("To-do fields and answers");
+const todo = field({ type: "todo", label: "Services", services: [
+  { id: "serv0001", name: "Logo concepts", price: 1_500_000, max_qty: 3, note: "Three routes" },
+  { id: "serv0002", name: "Brand guide", max_qty: 1 },
+] });
+const parsedTodo = fieldsOf([todo])[0];
+check("good To-do field parses", parsedTodo.services?.length === 2);
+check("To-do pricing defaults to exact", parsedTodo.price_display === "exact");
+const defaults = fieldsOf([{ ...todo, services: [{ id: "serv0001", name: "Logo concepts" }] }])[0];
+check("To-do quantity defaults to one", defaults.services?.[0].max_qty === 1);
+for (const [name, patch] of [
+  ["missing name", { name: " " }],
+  ["long name", { name: "x".repeat(81) }],
+  ["long note", { note: "x".repeat(201) }],
+  ["bad note", { note: 123 }],
+  ["bad price", { price: -1 }],
+  ["fractional price", { price: 1.5 }],
+  ["oversized price", { price: 1_000_000_001 }],
+  ["null price", { price: null }],
+  ["bad quantity", { max_qty: 21 }],
+  ["zero quantity limit", { max_qty: 0 }],
+  ["fractional quantity limit", { max_qty: 1.5 }],
+  ["null quantity limit", { max_qty: null }],
+  ["non-HTTPS image", { image_url: "http://example.com/image.png" }],
+  ["long image URL", { image_url: "https://example.com/" + "x".repeat(500) }],
+] as const) {
+  check("To-do rejects " + name, "error" in parseFields([{ ...todo, services: [{ ...todo.services![0], ...patch }] }]));
+}
+check("To-do accepts boundary values", "fields" in parseFields([{ ...todo, services: [{ ...todo.services![0], name: "x".repeat(80), note: "x".repeat(200), price: 1_000_000_000, max_qty: 20, image_url: "https://example.com/image.png" }] }]));
+check("To-do rejects duplicate service ids", "error" in parseFields([{ ...todo, services: [todo.services![0], { ...todo.services![1], id: "serv0001" }] }]));
+check("To-do rejects duplicate names", "error" in parseFields([{ ...todo, services: [todo.services![0], { ...todo.services![1], name: " Logo concepts " }] }]));
+check("To-do needs services", "error" in parseFields([{ ...todo, services: [] }]));
+check("To-do rejects invalid pricing display", "error" in parseFields([{ ...todo, price_display: "paid" }]));
+check("To-do respects maximum service count", "error" in parseFields([{ ...todo, services: Array.from({ length: MAX_SERVICES + 1 }, (_, index) => ({ id: "sv" + String(index).padStart(6, "0"), name: "Service " + index, max_qty: 1 })) }]));
+const todoSchema = schemaOf([parsedTodo]);
+const todoAnswer = (answer: unknown) => todoSchema.safeParse({ [todo.id]: answer });
+check("To-do rejects unknown item ids", !todoAnswer({ unknown1: 1 }).success);
+check("To-do rejects unknown zero item ids", !todoAnswer({ unknown1: 0 }).success);
+check("To-do rejects prototype-named unknown item ids", !todoAnswer(JSON.parse('{"__proto__":1}')).success);
+check("To-do rejects quantities above maximum", !todoAnswer({ serv0001: 4 }).success);
+check("To-do rejects fractional quantities", !todoAnswer({ serv0001: 1.5 }).success);
+check("To-do rejects negative quantities", !todoAnswer({ serv0001: -1 }).success);
+check("To-do rejects string quantities", !todoAnswer({ serv0001: "1" }).success);
+const zerosDropped = todoAnswer({ serv0001: 2, serv0002: 0 });
+check("To-do drops zero entries", zerosDropped.success && JSON.stringify(zerosDropped.data[todo.id]) === JSON.stringify({ serv0001: 2 }));
+const noPicks = todoAnswer({ serv0001: 0 });
+check("To-do optional empty answer is omitted", noPicks.success && !(todo.id in noPicks.data));
+check("To-do optional missing answer is omitted", JSON.stringify(todoSchema.parse({})) === "{}");
+check("To-do required needs a pick", !schemaOf([{ ...parsedTodo, required: true }]).safeParse({ [todo.id]: {} }).success);
+check("To-do required rejects zero picks", !schemaOf([{ ...parsedTodo, required: true }]).safeParse({ [todo.id]: { serv0001: 0 } }).success);
+check("To-do exact total uses quantities", todoTotal(parsedTodo, { serv0001: 3 }) === 4_500_000);
+check("To-do from total uses quantities", todoTotal({ ...parsedTodo, price_display: "from" }, { serv0001: 3 }) === 4_500_000);
+check("To-do hidden total is null", todoTotal({ ...parsedTodo, price_display: "hidden" }, { serv0001: 3 }) === null);
+check("To-do mixed total ignores unpriced items", todoTotal(parsedTodo, { serv0001: 2, serv0002: 1 }) === 3_000_000);
+check("To-do only unpriced total is null", todoTotal(parsedTodo, { serv0002: 1 }) === null);
+check("To-do empty total is null", todoTotal(parsedTodo, {}) === null);
+check("To-do free price counts as priced", todoTotal({ ...parsedTodo, services: [{ ...parsedTodo.services![0], price: 0 }] }, { serv0001: 1 }) === 0);
+check("To-do ignores invalid picks for reporting", todoPicks(parsedTodo, { serv0001: 99, unknown1: 1 }).length === 0);
+const todoData = new FormData();
+todoData.set(todo.id + ".serv0001", "3");
+todoData.set(todo.id + ".serv0002", "0");
+todoData.set(todo.id + ".total", "1");
+check("To-do posted unknown ids are rejected", !todoSchema.safeParse(readAnswers([parsedTodo], todoData)).success);
+todoData.delete(todo.id + ".total");
+check("To-do posted quantities survive validation", JSON.stringify(todoSchema.parse(readAnswers([parsedTodo], todoData))) === JSON.stringify({ [todo.id]: { serv0001: 3 } }));
+todoData.set(todo.id + ".__proto__", "1");
+check("To-do posted prototype-named unknown ids are rejected", !todoSchema.safeParse(readAnswers([parsedTodo], todoData)).success);
+const todoCsv = responsesToCsv([{ id: "todo-v1", number: 1, fields: [parsedTodo] }], [{ version_id: "todo-v1", submitted_at: submitted, answers: { [todo.id]: { serv0001: 3, serv0002: 1 } } }]);
+check("To-do CSV names picked services", todoCsv.includes("Logo concepts x3; Brand guide x1"));
+check("To-do CSV has numeric KES total", todoCsv.includes("Services total (KES)") && todoCsv.includes(",45000"));
+const hiddenCsv = responsesToCsv([{ id: "hidden", number: 1, fields: [{ ...parsedTodo, price_display: "hidden" }] }], []);
+check("To-do CSV hides total column for hidden prices", !hiddenCsv.includes("total (KES)"));
+const frozenCsv = responsesToCsv([
+  { id: "new", number: 2, fields: [{ ...parsedTodo, services: [{ ...parsedTodo.services![0], name: "New name", price: 99 }] }] },
+  { id: "old", number: 1, fields: [parsedTodo] },
+], [{ version_id: "old", submitted_at: submitted, answers: { [todo.id]: { serv0001: 3 } } }]);
+check("To-do CSV uses frozen names and prices", frozenCsv.includes("Logo concepts x3,45000"));
+
 console.log("");
 if (failures > 0) {
   console.log(`forms checks: ${failures} of ${checks} failed`);

@@ -9,120 +9,164 @@
 @custom-variant dark (&:where(.dark, .dark *));
 
 /*
-  Palette. Near-neutral greys carrying a faint green cast, with one saturated
-  green doing all the accent work, in the manner of supabase.com. The greys are
-  hue 120-155 at very low saturation, so the interface reads as grey while
-  sitting in the same family as the accent rather than fighting it.
-
-  --brand is the saturated accent and is deliberately separate from --primary:
-  --primary is a button surface that text sits on, while --brand is used as
-  text and hairlines. On white, #3ECF8E has too little contrast to read as
-  text, so the light theme darkens it rather than reusing the same value.
+  Ink & Ember palette. Warm stone neutrals paired with burnt terracotta and
+  ember accents, plus dark ink chrome for the persistent sidebar. --primary
+  and --ring drive interactive surfaces and focus rings, while --brand is
+  tuned separately so accent text and links hold contrast in both themes.
 */
 @layer base {
   :root {
     color-scheme: light;
-    --background: 0 0% 100%;
-    --foreground: 120 2.6% 7.6%;
-    --card: 0 0% 100%;
-    --card-foreground: 120 2.6% 7.6%;
-    --popover: 0 0% 100%;
-    --popover-foreground: 120 2.6% 7.6%;
-    --primary: 155 100% 19.2%;
-    --primary-foreground: 0 0% 100%;
-    --secondary: 120 4.8% 95.9%;
-    --secondary-foreground: 120 2.6% 7.6%;
-    --muted: 120 4.8% 95.9%;
-    --muted-foreground: 100 3.1% 38.4%;
-    --accent: 120 7.7% 94.9%;
-    --accent-foreground: 120 2.6% 7.6%;
-    --destructive: 0 72.2% 50.6%;
-    --destructive-foreground: 0 0% 100%;
-    --border: 120 5.7% 89.6%;
-    --input: 120 5.7% 89.6%;
-    --ring: 152 67% 36.9%;
-    --brand: 151 78.1% 26.9%;
-    --brand-foreground: 0 0% 100%;
+    --background: #FAFAF9;
+    --foreground: #111110;
+    --card: #FFFFFF;
+    --card-foreground: #111110;
+    --popover: #FFFFFF;
+    --popover-foreground: #111110;
+    --primary: #C4401A;
+    --primary-foreground: #FFFFFF;
+    --secondary: #F3F3F1;
+    --secondary-foreground: #111110;
+    --muted: #F3F3F1;
+    --muted-foreground: #66655F;
+    --accent: #F3F3F1;
+    --accent-foreground: #111110;
+    --destructive: #B4232A;
+    --destructive-foreground: #FFFFFF;
+    --border: #E5E4E0;
+    --input: #E5E4E0;
+    --ring: #C4401A;
+    --brand: #B93C17;
+    --brand-foreground: #FFFFFF;
+    --signal: #E8501C;
+    --tint: #FCEDE7;
+    --success: #1A6B43;
+    --success-tint: #E6F4EC;
+    --destructive-tint: #FBE9E9;
+    --sidebar: #161615;
+    --sidebar-foreground: #EDEDEA;
+    --sidebar-muted: #9C9B95;
+    --sidebar-border: #2B2B28;
+    --sidebar-active: #232320;
+    --sidebar-primary: #FF6A33;
     /* Small radii: 6px on controls, 12px on panels. */
     --radius: 0.375rem;
   }
 
   .dark {
     color-scheme: dark;
-    --background: 120 2.6% 7.6%;
-    --foreground: 150 5.9% 93.3%;
-    --card: 150 4% 9.8%;
-    --card-foreground: 150 5.9% 93.3%;
-    --popover: 150 4% 9.8%;
-    --popover-foreground: 150 5.9% 93.3%;
-    --primary: 155 100% 19.2%;
-    --primary-foreground: 150 5.9% 93.3%;
-    --secondary: 150 2.8% 14.1%;
-    --secondary-foreground: 150 5.9% 93.3%;
-    --muted: 150 3.2% 12.2%;
-    --muted-foreground: 150 1% 60%;
-    --accent: 150 2.8% 14.1%;
-    --accent-foreground: 150 5.9% 93.3%;
-    --destructive: 0 72% 62%;
-    --destructive-foreground: 0 0% 7%;
-    --border: 150 2.3% 16.9%;
-    --input: 150 2.3% 16.9%;
-    --ring: 153 60.2% 52.7%;
-    --brand: 153 60.2% 52.7%;
-    --brand-foreground: 155 100% 9.4%;
+    --background: #0E0E0D;
+    --foreground: #EDEDEA;
+    --card: #161615;
+    --card-foreground: #EDEDEA;
+    --popover: #161615;
+    --popover-foreground: #EDEDEA;
+    --primary: #FF6A33;
+    --primary-foreground: #170A04;
+    --secondary: #232320;
+    --secondary-foreground: #EDEDEA;
+    --muted: #232320;
+    --muted-foreground: #9C9B95;
+    --accent: #232320;
+    --accent-foreground: #EDEDEA;
+    --destructive: #FF6B6B;
+    --destructive-foreground: #1A0606;
+    --border: #2B2B28;
+    --input: #2B2B28;
+    --ring: #FF6A33;
+    --brand: #FF8A5C;
+    --brand-foreground: #170A04;
+    --signal: #FF6A33;
+    --tint: #2A1A12;
+    --success: #5CC98F;
+    --success-tint: #14261C;
+    --destructive-tint: #2E1616;
+    --sidebar: #161615;
+    --sidebar-foreground: #EDEDEA;
+    --sidebar-muted: #9C9B95;
+    --sidebar-border: #2B2B28;
+    --sidebar-active: #232320;
+    --sidebar-primary: #FF6A33;
   }
 }
 
 @theme inline {
-  --color-background: hsl(var(--background));
-  --color-foreground: hsl(var(--foreground));
-  --color-card: hsl(var(--card));
-  --color-card-foreground: hsl(var(--card-foreground));
-  --color-popover: hsl(var(--popover));
-  --color-popover-foreground: hsl(var(--popover-foreground));
-  --color-primary: hsl(var(--primary));
-  --color-primary-foreground: hsl(var(--primary-foreground));
-  --color-secondary: hsl(var(--secondary));
-  --color-secondary-foreground: hsl(var(--secondary-foreground));
-  --color-muted: hsl(var(--muted));
-  --color-muted-foreground: hsl(var(--muted-foreground));
-  --color-accent: hsl(var(--accent));
-  --color-accent-foreground: hsl(var(--accent-foreground));
-  --color-destructive: hsl(var(--destructive));
-  --color-destructive-foreground: hsl(var(--destructive-foreground));
-  --color-border: hsl(var(--border));
-  --color-input: hsl(var(--input));
-  --color-ring: hsl(var(--ring));
-  --color-brand: hsl(var(--brand));
-  --color-brand-foreground: hsl(var(--brand-foreground));
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --color-brand: var(--brand);
+  --color-brand-foreground: var(--brand-foreground);
+  --color-signal: var(--signal);
+  --color-tint: var(--tint);
+  --color-success: var(--success);
+  --color-success-tint: var(--success-tint);
+  --color-destructive-tint: var(--destructive-tint);
+  --color-sidebar: var(--sidebar);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar-muted: var(--sidebar-muted);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-active: var(--sidebar-active);
+  --color-sidebar-primary: var(--sidebar-primary);
   --radius-lg: var(--radius);
   --radius-md: calc(var(--radius) - 2px);
   --radius-sm: calc(var(--radius) - 4px);
   /* Panels sit noticeably rounder than controls. */
   --radius-panel: 0.75rem;
-  --font-sans: var(--font-inter);
-  --font-display: var(--font-manrope);
+  --font-sans: var(--font-geist-sans);
+  --font-display: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
 }
 
 @layer base {
   * {
-    border-color: hsl(var(--border));
+    border-color: var(--border);
   }
   body {
-    background-color: hsl(var(--background));
-    color: hsl(var(--foreground));
+    background-color: var(--background);
+    color: var(--foreground);
+    font-size: 13px;
+    line-height: 1.45;
     font-feature-settings: "rlig" 1, "calt" 1;
   }
   :root {
     /* One motion voice for the whole app. */
-    --ease: cubic-bezier(0, 0, 0.2, 1);
-    --fast: 200ms;
-    --dur-1: 140ms;
-    --dur-2: 220ms;
-    --dur-3: 320ms;
-    --ease-out: var(--ease);
+    --dur-1: 120ms;
+    --dur-2: 180ms;
+    --dur-3: 260ms;
+    --ease-out: cubic-bezier(0.2, 0, 0, 1);
+    --ease-in-out: cubic-bezier(0.4, 0, 0.2, 1);
+    --ease: var(--ease-out);
+    --fast: var(--dur-2);
   }
+  @media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+    }
+  }
+}
+
+.nums {
+  font-variant-numeric: tabular-nums;
 }
 
 /* Service selection uses the app palette and shared motion tokens. */
@@ -207,8 +251,8 @@
 
 .nf-panel {
   border-radius: var(--radius-panel, 0.75rem);
-  border: 1px solid hsl(var(--border));
-  background-color: hsl(var(--card));
+  border: 1px solid var(--border);
+  background-color: var(--card);
   transition:
     transform var(--fast) var(--ease),
     border-color var(--fast) var(--ease);
@@ -216,7 +260,7 @@
 
 .nf-panel-interactive:hover {
   transform: translateY(-2px);
-  border-color: hsl(var(--brand) / 0.35);
+  border-color: color-mix(in srgb, var(--brand) 35%, transparent);
 }
 
 /* Small mono label that sits above a heading. */
@@ -225,7 +269,7 @@
   font-size: 0.6875rem;
   letter-spacing: 0.14em;
   text-transform: uppercase;
-  color: hsl(var(--brand));
+  color: var(--brand);
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -307,7 +351,7 @@
 .htc-fill {
   position: absolute;
   inset: 0;
-  background: hsl(var(--foreground));
+  background: var(--foreground);
   transform: translateX(-104%);
   will-change: transform;
 }
@@ -326,7 +370,7 @@
 
 /* the copy of the label that reads against the liquid */
 .htc-reveal {
-  color: hsl(var(--background));
+  color: var(--background);
   clip-path: inset(0 100% 0 0);
   will-change: clip-path;
 }
