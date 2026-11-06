@@ -2,6 +2,8 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { useEffect, useState } from "react";
+import { getTodoUnseenCountAction } from "@/lib/actions/todo";
 import { cn } from "@/lib/utils";
 
 /**
@@ -19,6 +21,7 @@ const TABS = [
   { href: "/dashboard/companies", label: "Cards", exact: false },
   { href: "/dashboard/qr", label: "QR codes", exact: false },
   { href: "/dashboard/forms", label: "Forms", exact: false },
+  { href: "/dashboard/todo", label: "To-do", exact: false },
   { href: "/dashboard/checklists", label: "Checklists", exact: false },
   { href: "/dashboard/events", label: "Events", exact: false },
   { href: "/dashboard/analytics", label: "Analytics", exact: false },
@@ -26,6 +29,12 @@ const TABS = [
 
 export function DashNav() {
   const pathname = usePathname();
+  const [todoCount, setTodoCount] = useState(0);
+  useEffect(() => {
+    let active = true;
+    getTodoUnseenCountAction().then((count) => { if (active) setTodoCount(count); }).catch(() => {});
+    return () => { active = false; };
+  }, [pathname]);
 
   return (
     <nav
@@ -53,6 +62,7 @@ export function DashNav() {
             )}
           >
             {label}
+            {href === "/dashboard/todo" && todoCount > 0 && <span className="ml-1.5 rounded-full bg-primary px-1.5 py-0.5 text-[10px] text-primary-foreground" aria-label={`${todoCount} unread requests`}>{todoCount}</span>}
           </Link>
         );
       })}
