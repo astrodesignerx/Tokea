@@ -60,7 +60,7 @@ export default async function TodoOverview({ searchParams }: { searchParams: Pro
       {total > 50 && <nav className="mt-4 flex items-center gap-4 text-sm" aria-label="Inbox pages">{page > 1 && <Link href={url(status, page - 1)}>Previous</Link>}<span>Page {page} of {Math.max(1, Math.ceil(total / 50))}</span>{page * 50 < total && <Link href={url(status, page + 1)}>Next</Link>}</nav>}
     </section>
     <section className="mt-10" aria-labelledby="lists-title"><h2 id="lists-title" className="text-xl font-medium">Your lists</h2>
-      <div className="mt-4 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">{lists.map((list) => <div key={list.id} className="nf-panel p-5">
+      <div className="mt-4 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">{lists.map((list) => <div key={list.id} className="nf-panel min-w-0 p-5">
         <div className="flex flex-wrap items-center justify-between gap-2"><Link href={`/dashboard/todo/${list.id}`} className="font-medium underline underline-offset-4">{list.title}</Link><span className="rounded-full bg-muted px-2 py-1 text-xs capitalize">{list.status}</span></div>
         <p className="mt-3 text-sm text-muted-foreground">{list._count.requests} {list._count.requests === 1 ? "request" : "requests"}</p>
         <div className="mt-3 flex items-center gap-1"><a href={`${origin}/t/${list.slug}`} target="_blank" rel="noreferrer" className="min-w-0 truncate font-mono text-xs text-brand">{origin}/t/{list.slug}</a><CopyButton value={`${origin}/t/${list.slug}`} /></div>
