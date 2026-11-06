@@ -6,6 +6,13 @@ export type EmailTemplate = {
   text: string;
 };
 
+export function todoRequestEmail(requestUrl: string): EmailTemplate {
+  const subject = "New to-do request";
+  const body = `<p>A new request is waiting in your To-do inbox.</p><div style="margin:24px 0">${button(requestUrl, "Open request")}</div>`;
+  const { html } = layout({ heading: subject, body });
+  return { subject, html, text: `A new request is waiting in your To-do inbox.\n\nOpen request: ${requestUrl}` };
+}
+
 export function taskReminderEmail(input: {
   name: string | null;
   overdue: ReminderTask[];

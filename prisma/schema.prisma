@@ -34,6 +34,7 @@ model User {
   organisations            Organisation[]
   qr_codes                 QrCode[]
   forms                    Form[]
+  todo_lists               TodoList[]
   checklists               Checklist[]
   checklist_memberships    ChecklistMember[]
   checklist_assigned_items ChecklistItem[]     @relation("ChecklistItemAssignee")
@@ -252,6 +253,7 @@ model Organisation {
   owner User          @relation(fields: [owner_id], references: [id], onDelete: Cascade)
   cards ContactCard[]
   forms Form[]
+  todo_lists TodoList[]
 
   @@index([owner_id])
 }
@@ -599,4 +601,105 @@ model ChecklistActivity {
   actor     User      @relation("ChecklistActivityActor", fields: [actor_id], references: [id], onDelete: Cascade)
 
   @@index([checklist_id, created_at])
+}
+
+// Service pick lists and immutable request snapshots.
+model TodoList {
+  id                String   @id @default(cuid())
+  owner_id          String
+  organisation_id   String?
+  title             String
+  intro             String?
+  slug              String   @unique
+  status            String   @default("draft")
+  layout            String   @default("list")
+  allow_view_switch Boolean  @default(false)
+  show_prices       Boolean  @default(false)
+  currency          String   @default("KES")
+  ask_event_date    Boolean  @default(true)
+  notify_emails     String[] @default([])
+  thank_you         String?
+  created_at        DateTime @default(now())
+  updated_at        DateTime @updatedAt
+
+  owner        User          @relation(fields: [owner_id], references: [id], onDelete: Cascade)
+  organisation Organisation? @relation(fields: [organisation_id], references: [id], onDelete: SetNull)
+  sections     TodoSection[]
+  items        TodoItem[]
+  requests     TodoRequest[]
+
+  @@index([owner_id])
+}
+
+model TodoSection {
+  id         String   @id @default(cuid())
+  list_id    String
+  title      String
+  position   Int
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+
+  list  TodoList   @relation(fields: [list_id], references: [id], onDelete: Cascade)
+  items TodoItem[]
+
+  @@index([list_id, position])
+}
+
+model TodoItem {
+  id           String   @id @default(cuid())
+  list_id      String
+  section_id   String?
+  name         String
+  note         String?
+  image_url    String?
+  price        Int?
+  per_unit     Boolean  @default(false)
+  unit_label   String?
+  max_quantity Int      @default(20)
+  position     Int
+  active       Boolean  @default(true)
+  created_at   DateTime @default(now())
+  updated_at   DateTime @updatedAt
+
+  list          TodoList          @relation(fields: [list_id], references: [id], onDelete: Cascade)
+  section       TodoSection?      @relation(fields: [section_id], references: [id], onDelete: SetNull)
+  request_items TodoRequestItem[]
+
+  @@index([list_id, position])
+}
+
+model TodoRequest {
+  id         String    @id @default(cuid())
+  list_id    String
+  name       String
+  phone      String
+  email      String?
+  event_date DateTime? @db.Date
+  notes      String?
+  status     String    @default("new")
+  estimate   Int?
+  currency   String
+  seen_at    DateTime?
+  created_at DateTime  @default(now())
+  updated_at DateTime  @updatedAt
+
+  list  TodoList          @relation(fields: [list_id], references: [id], onDelete: Cascade)
+  items TodoRequestItem[]
+
+  @@index([list_id, status, created_at])
+}
+
+model TodoRequestItem {
+  id         String   @id @default(cuid())
+  request_id String
+  item_id    String?
+  name       String
+  quantity   Int
+  unit_price Int?
+  line_total Int?
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+
+  request TodoRequest @relation(fields: [request_id], references: [id], onDelete: Cascade)
+  item    TodoItem?   @relation(fields: [item_id], references: [id], onDelete: SetNull)
 }

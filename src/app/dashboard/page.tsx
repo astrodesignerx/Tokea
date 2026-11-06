@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { ArrowRight, BarChart3, CalendarCheck, ClipboardList, IdCard, ListChecks, Plus, QrCode } from "lucide-react";
+import { ArrowRight, BarChart3, CalendarCheck, ClipboardList, IdCard, ListChecks, ListTodo, Plus, QrCode } from "lucide-react";
 import { requireUser } from "@/lib/require-user";
 import { prisma } from "@/lib/db";
 import { Button } from "@/components/ui/button";
@@ -23,7 +23,7 @@ export default async function DashboardPage() {
   const user = await requireUser();
   const checklists = await checklistCounts(user.id);
 
-  const [companies, cards, scans, events, qrCodes, qrScans, forms, formResponses] =
+  const [companies, cards, scans, events, qrCodes, qrScans, forms, formResponses, todoLists, todoRequests] =
     await Promise.all([
       prisma.organisation.count({ where: { owner_id: user.id } }),
       prisma.contactCard.count({
@@ -37,6 +37,8 @@ export default async function DashboardPage() {
       prisma.qrScan.count({ where: { qr_code: { owner_id: user.id } } }),
       prisma.form.count({ where: { owner_id: user.id, status: { not: "archived" } } }),
       prisma.formResponse.count({ where: { form: { owner_id: user.id } } }),
+      prisma.todoList.count({ where: { owner_id: user.id, status: { not: "archived" } } }),
+      prisma.todoRequest.count({ where: { list: { owner_id: user.id }, status: "new" } }),
     ]);
 
   const services = [
@@ -76,6 +78,17 @@ export default async function DashboardPage() {
       ],
       href: "/dashboard/forms",
       action: { label: "New form", href: "/dashboard/forms/new" },
+    },
+    {
+      icon: ListTodo,
+      name: "To-do",
+      description: "Share a list of your services. Clients tick what they need and send it to you.",
+      stats: [
+        { label: todoLists === 1 ? "list" : "lists", value: todoLists },
+        { label: todoRequests === 1 ? "new request" : "new requests", value: todoRequests },
+      ],
+      href: "/dashboard/todo",
+      action: { label: "New to-do list", href: "/dashboard/todo/new" },
     },
     {
       icon: ListChecks,
