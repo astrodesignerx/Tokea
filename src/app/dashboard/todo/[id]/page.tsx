@@ -11,16 +11,14 @@ import { brandColours } from "@/lib/todo/data";
 
 export const metadata = { title: "To-do list" };
 
-export default async function TodoEditorPage({ params, searchParams }: {
-  params: Promise<{ id: string }>; searchParams: Promise<{ saved?: string }>;
-}) {
+export default async function TodoEditorPage({ params }: { params: Promise<{ id: string }> }) {
   const user = await requireUser();
   const { id } = await params;
   const list = await prisma.todoList.findFirst({ where: { id, owner_id: user.id }, include: { sections: { orderBy: { position: "asc" } }, items: { orderBy: { position: "asc" } } } });
   if (!list) notFound();
-  const [organisations, origin, search] = await Promise.all([
+  const [organisations, origin] = await Promise.all([
     prisma.organisation.findMany({ where: { owner_id: user.id }, select: { id: true, name: true, logo_url: true, brand_primary: true, brand_ink: true }, orderBy: { name: "asc" } }),
-    getCardsOrigin(), searchParams,
+    getCardsOrigin(),
   ]);
   const initial: TodoEditorValue = {
     title: list.title, intro: list.intro ?? "", organisation_id: list.organisation_id ?? "",
@@ -32,7 +30,7 @@ export default async function TodoEditorPage({ params, searchParams }: {
   };
   return <div className="mx-auto max-w-[1440px] px-4 py-7 sm:px-6">
     <Link href="/dashboard/todo" className="inline-flex min-h-11 items-center text-sm text-muted-foreground">Back to To-do</Link>
-    <TodoEditor key={list.updated_at.toISOString()} id={id} initial={initial} businessName={user.name ?? "NikoForm"} publicUrl={origin + "/t/" + list.slug} organisations={organisations.map((org) => ({ id: org.id, name: org.name, logo_url: org.logo_url, brand: brandColours(org.brand_primary, org.brand_ink) }))} saved={search.saved === "1"} />
+    <TodoEditor key={list.id} id={id} initial={initial} businessName={user.name ?? "NikoForm"} origin={origin} slug={list.slug} organisations={organisations.map((org) => ({ id: org.id, name: org.name, logo_url: org.logo_url, brand: brandColours(org.brand_primary, org.brand_ink) }))} />
     <TodoShare url={`${origin}/t/${list.slug}`} slug={list.slug} />
   </div>;
 }

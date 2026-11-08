@@ -25,18 +25,22 @@ function refresh(id: string, slug: string) {
   revalidatePath("/dashboard", "layout");
 }
 
-export async function saveTodoAction(id: string | null, _prev: TodoState, form: FormData): Promise<TodoState> {
-  const user = await requireUser();
-  const raw = String(form.get("payload") ?? "");
-  if (raw.length > 500_000) return { error: "This list is too large." };
+type Persisted = { id: string; slug: string; updated_at: string; idMap: Record<string, string> };
+
+class ConflictError extends Error {}
+
+// Validates, checks ownership and writes the whole list in one transaction.
+// Throws an Error with a message that is safe to show to the owner.
+async function persistTodo(userId: string, id: string | null, raw: string): Promise<Persisted> {
+  if (raw.length > 500_000) throw new Error("This list is too large.");
   let json: unknown;
-  try { json = JSON.parse(raw); } catch { return { error: "Check the list and try again." }; }
+  try { json = JSON.parse(raw); } catch { throw new Error("Check the list and try again."); }
   const parsed = editorSchema.safeParse(json);
-  if (!parsed.success) return { error: parsed.error.issues[0]?.message ?? "Check the list." };
+  if (!parsed.success) throw new Error(parsed.error.issues[0]?.message ?? "Check the list.");
   const value = parsed.data;
   const prices = value.items.map((item) => item.price.trim() ? toMinorUnits(item.price) : null);
   if (value.items.some((item, i) => item.price.trim() && prices[i] === null)) {
-    return { error: "Use a positive price or zero, with at most two decimal places." };
+    throw new Error("Use a positive price or zero, with at most two decimal places.");
   }
 
   const settings = {
@@ -48,21 +52,21 @@ export async function saveTodoAction(id: string | null, _prev: TodoState, form: 
     thank_you: value.thank_you || null,
   };
   const base = slugify(value.title) || "todo";
-  let saved: { id: string; slug: string } | null = null;
+  let saved: Persisted | null = null;
   for (let attempt = 0; attempt < 5 && !saved; attempt++) {
     try {
       saved = await prisma.$transaction(async (tx) => {
         if (settings.organisation_id) {
-          const organisation = await tx.organisation.findFirst({ where: { id: settings.organisation_id, owner_id: user.id } });
+          const organisation = await tx.organisation.findFirst({ where: { id: settings.organisation_id, owner_id: userId } });
           if (!organisation) throw new Error("Choose one of your own businesses.");
         }
-        if (id) await tx.$queryRaw`SELECT id FROM "TodoList" WHERE id = ${id} AND owner_id = ${user.id} FOR UPDATE`;
+        if (id) await tx.$queryRaw`SELECT id FROM "TodoList" WHERE id = ${id} AND owner_id = ${userId} FOR UPDATE`;
         const existing = id ? await tx.todoList.findFirst({
-          where: { id, owner_id: user.id }, include: { sections: true, items: true },
+          where: { id, owner_id: userId }, include: { sections: true, items: true },
         }) : null;
         if (id && !existing) throw new Error("This list is not available.");
         if (existing && existing.updated_at.toISOString() !== value.updated_at) {
-          throw new Error("This list changed in another window. Reload before saving.");
+          throw new ConflictError("This list changed in another window. Reload before saving.");
         }
         const knownSections = new Set(existing?.sections.map((s) => s.id));
         const knownItems = new Set(existing?.items.map((i) => i.id));
@@ -73,8 +77,9 @@ export async function saveTodoAction(id: string | null, _prev: TodoState, form: 
           if (!knownItems.has(item.id) && !item.id.startsWith("new:")) throw new Error("That service is not in this list.");
         }
         const list = existing
-          ? await tx.todoList.update({ where: { id: existing.id, owner_id: user.id }, data: settings })
-          : await tx.todoList.create({ data: { ...settings, owner_id: user.id, slug: attempt === 0 ? base : withCollisionSuffix(base) } });
+          ? await tx.todoList.update({ where: { id: existing.id, owner_id: userId }, data: settings })
+          : await tx.todoList.create({ data: { ...settings, owner_id: userId, slug: attempt === 0 ? base : withCollisionSuffix(base) } });
+        const idMap: Record<string, string> = {};
         const sectionIds = new Map<string, string>();
         for (const [position, section] of value.sections.entries()) {
           const data = { title: section.title, position };
@@ -82,6 +87,7 @@ export async function saveTodoAction(id: string | null, _prev: TodoState, form: 
             ? await tx.todoSection.update({ where: { id: section.id, list_id: list.id }, data })
             : await tx.todoSection.create({ data: { ...data, list_id: list.id } });
           sectionIds.set(section.id, savedSection.id);
+          if (section.id.startsWith("new:")) idMap[section.id] = savedSection.id;
         }
         const keptItems: string[] = [];
         for (const [position, item] of value.items.entries()) {
@@ -95,21 +101,48 @@ export async function saveTodoAction(id: string | null, _prev: TodoState, form: 
             ? await tx.todoItem.update({ where: { id: item.id, list_id: list.id }, data })
             : await tx.todoItem.create({ data: { ...data, list_id: list.id } });
           keptItems.push(savedItem.id);
+          if (item.id.startsWith("new:")) idMap[item.id] = savedItem.id;
         }
         // SetNull on request items preserves their snapshots when a service goes away.
         await tx.todoItem.deleteMany({ where: { list_id: list.id, id: { notIn: keptItems } } });
         await tx.todoSection.deleteMany({ where: { list_id: list.id, id: { notIn: [...sectionIds.values()] } } });
-        return { id: list.id, slug: list.slug };
+        return { id: list.id, slug: list.slug, updated_at: list.updated_at.toISOString(), idMap };
       }, { timeout: 20000 });
     } catch (error) {
       if (!id && isUniqueViolation(error, "slug")) continue;
       console.error("[todo] save failed", error);
-      return { error: error instanceof Error && !error.message.includes("\n") ? error.message : "Could not save the list. Try again." };
+      if (error instanceof ConflictError) throw error;
+      throw new Error(error instanceof Error && !error.message.includes("\n") ? error.message : "Could not save the list. Try again.");
     }
   }
-  if (!saved) return { error: "That link name is taken. Try a different title." };
+  if (!saved) throw new Error("That link name is taken. Try a different title.");
+  return saved;
+}
+
+export async function saveTodoAction(id: string | null, _prev: TodoState, form: FormData): Promise<TodoState> {
+  const user = await requireUser();
+  let saved: Persisted;
+  try { saved = await persistTodo(user.id, id, String(form.get("payload") ?? "")); }
+  catch (error) { return { error: error instanceof Error ? error.message : "Could not save the list. Try again." }; }
   refresh(saved.id, saved.slug);
   redirect(`${ROOT}/${saved.id}?saved=1`);
+}
+
+export async function autosaveTodoAction(id: string | null, payload: string): Promise<
+  { ok: true; id: string; slug: string; updated_at: string; idMap: Record<string, string> }
+  | { ok: false; error: string; conflict?: boolean }
+> {
+  const user = await requireUser();
+  try {
+    const saved = await persistTodo(user.id, id, payload);
+    // Skip the editor page and the dashboard layout so the open editor is not re-rendered while typing.
+    revalidatePath(`/t/${saved.slug}`);
+    revalidatePath(ROOT);
+    return { ok: true, ...saved };
+  } catch (error) {
+    if (error instanceof ConflictError) return { ok: false, error: error.message, conflict: true };
+    return { ok: false, error: error instanceof Error ? error.message : "Could not save the list. Try again." };
+  }
 }
 
 export async function setTodoRequestStatusAction(form: FormData): Promise<void> {
@@ -129,7 +162,7 @@ export async function deleteTodoListAction(_prev: TodoState, form: FormData): Pr
     await tx.$queryRaw`SELECT id FROM "TodoList" WHERE id = ${id} AND owner_id = ${user.id} FOR UPDATE`;
     const list = await tx.todoList.findFirst({ where: { id, owner_id: user.id } });
     if (!list) return "This list is not available.";
-    if (await tx.todoRequest.count({ where: { list_id: id } })) return "This list has requests. Archive it in Basics instead.";
+    if (await tx.todoRequest.count({ where: { list_id: id } })) return "This list has requests. Archive it instead.";
     await tx.todoList.delete({ where: { id, owner_id: user.id } });
     revalidatePath(`/t/${list.slug}`);
     return null;
