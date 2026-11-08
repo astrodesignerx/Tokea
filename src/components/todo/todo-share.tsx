@@ -16,11 +16,11 @@ export function TodoShare({ url, slug }: { url: string; slug: string }) {
       .catch(() => { if (active) setFailed(true); });
     return () => { active = false; };
   }, [url]);
-  return <div className="nf-panel mt-6 flex flex-wrap items-center gap-5 p-4">
-    {qr && <Image src={qr} alt="QR code for this service list" width={100} height={100} unoptimized className="rounded-md" />}
-    <div className="min-w-0 flex-1">
+  return <div className="nf-panel mt-6 flex flex-wrap items-center gap-5 p-4 lg:sticky lg:top-24 lg:mt-2 lg:flex-col lg:flex-nowrap lg:items-start">
+    {qr && <Image src={qr} alt="QR code for this service list" width={100} height={100} unoptimized className="rounded-md lg:h-40 lg:w-40" />}
+    <div className="min-w-0 flex-1 lg:w-full lg:flex-none">
       <p className="text-sm font-medium">Share your list</p>
-      <div className="mt-1 flex min-w-0 items-center gap-1"><span className="min-w-0 truncate font-mono text-xs">{url}</span><CopyButton value={url} /></div>
+      <div className="mt-1 flex min-w-0 items-center gap-1"><span className="min-w-0 truncate font-mono text-xs lg:overflow-visible lg:whitespace-normal lg:[overflow-wrap:anywhere]">{url}</span><CopyButton value={url} /></div>
       <div className="mt-2 flex flex-wrap gap-2">
         <Button asChild size="sm" variant="outline"><a href={url} target="_blank" rel="noreferrer">View live page</a></Button>
         {qr && <Button asChild size="sm" variant="outline"><a href={qr} download={`${slug}-qr.png`}>Download QR code</a></Button>}

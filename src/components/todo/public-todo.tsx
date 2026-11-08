@@ -45,8 +45,8 @@ export function PublicTodo(props: Props) {
   try { estimate = calculateEstimate(selected.map((i) => ({ price: i.price, quantity: picked[i.id] })), props.showPrices); }
   catch { tooLarge = true; }
   const groups = [
+    { id: "ungrouped", title: "", items: props.items.filter((i) => !i.section_id) },
     ...props.sections.map((section) => ({ ...section, items: props.items.filter((i) => i.section_id === section.id) })),
-    { id: "ungrouped", title: props.sections.length ? "Other services" : "Services", items: props.items.filter((i) => !i.section_id) },
   ].filter((group) => group.items.length);
   function toggle(item: Item) {
     setPicked((current) => {
@@ -97,15 +97,15 @@ export function PublicTodo(props: Props) {
         {!props.items.length && <p className="mt-8 text-muted-foreground">Services will appear here when they are added.</p>}
         <div className="relative mt-6">
           {(["list", "visual"] as const).map((layout) => <div key={layout} className="todo-view-panel" data-active={view === layout} aria-hidden={view !== layout} inert={view !== layout}>
-            {groups.map((group) => <section key={group.id} className="mt-7 first:mt-0" aria-label={group.title}>
-              <h2 className="mb-3 font-mono text-xs uppercase tracking-widest text-muted-foreground">{group.title}</h2>
+            {groups.map((group) => <section key={group.id} className="mt-7 first:mt-0" aria-label={group.title || undefined}>
+              {group.title && <h2 className="mb-3 text-xs font-semibold text-muted-foreground">{group.title}</h2>}
               <div className={layout === "visual" ? "todo-grid" : ""}>
                 {group.items.map((item) => <div key={item.id} className={layout === "visual" ? "todo-card" : "todo-row"} data-selected={!!picked[item.id]}>
-                  <button type="button" className={layout === "visual" ? "todo-visual-pick" : "todo-list-pick"} aria-pressed={!!picked[item.id]} onClick={() => toggle(item)}>
-                    {layout === "visual" && (item.image_url ? <Image src={item.image_url} alt="" width={480} height={360} unoptimized className="todo-photo" /> : <span className="todo-letter" aria-hidden="true">{item.name.charAt(0)}</span>)}
-                    <span className={layout === "visual" ? "todo-check todo-badge" : "todo-check"} aria-hidden="true"><Check size={15} /></span>
-                    <span className="todo-item-copy"><span className="block font-medium">{item.name}</span>{item.note && <span className="mt-1 block text-xs leading-relaxed text-muted-foreground">{item.note}</span>}</span>
-                    {price(item)}
+                  <button type="button" className={layout === "visual" ? "todo-visual-pick" : "todo-list-pick"} data-photo={layout === "visual" ? !!item.image_url : undefined} aria-pressed={!!picked[item.id]} onClick={() => toggle(item)}>
+                    {layout === "visual" && item.image_url && <Image src={item.image_url} alt="" width={480} height={360} unoptimized className="todo-photo" />}
+                    <span className={layout === "visual" && item.image_url ? "todo-check todo-badge" : "todo-check"} aria-hidden="true"><Check size={15} /></span>
+                    <span className="todo-item-copy"><span className="block font-medium">{item.name}</span>{item.note && <span className={"mt-1 block text-xs leading-relaxed text-muted-foreground" + (layout === "list" ? " line-clamp-2" : "")}>{item.note}</span>}{layout === "visual" && !item.image_url && price(item)}</span>
+                    {!(layout === "visual" && !item.image_url) && price(item)}
                   </button>
                   {quantity(item)}
                 </div>)}
