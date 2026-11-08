@@ -30,7 +30,11 @@ export default async function TodoEditorPage({ params }: { params: Promise<{ id:
   };
   return <div className="mx-auto max-w-[1440px] px-4 py-7 sm:px-6">
     <Link href="/dashboard/todo" className="inline-flex min-h-11 items-center text-sm text-muted-foreground">Back to To-do</Link>
-    <TodoEditor key={list.id} id={id} initial={initial} businessName={user.name ?? "NikoForm"} origin={origin} slug={list.slug} organisations={organisations.map((org) => ({ id: org.id, name: org.name, logo_url: org.logo_url, brand: brandColours(org.brand_primary, org.brand_ink) }))} />
-    <TodoShare url={`${origin}/t/${list.slug}`} slug={list.slug} />
+    <div className="lg:grid lg:grid-cols-[minmax(0,640px)_340px] lg:items-start lg:justify-center lg:gap-8">
+      <div className="min-w-0">
+        <TodoEditor key={list.id} id={id} initial={initial} businessName={user.name ?? "NikoForm"} origin={origin} slug={list.slug} organisations={organisations.map((org) => ({ id: org.id, name: org.name, logo_url: org.logo_url, brand: brandColours(org.brand_primary, org.brand_ink) }))} />
+      </div>
+      <TodoShare url={`${origin}/t/${list.slug}`} slug={list.slug} />
+    </div>
   </div>;
 }
