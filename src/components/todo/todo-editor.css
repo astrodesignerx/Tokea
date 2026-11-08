@@ -76,7 +76,7 @@
   .te-sheet[open]::backdrop { opacity: 0; }
 }
 .te-sheet-body { display: grid; gap: 14px; max-height: min(88dvh, 760px); overflow-y: auto; overscroll-behavior: contain; padding: 18px 20px max(20px, env(safe-area-inset-bottom)); }
-.te-sheet-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; min-height: 44px; }
+.te-sheet-head { position: sticky; top: -18px; z-index: 1; margin: -18px -20px 0; padding: 18px 20px 8px; background: var(--card); display: flex; align-items: center; justify-content: space-between; gap: 12px; min-height: 44px; }
 .te-sheet-head h2 { font-size: 18px; font-weight: 700; letter-spacing: -.02em; }
 .te-field { display: grid; gap: 6px; min-width: 0; }
 .te-label { font-size: 12px; font-weight: 500; color: var(--muted-foreground); }
@@ -93,7 +93,7 @@
 .todo-editor-a .te-danger { justify-self: start; min-height: 44px; padding-inline: 4px; font-size: 14px; font-weight: 600; color: var(--destructive); text-align: left; }
 .te-confirm { display: grid; gap: 10px; padding: 12px; border-radius: 12px; background: var(--destructive-tint); }
 .te-confirm > p:first-of-type { font-size: 14px; font-weight: 600; overflow-wrap: anywhere; }
-.te-done { margin-top: 4px; }
+.te-done { min-height: 44px; padding-inline: 16px; }
 .te-line { display: flex; align-items: center; justify-content: space-between; gap: 16px; min-height: 52px; border-top: 1px solid var(--border); font-size: 15px; cursor: pointer; }
 .te-line-text { display: grid; gap: 2px; min-width: 0; }
 .te-line small { font-size: 12px; color: var(--muted-foreground); }

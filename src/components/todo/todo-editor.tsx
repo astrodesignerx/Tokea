@@ -427,7 +427,7 @@ export function TodoEditor({ id, initial, organisations, businessName = "NikoFor
 
     <Sheet open={active === "row"} onClose={() => sheetClosed("row")} label="Edit service">
       {rowItem && <>
-        <div className="te-sheet-head"><h2>Edit service</h2></div>
+        <div className="te-sheet-head"><h2>Edit service</h2><Button type="button" className="te-done" onClick={closeSheet}>Done</Button></div>
         <div className="te-field">
           <span className="te-label">Photo (optional)</span>
           <CoverUpload value={rowItem.image_url || null} onChange={(url) => patchItem(rowItem.id, { image_url: url ?? "" })} />
@@ -471,13 +471,12 @@ export function TodoEditor({ id, initial, organisations, businessName = "NikoFor
             </div>
           </div>
           : <button type="button" className="te-danger" onClick={() => setConfirming(rowItem.id)}>Delete</button>}
-        <Button type="button" className="te-wide te-done" onClick={closeSheet}>Done</Button>
       </>}
     </Sheet>
 
     <Sheet open={active === "section"} onClose={() => sheetClosed("section")} label="Edit heading">
       {sectionItem && <>
-        <div className="te-sheet-head"><h2>Edit heading</h2></div>
+        <div className="te-sheet-head"><h2>Edit heading</h2><Button type="button" className="te-done" onClick={closeSheet}>Done</Button></div>
         <label className="te-field"><span className="te-label">Name</span>
           <input value={sectionItem.title} maxLength={MAX_SECTION_NAME}
             onChange={(event) => { const title = event.target.value; update((current) => ({ ...current, sections: current.sections.map((s) => s.id === sectionItem.id ? { ...s, title } : s) })); }} /></label>
@@ -487,12 +486,11 @@ export function TodoEditor({ id, initial, organisations, businessName = "NikoFor
           <Button type="button" variant="outline" className="te-wide" disabled={sectionIndex >= value.sections.length - 1} onClick={() => moveSection(sectionItem, 1)}><ArrowDown size={16} />Move down</Button>
         </div>
         <button type="button" className="te-danger" onClick={() => removeSection(sectionItem.id)}>Delete heading (services move to no heading)</button>
-        <Button type="button" className="te-wide te-done" onClick={closeSheet}>Done</Button>
       </>}
     </Sheet>
 
     <Sheet open={active === "settings"} onClose={() => sheetClosed("settings")} label="Settings">
-      <div className="te-sheet-head"><h2>Settings</h2></div>
+      <div className="te-sheet-head"><h2>Settings</h2><Button type="button" className="te-done" onClick={closeSheet}>Done</Button></div>
       <div className="te-field">
         <span className="te-label" id="te-look">Look</span>
         <Segmented aria-labelledby="te-look" value={value.layout} className="te-segmented"
@@ -531,7 +529,6 @@ export function TodoEditor({ id, initial, organisations, businessName = "NikoFor
           </form>
           : <button type="button" className="te-danger" onClick={() => setConfirming("list")}>Delete list</button>)}
       </div>
-      <Button type="button" className="te-wide te-done" onClick={closeSheet}>Done</Button>
     </Sheet>
 
     <Sheet open={active === "preview"} onClose={() => sheetClosed("preview")} label="Client preview" wide={previewMode === "wide"}>

@@ -203,7 +203,7 @@
 [data-selected="true"] .todo-check svg { transform: scale(1); opacity: 1; }
 .todo-price { font: 500 12px/1.5 var(--font-mono), monospace; color: var(--muted-foreground); }
 .todo-list-pick > .todo-price { max-width: 120px; text-align: right; }
-.todo-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
+.todo-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; align-items: start; }
 .todo-card { min-width: 0; border: 1px solid var(--border); border-radius: 12px; overflow: hidden; background: var(--card); }
 .todo-card[data-selected="true"] { border-color: var(--todo-primary); box-shadow: 0 0 0 1px var(--todo-primary); }
 .todo-visual-pick { position: relative; display: flex; flex-direction: column; width: 100%; height: auto; text-align: left; padding-bottom: 12px; }
