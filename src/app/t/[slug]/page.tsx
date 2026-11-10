@@ -31,8 +31,7 @@ export default async function TodoPublicPage({ params }: Props) {
     </main>
   );
   return <PublicTodo
-    slug={list.slug} title={list.title} intro={list.intro} business={business}
-    logo={list.organisation?.logo_url ?? null} brand={brand}
+    slug={list.slug} title={list.title} intro={list.intro} brand={brand}
     layout={list.layout === "visual" ? "visual" : "list"}
     allowViewSwitch={list.allow_view_switch} showPrices={list.show_prices}
     currency={list.currency} askEventDate={list.ask_event_date} preview={list.status === "draft"}

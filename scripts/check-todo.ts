@@ -1,11 +1,13 @@
 import assert from "node:assert/strict";
 import { calculateEstimate, clampQuantity, normalisePhone, validEventDate } from "../src/lib/todo/logic";
 import { allowTodoSubmission } from "../src/lib/todo/throttle";
-import { editorSchema } from "../src/lib/todo/validation";
+import { editorSchema, submissionSchema } from "../src/lib/todo/validation";
 import { slugify, withCollisionSuffix } from "../src/lib/slug";
 
 assert.equal(calculateEstimate([{ price: 12550, quantity: 3 }, { price: null, quantity: 9 }], true), 37650);
 assert.equal(calculateEstimate([{ price: 12550, quantity: 3 }], false), null);
+assert.equal(calculateEstimate([], true), null);
+assert.equal(calculateEstimate([], false), null);
 assert.equal(calculateEstimate([{ price: null, quantity: 3 }], true), 0);
 assert.equal(calculateEstimate([{ price: 0, quantity: 2 }], true), 0);
 assert.throws(() => calculateEstimate([{ price: 1_000_000_000, quantity: 3 }], true));
@@ -37,4 +39,23 @@ assert.deepEqual(validDraft.notify_emails, []);
 assert.deepEqual(editorSchema.parse({ ...draft, notify_emails: ["ONE@example.com, two@example.com", "one@example.com"] }).notify_emails, ["one@example.com", "two@example.com"]);
 assert.equal(editorSchema.safeParse({ ...draft, status: "open" }).success, false);
 assert.equal(editorSchema.safeParse({ ...draft, sections: [{ id: "same", title: "One" }, { id: "same", title: "Two" }] }).success, false);
-console.log("To-do checks passed: estimates, overflow, quantities, phone, dates, slugs, throttle, validation.");
+const submission = { name: "Client", phone: "0712 345 678", email: "", event_date: "", notes: "", items: [{ id: "service-1", quantity: 2 }] };
+assert.equal(submissionSchema.safeParse(submission).success, true);
+const withNotes = submissionSchema.parse({ ...submission, notes: "  We also need a brand guide.  " });
+assert.equal(withNotes.notes, "We also need a brand guide.");
+assert.equal(withNotes.phone, "+254712345678");
+assert.deepEqual(withNotes.items, submission.items);
+assert.equal(submissionSchema.safeParse({ ...submission, items: [], notes: "A brand guide, please." }).success, true);
+for (const notes of ["", " \n\t "]) {
+  assert.equal(submissionSchema.safeParse({ ...submission, items: [], notes }).success, false);
+}
+assert.equal(submissionSchema.safeParse({ ...submission, notes: "x".repeat(1000) }).success, true);
+assert.equal(submissionSchema.safeParse({ ...submission, notes: "x".repeat(1001) }).success, false);
+assert.equal(submissionSchema.safeParse({ ...submission, items: [...submission.items, ...submission.items] }).success, false);
+assert.equal(submissionSchema.safeParse({ ...submission, phone: "123" }).success, false);
+assert.equal(submissionSchema.safeParse({ ...submission, name: " " }).success, false);
+assert.equal(submissionSchema.safeParse({ ...submission, email: "not-an-email" }).success, false);
+assert.equal(submissionSchema.safeParse({ ...submission, event_date: "2026-02-30" }).success, false);
+assert.equal(submissionSchema.safeParse({ ...submission, items: [{ id: "service-1", quantity: Infinity }] }).success, false);
+assert.equal(submissionSchema.safeParse({ ...submission, items: Array.from({ length: 201 }, (_, index) => ({ id: `service-${index}`, quantity: 1 })) }).success, false);
+console.log("To-do checks passed: estimates, overflow, quantities, phone, dates, slugs, throttle, editor and marked-list submissions.");

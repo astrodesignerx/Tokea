@@ -186,9 +186,8 @@
 }
 .todo-surface button:active, .todo-editor button:active { transform: scale(.97); }
 .todo-surface button:disabled, .todo-editor button:disabled { cursor: default; opacity: .5; }
-.todo-logo { display: grid; place-items: center; width: 44px; height: 44px; flex: none; border-radius: 12px; background: var(--foreground); color: var(--background); font-weight: 650; }
-.todo-view { display: flex; padding: 2px; border: 1px solid var(--border); border-radius: 9px; }
-.todo-view button { display: grid; place-items: center; width: 36px; height: 36px; border-radius: 6px; color: var(--muted-foreground); }
+.todo-view { display: flex; flex: none; padding: 2px; border: 1px solid var(--border); border-radius: 9px; }
+.todo-view button { display: grid; place-items: center; width: 44px; height: 44px; border-radius: 6px; color: var(--muted-foreground); }
 .todo-view button[aria-pressed="true"] { background: var(--muted); color: var(--foreground); }
 .todo-main { overflow: clip; }
 .todo-flow, .todo-view-panel { transition: opacity var(--dur-2) var(--ease-out), transform var(--dur-2) var(--ease-out); }
