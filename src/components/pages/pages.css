@@ -33,6 +33,15 @@
 .pages-dialog-content { animation: pages-enter 200ms var(--ease-out); }
 .pages-dialog-content[data-state="closed"] { animation: pages-enter 180ms var(--ease-out) reverse; }
 @keyframes pages-fade { from { opacity: 0; } to { opacity: 1; } }
+.pages-viewer { --pages-pill-duration: 200ms; }
+.pages-pill {
+  margin-right: env(safe-area-inset-right);
+  margin-bottom: env(safe-area-inset-bottom);
+  transition: opacity var(--pages-pill-duration) ease-out, transform var(--pages-pill-duration) ease-out;
+}
+.pages-pill-closed { opacity: 0; transform: translateY(6px); pointer-events: none; }
+.pages-image-enter { animation: pages-fade var(--pages-settle) var(--pages-ease); }
+.pages-pdf-canvas { transition: opacity var(--pages-settle) var(--pages-ease); }
 @media (prefers-reduced-motion: reduce) {
   .pages-ui *, .pages-ui *::before, .pages-dialog-overlay { transition: none !important; animation: none !important; }
   .pages-ui button:active { transform: none; }
