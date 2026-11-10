@@ -9,10 +9,9 @@
 @custom-variant dark (&:where(.dark, .dark *));
 
 /*
-  Ink & Ember palette. Warm stone neutrals paired with burnt terracotta and
-  ember accents, plus dark ink chrome for the persistent sidebar. --primary
-  and --ring drive interactive surfaces and focus rings, while --brand is
-  tuned separately so accent text and links hold contrast in both themes.
+  Lime brand palette. Clean neutrals paired with vivid lime (#C3EC52) for
+  buttons, rings, and badges, plus dark olive (#4F6B00) in light mode for
+  text/link contrast against white.
 */
 @layer base {
   :root {
@@ -23,8 +22,8 @@
     --card-foreground: #111110;
     --popover: #FFFFFF;
     --popover-foreground: #111110;
-    --primary: #C4401A;
-    --primary-foreground: #FFFFFF;
+    --primary: #C3EC52;
+    --primary-foreground: #111110;
     --secondary: #F3F3F1;
     --secondary-foreground: #111110;
     --muted: #F3F3F1;
@@ -35,11 +34,11 @@
     --destructive-foreground: #FFFFFF;
     --border: #E5E4E0;
     --input: #E5E4E0;
-    --ring: #C4401A;
-    --brand: #B93C17;
+    --ring: #4F6B00;
+    --brand: #4F6B00;
     --brand-foreground: #FFFFFF;
-    --signal: #E8501C;
-    --tint: #FCEDE7;
+    --signal: #C3EC52;
+    --tint: #F3F9DD;
     --success: #1A6B43;
     --success-tint: #E6F4EC;
     --destructive-tint: #FBE9E9;
@@ -48,7 +47,7 @@
     --sidebar-muted: #9C9B95;
     --sidebar-border: #2B2B28;
     --sidebar-active: #232320;
-    --sidebar-primary: #FF6A33;
+    --sidebar-primary: #C3EC52;
     /* Small radii: 6px on controls, 12px on panels. */
     --radius: 0.375rem;
   }
@@ -61,8 +60,8 @@
     --card-foreground: #EDEDEA;
     --popover: #161615;
     --popover-foreground: #EDEDEA;
-    --primary: #FF6A33;
-    --primary-foreground: #170A04;
+    --primary: #C3EC52;
+    --primary-foreground: #111110;
     --secondary: #232320;
     --secondary-foreground: #EDEDEA;
     --muted: #232320;
@@ -73,11 +72,11 @@
     --destructive-foreground: #1A0606;
     --border: #2B2B28;
     --input: #2B2B28;
-    --ring: #FF6A33;
-    --brand: #FF8A5C;
-    --brand-foreground: #170A04;
-    --signal: #FF6A33;
-    --tint: #2A1A12;
+    --ring: #C3EC52;
+    --brand: #C3EC52;
+    --brand-foreground: #111110;
+    --signal: #C3EC52;
+    --tint: #1C230B;
     --success: #5CC98F;
     --success-tint: #14261C;
     --destructive-tint: #2E1616;
@@ -86,7 +85,7 @@
     --sidebar-muted: #9C9B95;
     --sidebar-border: #2B2B28;
     --sidebar-active: #232320;
-    --sidebar-primary: #FF6A33;
+    --sidebar-primary: #C3EC52;
   }
 }
 
