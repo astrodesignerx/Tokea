@@ -11,6 +11,7 @@
 - Next.js refuses to run two `next dev` servers for this folder at once.
 
 ## Current status
+- To-do list Responses tab implemented on `ds/todo-responses` from `origin/master` at `9e7024c` (2026-11-10). Adds owner-scoped, read-only tallies and paginated submissions, plus shared Edit/Responses tabs. No schema change or migration. Fixture browser checks passed at 375 px and 1440 px in light and dark, including keyboard controls, reduced motion and another-owner 404. Final checks and evidence are recorded in `.claude/artifacts/todo-responses/report.md`. This worktree uses no live database; the temporary fixture and dummy environment file are removed before commit. Owner review is pending; no push, merge or PR.
 - Dynamic QR codes (with iPhone/Android links, expiry, passwords, scheduled changes) are merged to `master` via https://github.com/astrodesignerx/Tokea/pull/1 (commit `b27e0f7`) and live on https://nikoform.co.ke since 2026-09-17.
 - Migrations `20260916120000_add_dynamic_qr_codes`, `20260917120000_qr_code_designs` and `20260917180000_qr_code_density` are applied; production uses the same Supabase database as `.env.local` (confirmed by scanning a test code through production).
 - Verified on production (2026-09-17, 17 checks): unknown and password codes, UTM tags, iPhone link, instant link edits, scan logging with device and country, owner-only downloads, existing card short links, and sign-in redirects on dashboard pages. Test codes were deleted afterwards; the QR tables held no client data at that point.
