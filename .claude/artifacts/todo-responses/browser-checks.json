@@ -1,0 +1,69 @@
+[
+  {
+    "width": 375,
+    "theme": "light",
+    "geometry": {
+      "width": 375,
+      "page": 375,
+      "client": 375
+    },
+    "keyboardFilter": "pass",
+    "tableScroll": "pass",
+    "bothTabs": "pass",
+    "pageErrors": []
+  },
+  {
+    "width": 375,
+    "theme": "dark",
+    "geometry": {
+      "width": 375,
+      "page": 375,
+      "client": 375
+    },
+    "keyboardFilter": "pass",
+    "tableScroll": "pass",
+    "bothTabs": "pass",
+    "pageErrors": []
+  },
+  {
+    "width": 1440,
+    "theme": "light",
+    "geometry": {
+      "width": 1440,
+      "page": 1440,
+      "client": 1440
+    },
+    "keyboardFilter": "pass",
+    "tableScroll": "pass",
+    "bothTabs": "pass",
+    "pageErrors": []
+  },
+  {
+    "width": 1440,
+    "theme": "dark",
+    "geometry": {
+      "width": 1440,
+      "page": 1440,
+      "client": 1440
+    },
+    "keyboardFilter": "pass",
+    "tableScroll": "pass",
+    "bothTabs": "pass",
+    "pageErrors": []
+  },
+  {
+    "reducedMotion": {
+      "reduced": true,
+      "animation": "none",
+      "transform": "matrix(0.75, 0, 0, 1, 0, 0)"
+    }
+  },
+  {
+    "allStatuses": "pass",
+    "pagination": "50 then 5",
+    "empty": "pass",
+    "notesOnly": "pass",
+    "noEstimate": "pass",
+    "anotherOwner": 404
+  }
+]

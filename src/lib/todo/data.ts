@@ -2,6 +2,15 @@ import { cache } from "react";
 import { prisma } from "@/lib/db";
 import { auth } from "@/lib/auth";
 
+export async function todoResponseCounts(listId: string, ownerId: string) {
+  const where = { list_id: listId, list: { owner_id: ownerId }, status: { not: "archived" } };
+  const [count, unread] = await Promise.all([
+    prisma.todoRequest.count({ where }),
+    prisma.todoRequest.count({ where: { ...where, status: "new", seen_at: null } }),
+  ]);
+  return { count, unread: unread > 0 };
+}
+
 export const visibleTodo = cache(async (slug: string) => {
   const list = await prisma.todoList.findUnique({
     where: { slug },

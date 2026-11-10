@@ -1,5 +1,5 @@
 import assert from "node:assert/strict";
-import { calculateEstimate, clampQuantity, normalisePhone, validEventDate } from "../src/lib/todo/logic";
+import { calculateEstimate, clampQuantity, normalisePhone, tallyRequestItems, validEventDate } from "../src/lib/todo/logic";
 import { allowTodoSubmission } from "../src/lib/todo/throttle";
 import { editorSchema, submissionSchema } from "../src/lib/todo/validation";
 import { slugify, withCollisionSuffix } from "../src/lib/slug";
@@ -58,4 +58,20 @@ assert.equal(submissionSchema.safeParse({ ...submission, email: "not-an-email" }
 assert.equal(submissionSchema.safeParse({ ...submission, event_date: "2026-02-30" }).success, false);
 assert.equal(submissionSchema.safeParse({ ...submission, items: [{ id: "service-1", quantity: Infinity }] }).success, false);
 assert.equal(submissionSchema.safeParse({ ...submission, items: Array.from({ length: 201 }, (_, index) => ({ id: `service-${index}`, quantity: 1 })) }).success, false);
-console.log("To-do checks passed: estimates, overflow, quantities, phone, dates, slugs, throttle, editor and marked-list submissions.");
+const picked = (request_id: string, item_id: string | null, name: string, quantity = 1, currentName?: string) => ({ request_id, item_id, name, quantity, item: currentName === undefined ? null : { name: currentName } });
+assert.deepEqual(tallyRequestItems([]), []);
+assert.deepEqual(tallyRequestItems([
+  picked("r1", "chairs", "Old name", 4, "Chairs"),
+  picked("r2", "chairs", "Earlier name", 1, "Chairs"),
+  picked("r1", "chairs", "Old name", 2, "Chairs"),
+  picked("r1", null, "Archived service", 1),
+  picked("r2", null, "Archived service", 1),
+  picked("r1", "other", "Chairs", 1, "Chairs"),
+  picked("r1", null, "Chairs", 1),
+]), [
+  { key: "name:Archived service", name: "Archived service", requests: 2, quantity: 2, hasQuantity: false },
+  { key: "item:chairs", name: "Chairs", requests: 2, quantity: 7, hasQuantity: true },
+  { key: "item:other", name: "Chairs", requests: 1, quantity: 1, hasQuantity: false },
+  { key: "name:Chairs", name: "Chairs", requests: 1, quantity: 1, hasQuantity: false },
+]);
+console.log("To-do checks passed: estimates, overflow, quantities, phone, dates, slugs, throttle, editor, marked-list submissions and response tallies.");

@@ -235,8 +235,46 @@
 .todo-layout-mini[data-layout="list"] i:nth-child(3) { width: 65%; }
 .todo-layout-mini[data-layout="visual"] { grid-template-columns: repeat(3, 1fr); }
 .todo-rise { animation: todo-rise var(--dur-2) var(--ease-out) both; }
+.todo-response-pill {
+  position: relative;
+  isolation: isolate;
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  background: var(--card);
+  transition: transform var(--dur-1) var(--ease-out), opacity var(--dur-1) var(--ease-out);
+}
+.todo-response-pill[aria-current="page"] { background: var(--primary); color: var(--primary-foreground); }
+.todo-response-pill::before {
+  content: "";
+  position: absolute;
+  z-index: -1;
+  inset: 0;
+  border-radius: inherit;
+  background: currentColor;
+  opacity: 0;
+  transition: opacity var(--dur-1) var(--ease-out);
+}
+.todo-response-pill:hover::before { opacity: .07; }
+.todo-response-pill:focus-visible::before { opacity: .12; }
+.todo-response-pill:focus-visible, .todo-response-page-link:focus-visible {
+  outline: 2px solid var(--ring);
+  outline-offset: 3px;
+}
+.todo-response-pill:active { transform: scale(.97); }
+.todo-response-page-link { transition: opacity var(--dur-1) var(--ease-out); }
+.todo-response-page-link:hover, .todo-response-page-link:focus-visible { opacity: .7; }
+.todo-tally-bar {
+  transform-origin: left;
+  transform: scaleX(var(--todo-share));
+  animation: todo-tally-in var(--dur-3) var(--ease-out) both;
+  animation-delay: var(--todo-delay);
+}
+@keyframes todo-tally-in { from { transform: scaleX(0); opacity: 0; } to { transform: scaleX(var(--todo-share)); opacity: 1; } }
 @keyframes todo-rise { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
 @media (prefers-reduced-motion: reduce) {
+  .todo-tally-bar, .todo-response-pill, .todo-response-pill::before, .todo-response-page-link { animation: none !important; transition: none !important; }
+  .todo-response-pill:active { transform: none; }
   .todo-surface *, .todo-editor *, .todo-rise { animation: none !important; transition: none !important; }
   .todo-surface button:active, .todo-editor button:active { transform: none; }
 }
