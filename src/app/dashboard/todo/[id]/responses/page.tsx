@@ -58,14 +58,14 @@ export default async function TodoResponsesPage({ params, searchParams }: {
 
     <section className="nf-panel todo-rise mt-6 min-w-0 p-5" aria-labelledby="most-picked-title">
       <h2 id="most-picked-title" className="text-lg font-medium">Most picked</h2>
-      <p className="mt-1 text-sm text-muted-foreground">Across {responses.count} non-archived {responses.count === 1 ? "response" : "responses"}.</p>
+      <p className="mt-1 text-sm text-muted-foreground">From {responses.count} {responses.count === 1 ? "response" : "responses"}, not counting archived ones.</p>
       {tally.length > 0 && <ul className="mt-5 space-y-4">
         {tally.map((item, index) => <li key={item.key} className="relative min-w-0 pb-3">
           <div className="flex items-start justify-between gap-4 text-sm">
             <span className="min-w-0 break-words">{item.name}</span>
             <span className="shrink-0 text-right tabular-nums">
               {item.requests} {item.requests === 1 ? "request" : "requests"}
-              {item.hasQuantity && <span className="block text-xs text-muted-foreground">{item.quantity} total quantity</span>}
+              {item.hasQuantity && <span className="block text-xs text-muted-foreground">{item.quantity} in total</span>}
             </span>
           </div>
           <span aria-hidden="true" className="absolute inset-x-0 bottom-0 h-1 overflow-hidden rounded-full bg-muted">
