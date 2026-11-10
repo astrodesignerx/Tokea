@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { LIST_STATUSES } from "./logic";
+import { LIST_STATUSES, normalisePhone, validEventDate } from "./logic";
 
 const key = z.string().min(1).max(80);
 const optionalText = (max: number) => z.string().trim().max(max);
@@ -47,3 +47,16 @@ export const editorSchema = z.object({
 });
 
 export type TodoEditorValue = z.infer<typeof editorSchema>;
+
+export const submissionSchema = z.object({
+  name: z.string().trim().min(1, "Enter your full name.").max(160),
+  phone: z.string().trim().max(60).transform(normalisePhone).refine((v) => v !== null, "Enter a valid phone number."),
+  email: z.union([z.literal(""), z.string().trim().email("Enter a valid email address.").max(200)]),
+  event_date: z.string().refine((v) => !v || validEventDate(v), "Enter a valid event date."),
+  notes: z.string().trim().max(1000, "Keep additional requests to 1000 characters."),
+  items: z.array(z.object({ id: key, quantity: z.number().finite() })).max(200),
+})
+  .refine((value) => value.items.length > 0 || value.notes.length > 0, {
+    message: "Tick an item or tell us what else you need.", path: ["items"],
+  })
+  .refine((value) => new Set(value.items.map((i) => i.id)).size === value.items.length, "Choose each service once.");

@@ -540,7 +540,7 @@ export function TodoEditor({ id, initial, organisations, businessName = "NikoFor
         <Segmented aria-label="Preview size" value={previewMode} onValueChange={setPreviewMode} options={[{ value: "phone", label: "Phone" }, { value: "wide", label: "Wide" }]} />
         <p>Select a service to edit it.</p>
       </div>
-      <TodoEditorPreview value={value} organisation={organisation} businessName={businessName} wide={previewMode === "wide"} onEdit={openRow} />
+      <TodoEditorPreview value={value} organisation={organisation} wide={previewMode === "wide"} onEdit={openRow} />
     </Sheet>
   </div>;
 }

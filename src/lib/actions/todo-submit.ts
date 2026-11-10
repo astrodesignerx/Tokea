@@ -1,26 +1,17 @@
 "use server";
 
-import { z } from "zod";
 import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 import { after } from "next/server";
 import { revalidatePath } from "next/cache";
 import { prisma } from "@/lib/db";
-import { calculateEstimate, clampQuantity, normalisePhone, validEventDate } from "@/lib/todo/logic";
+import { calculateEstimate, clampQuantity } from "@/lib/todo/logic";
+import { submissionSchema } from "@/lib/todo/validation";
 import { allowTodoSubmission } from "@/lib/todo/throttle";
 import { sendEmail } from "@/lib/email";
 import { todoRequestEmail } from "@/lib/emails";
 import { getCardsOrigin } from "@/lib/cards/links";
 import type { TodoState } from "./todo";
-
-const submissionSchema = z.object({
-  name: z.string().trim().min(1, "Enter your full name.").max(160),
-  phone: z.string().trim().max(60).transform(normalisePhone).refine((v) => v !== null, "Enter a valid phone number."),
-  email: z.union([z.literal(""), z.string().trim().email("Enter a valid email address.").max(200)]),
-  event_date: z.string().refine((v) => !v || validEventDate(v), "Enter a valid event date."),
-  notes: z.string().trim().max(1000, "Keep notes to 1000 characters."),
-  items: z.array(z.object({ id: z.string().min(1).max(80), quantity: z.number().finite() })).min(1, "Pick at least one service.").max(200),
-}).refine((value) => new Set(value.items.map((i) => i.id)).size === value.items.length, "Choose each service once.");
 
 export async function submitTodoAction(slug: string, _prev: TodoState, form: FormData): Promise<TodoState> {
   const list = await prisma.todoList.findUnique({ where: { slug }, select: { id: true, status: true } });
@@ -32,7 +23,7 @@ export async function submitTodoAction(slug: string, _prev: TodoState, form: For
   const raw = String(form.get("items") ?? "");
   if (raw.length > 30000) return { error: "Choose fewer services and try again." };
   let items: unknown;
-  try { items = JSON.parse(raw); } catch { return { error: "Pick at least one service." }; }
+  try { items = JSON.parse(raw); } catch { return { error: "Reload the list and try sharing it again." }; }
   const parsed = submissionSchema.safeParse({
     name: form.get("name"), phone: form.get("phone"), email: form.get("email"),
     event_date: form.get("event_date") ?? "", notes: form.get("notes"), items,

@@ -13,7 +13,7 @@ export function calculateEstimate(
   items: { price: number | null; quantity: number }[],
   showPrices: boolean,
 ): number | null {
-  if (!showPrices) return null;
+  if (!showPrices || !items.length) return null;
   const total = items.reduce((sum, item) => sum + (item.price ?? 0) * item.quantity, 0);
   if (!Number.isSafeInteger(total) || total < 0 || total > MAX_TOTAL) {
     throw new Error("This estimate is too large. Please contact the business directly.");
