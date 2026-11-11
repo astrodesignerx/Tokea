@@ -1,8 +1,8 @@
 /**
  * Product name.
  *
- * NikoForm is the whole site. Digital business cards and event RSVPs are
- * features within it, not separate products, and more are expected. Kept in
+ * NikoForm is the whole site. Cards, QR codes, forms, pages, service lists,
+ * checklists and event RSVPs are features within it, not separate products. Kept in
  * one place so a rename is a single edit rather than a search across the app.
  */
 
@@ -13,4 +13,4 @@ export const PRODUCT = "NikoForm";
  * emails and running prose stay sentence case; only the mark shouts.
  */
 export const WORDMARK = "NIKOFORM";
-export const TAGLINE = "Digital cards and event RSVPs, in one place";
+export const TAGLINE = "Cards, QR codes, forms, pages and RSVPs in one place";
