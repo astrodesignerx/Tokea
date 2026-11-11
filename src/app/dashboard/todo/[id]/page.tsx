@@ -7,7 +7,8 @@ import { TodoEditor } from "@/components/todo/todo-editor";
 import { TodoShare } from "@/components/todo/todo-share";
 import { getCardsOrigin } from "@/lib/cards/links";
 import type { TodoEditorValue } from "@/lib/todo/validation";
-import { brandColours } from "@/lib/todo/data";
+import { brandColours, todoResponseCounts } from "@/lib/todo/data";
+import { TodoListTabs } from "@/components/todo/todo-list-tabs";
 
 export const metadata = { title: "To-do list" };
 
@@ -16,9 +17,10 @@ export default async function TodoEditorPage({ params }: { params: Promise<{ id:
   const { id } = await params;
   const list = await prisma.todoList.findFirst({ where: { id, owner_id: user.id }, include: { sections: { orderBy: { position: "asc" } }, items: { orderBy: { position: "asc" } } } });
   if (!list) notFound();
-  const [organisations, origin] = await Promise.all([
+  const [organisations, origin, responses] = await Promise.all([
     prisma.organisation.findMany({ where: { owner_id: user.id }, select: { id: true, name: true, logo_url: true, brand_primary: true, brand_ink: true }, orderBy: { name: "asc" } }),
     getCardsOrigin(),
+    todoResponseCounts(id, user.id),
   ]);
   const initial: TodoEditorValue = {
     title: list.title, intro: list.intro ?? "", organisation_id: list.organisation_id ?? "",
@@ -30,6 +32,7 @@ export default async function TodoEditorPage({ params }: { params: Promise<{ id:
   };
   return <div className="mx-auto max-w-[1440px] px-4 py-7 sm:px-6">
     <Link href="/dashboard/todo" className="inline-flex min-h-11 items-center text-sm text-muted-foreground">Back to To-do</Link>
+    <TodoListTabs id={id} active="edit" {...responses} />
     <div className="lg:grid lg:grid-cols-[minmax(0,640px)_340px] lg:items-start lg:justify-center lg:gap-8">
       <div className="min-w-0">
         <TodoEditor key={list.id} id={id} initial={initial} businessName={user.name ?? "NikoForm"} origin={origin} slug={list.slug} organisations={organisations.map((org) => ({ id: org.id, name: org.name, logo_url: org.logo_url, brand: brandColours(org.brand_primary, org.brand_ink) }))} />

@@ -9,7 +9,7 @@
     Drawn on a 32 unit grid with a 3 unit stroke throughout, so every edge
     lands on a whole pixel at 16px and 32px.
   -->
-  <rect width="32" height="32" rx="7" fill="#3ECF8E"/>
+  <rect width="32" height="32" rx="7" fill="#C3EC52"/>
   <g fill="#131413">
     <!-- N: left stem, diagonal, shared spine -->
     <rect x="7" y="9" width="3" height="14"/>

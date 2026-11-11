@@ -1,0 +1,181 @@
+pnpm.cmd : ⚠ Warning: Next.js inferred your workspace root, but it may not be correct.
+
+At line:2 char:1
+
++ pnpm.cmd exec next build > .claude/artifacts/todo-responses/build.log ...
+
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+    + CategoryInfo          : NotSpecified: (⚠ Warning: Next...not be correct.:String) [], RemoteException
+
+    + FullyQualifiedErrorId : NativeCommandError
+
+
+
+ We detected multiple lockfiles and selected the directory of C:\Users\ether\pnpm-workspace.yaml as the root directory.
+
+ To silence this warning, set `turbopack.root` in your Next.js config, or consider removing one of the lockfiles if
+
+it's not needed.
+
+   See https://nextjs.org/docs/app/api-reference/config/next-config-js/turbopack#root-directory for more information.
+
+ Detected additional lockfiles:
+
+   * C:\Users\ether\.t3\worktrees\NikoForm\t3-db0889c5\pnpm-workspace.yaml
+
+▲ Next.js 16.2.12 (Turbopack)
+
+- Environments: .env.local
+
+  Creating an optimized production build ...
+
+✓ Compiled successfully in 16.0s
+
+  Running TypeScript ...
+
+  Finished TypeScript in 28.2s ...
+
+  Collecting page data using 15 workers ...
+
+  Generating static pages using 15 workers (0/29) ...
+
+  Generating static pages using 15 workers (7/29)
+
+  Generating static pages using 15 workers (14/29)
+
+  Generating static pages using 15 workers (21/29)
+
+✓ Generating static pages using 15 workers (29/29) in 993ms
+
+  Finalizing page optimization ...
+
+Route (app)
+
+┌ ƒ /
+
+├ ○ /_not-found
+
+├ ƒ /api/auth/[...nextauth]
+
+├ ƒ /api/cards/[slug]/qr
+
+├ ƒ /api/cards/[slug]/vcard
+
+├ ƒ /api/checkin
+
+├ ƒ /api/cron/reminders
+
+├ ƒ /api/cron/task-reminders
+
+├ ƒ /api/dev/sign-in-link
+
+├ ƒ /api/events/[id]/counts
+
+├ ƒ /api/events/[id]/export
+
+├ ƒ /api/forms/[id]/export
+
+├ ƒ /api/invite/[token]/ics
+
+├ ƒ /api/payments/status
+
+├ ƒ /api/qr/[id]
+
+├ ƒ /api/uploads/cover
+
+├ ƒ /api/webhooks/paystack
+
+├ ○ /c
+
+├ ƒ /c/[slug]
+
+├ ƒ /dashboard
+
+├ ƒ /dashboard/analytics
+
+├ ƒ /dashboard/checklists
+
+├ ƒ /dashboard/checklists/[id]
+
+├ ƒ /dashboard/companies
+
+├ ƒ /dashboard/companies/[slug]
+
+├ ƒ /dashboard/companies/[slug]/cards/[cardId]
+
+├ ƒ /dashboard/companies/[slug]/cards/new
+
+├ ƒ /dashboard/companies/[slug]/settings
+
+├ ƒ /dashboard/companies/new
+
+├ ƒ /dashboard/events
+
+├ ƒ /dashboard/events/[eventId]
+
+├ ƒ /dashboard/events/[eventId]/checkin
+
+├ ƒ /dashboard/events/[eventId]/edit
+
+├ ƒ /dashboard/events/[eventId]/guests
+
+├ ƒ /dashboard/events/new
+
+├ ƒ /dashboard/forms
+
+├ ƒ /dashboard/forms/[id]
+
+├ ƒ /dashboard/forms/new
+
+├ ƒ /dashboard/qr
+
+├ ƒ /dashboard/qr/[id]
+
+├ ƒ /dashboard/qr/new
+
+├ ƒ /dashboard/todo
+
+├ ƒ /dashboard/todo/[id]
+
+├ ƒ /dashboard/todo/[id]/responses
+
+├ ƒ /dashboard/todo/new
+
+├ ƒ /dashboard/todo/requests/[id]
+
+├ ƒ /e/[eventSlug]
+
+├ ƒ /f/[slug]
+
+├ ƒ /f/[slug]/done
+
+├ ○ /icon.svg
+
+├ ƒ /invite/[token]
+
+├ ƒ /invite/[token]/confirmation
+
+├ ƒ /join/[token]
+
+├ ƒ /login
+
+├ ○ /q
+
+├ ƒ /q/[code]
+
+├ ƒ /q/[code]/unlock
+
+├ ƒ /s/[code]
+
+├ ƒ /signup
+
+├ ƒ /t/[slug]
+
+└ ƒ /t/[slug]/done
+
+ƒ Proxy (Middleware)
+
+○  (Static)   prerendered as static content
+
+ƒ  (Dynamic)  server-rendered on demand
