@@ -22,6 +22,7 @@ const TABS = [
   { href: "/dashboard/qr", label: "QR codes", exact: false },
   { href: "/dashboard/forms", label: "Forms", exact: false },
   { href: "/dashboard/todo", label: "To-do", exact: false },
+  { href: "/dashboard/pages", label: "Pages", exact: false },
   { href: "/dashboard/checklists", label: "Checklists", exact: false },
   { href: "/dashboard/events", label: "Events", exact: false },
   { href: "/dashboard/analytics", label: "Analytics", exact: false },

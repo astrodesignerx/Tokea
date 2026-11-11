@@ -35,6 +35,7 @@ model User {
   qr_codes                 QrCode[]
   forms                    Form[]
   todo_lists               TodoList[]
+  pages                    Page[]
   checklists               Checklist[]
   checklist_memberships    ChecklistMember[]
   checklist_assigned_items ChecklistItem[]     @relation("ChecklistItemAssignee")
@@ -42,6 +43,43 @@ model User {
   checklist_created_items  ChecklistItem[]     @relation("ChecklistItemCreatedBy")
   checklist_sent_invites   ChecklistInvite[]   @relation("ChecklistInviteSender")
   checklist_activity       ChecklistActivity[] @relation("ChecklistActivityActor")
+}
+
+model Page {
+  id              String     @id @default(cuid())
+  owner_id        String
+  short_code      String     @unique
+  title           String
+  is_live         Boolean    @default(true)
+  show_badge      Boolean    @default(true)
+  view_count      Int        @default(0)
+  last_viewed_at  DateTime?
+  current_file_id String?    @unique
+  blocked_at      DateTime?
+  deleted_at      DateTime?
+  created_at      DateTime   @default(now())
+  updated_at      DateTime   @updatedAt
+  owner           User       @relation(fields: [owner_id], references: [id], onDelete: Cascade)
+  current_file    PageFile?   @relation("CurrentFile", fields: [current_file_id], references: [id], onDelete: SetNull)
+  files           PageFile[] @relation("PageFiles")
+
+  @@index([owner_id, deleted_at])
+}
+
+model PageFile {
+  id           String    @id @default(cuid())
+  page_id      String
+  key          String    @unique
+  file_name    String
+  mime         String
+  kind         String
+  size         Int
+  created_at   DateTime  @default(now())
+  confirmed_at DateTime?
+  page         Page      @relation("PageFiles", fields: [page_id], references: [id], onDelete: Cascade)
+  current_of   Page?     @relation("CurrentFile")
+
+  @@index([page_id])
 }
 
 model Account {

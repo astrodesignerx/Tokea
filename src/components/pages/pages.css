@@ -1,0 +1,48 @@
+.pages-ui {
+  --pages-fast: var(--dur-1);
+  --pages-settle: 200ms;
+  --pages-ease: var(--ease-out);
+}
+.pages-ui :is(button, a, input) {
+  transition: transform var(--pages-fast) var(--pages-ease), opacity var(--pages-fast) var(--pages-ease);
+}
+.pages-ui :is(button, a):hover { opacity: .85; }
+.pages-ui button:active { transform: scale(.97); }
+.pages-ui :focus-visible { outline: 2px solid var(--ring); outline-offset: 3px; }
+.pages-ui button:disabled { opacity: .5; cursor: default; }
+.pages-switch span, .pages-progress {
+  transition: transform var(--pages-settle) var(--pages-ease);
+}
+.pages-drop { position: relative; isolation: isolate; }
+.pages-drop::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  border-radius: inherit;
+  background: var(--muted);
+  opacity: 0;
+  transition: opacity var(--pages-fast) var(--pages-ease);
+}
+.pages-drop:hover::before, .pages-drop-over::before { opacity: 1; }
+.pages-enter { animation: pages-enter var(--pages-settle, 200ms) var(--ease-out) both; }
+.pages-follow { animation-delay: 60ms; }
+@keyframes pages-enter { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
+.pages-dialog-overlay { animation: pages-fade 180ms var(--ease-out); }
+.pages-dialog-overlay[data-state="closed"] { animation: pages-fade 180ms var(--ease-out) reverse; }
+.pages-dialog-content { animation: pages-enter 200ms var(--ease-out); }
+.pages-dialog-content[data-state="closed"] { animation: pages-enter 180ms var(--ease-out) reverse; }
+@keyframes pages-fade { from { opacity: 0; } to { opacity: 1; } }
+.pages-viewer { --pages-pill-duration: 200ms; }
+.pages-pill {
+  margin-right: env(safe-area-inset-right);
+  margin-bottom: env(safe-area-inset-bottom);
+  transition: opacity var(--pages-pill-duration) ease-out, transform var(--pages-pill-duration) ease-out;
+}
+.pages-pill-closed { opacity: 0; transform: translateY(6px); pointer-events: none; }
+.pages-image-enter { animation: pages-fade var(--pages-settle) var(--pages-ease); }
+.pages-pdf-canvas { transition: opacity var(--pages-settle) var(--pages-ease); }
+@media (prefers-reduced-motion: reduce) {
+  .pages-ui *, .pages-ui *::before, .pages-dialog-overlay { transition: none !important; animation: none !important; }
+  .pages-ui button:active { transform: none; }
+}

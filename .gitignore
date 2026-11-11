@@ -37,3 +37,4 @@ prisma/migrations/dev.db*
 *.local
 
 /src/generated/prisma
+/public/pages-pdf/

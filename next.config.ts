@@ -1,4 +1,6 @@
 import type { NextConfig } from "next";
+import { PHASE_DEVELOPMENT_SERVER, PHASE_PRODUCTION_BUILD } from "next/constants";
+import { preparePagesPdfAssets } from "./scripts/prepare-pages-pdf.mjs";
 
 const nextConfig: NextConfig = {
   /*
@@ -8,6 +10,10 @@ const nextConfig: NextConfig = {
    * required at runtime on the server, which is where they always run anyway.
    */
   serverExternalPackages: ["pg", "@prisma/adapter-pg"],
+
+  async headers() {
+    return [{ source: "/p/:path*", headers: [{ key: "X-Robots-Tag", value: "noindex, nofollow" }] }];
+  },
 
   /*
    * Compact QR codes encode their link in capitals (QR "alphanumeric" mode
@@ -21,4 +27,7 @@ const nextConfig: NextConfig = {
   },
 };
 
-export default nextConfig;
+export default function configure(phase: string): NextConfig {
+  if (phase === PHASE_DEVELOPMENT_SERVER || phase === PHASE_PRODUCTION_BUILD) preparePagesPdfAssets();
+  return nextConfig;
+}
