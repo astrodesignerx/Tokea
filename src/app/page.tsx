@@ -1,7 +1,10 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import QRCode from "qrcode";
-import { ArrowRight, CalendarCheck, IdCard, Lock } from "lucide-react";
+import {
+  ArrowRight, BarChart3, CalendarCheck, Check, ClipboardList,
+  FileText, IdCard, ListChecks, ListTodo, Lock, QrCode,
+} from "lucide-react";
 import { auth } from "@/lib/auth";
 import { Button } from "@/components/ui/button";
 import { Wordmark } from "@/components/marketing/wordmark";
@@ -14,48 +17,110 @@ import "./landing.css";
 export const metadata: Metadata = {
   title: { absolute: `${PRODUCT} - ${TAGLINE}` },
   description:
-    "NikoForm gives your organisation shareable pages with QR codes: digital business cards that never go out of date, and event invitations with RSVPs and check-in at the door.",
+    "NikoForm gives your organisation short links and QR codes for business cards, events, forms, files and service lists, with every reply in one dashboard.",
 };
 
-/**
- * Features are described in full to signed-out visitors. Only the call to
- * action changes, from "Open" to "Sign in to set up": hiding what the product
- * does from the people deciding whether to sign up helps nobody. The dashboard
- * routes are behind the auth guard, so nothing is reachable without an account.
- */
-const FEATURES = [
+const SERVICE_GROUPS = [
   {
-    icon: IdCard,
-    name: "Digital business cards",
-    summary:
-      "A page per person, with a QR code that never changes. Update a job title or a phone number and every card already printed keeps working.",
-    points: [
-      "Saves straight into a phone's contacts",
-      "Company logo, colours and tagline applied to every card at once",
-      "Works on an NFC tag with no extra setup",
-      "Scan counts per card",
+    label: "Hand out",
+    services: [
+      {
+        icon: IdCard,
+        name: "Digital business cards",
+        summary: "A page per person with a QR code that never changes. Update a title or phone number and every printed card keeps working.",
+        points: [
+          "Saves straight into phone contacts",
+          "Company logo and colours on every card",
+          "Works on NFC tags",
+        ],
+        href: "/dashboard/companies",
+      },
+      {
+        icon: QrCode,
+        name: "Dynamic QR codes",
+        summary: "Print a code once and change where it points whenever you like.",
+        points: [
+          "Swap the link without reprinting",
+          "Scan counts for each code",
+          "Download for print in high resolution",
+        ],
+        href: "/dashboard/qr",
+      },
+      {
+        icon: CalendarCheck,
+        name: "Events and RSVPs",
+        summary: "A public page per event, one magic link per guest, and QR check-in at the door.",
+        points: [
+          "Import the guest list from a spreadsheet",
+          "RSVP tracking with reminders",
+          "Optional paid tickets and deposits",
+        ],
+        href: "/dashboard/events",
+      },
+      {
+        icon: FileText,
+        name: "Pages",
+        summary: "Upload a PDF, HTML, images, video or an Office file and share it full screen on a permanent link and QR code.",
+        points: [
+          "PDFs and video open right in the browser",
+          "Replace the file, keep the link",
+          "Hidden from search engines",
+        ],
+        href: "/dashboard/pages",
+      },
     ],
-    href: "/dashboard/companies",
   },
   {
-    icon: CalendarCheck,
-    name: "Event invitations and RSVPs",
-    summary:
-      "A public page per event, one magic link per guest, and QR check-in at the door. Guests never make an account.",
-    points: [
-      "Guest list import from a spreadsheet",
-      "RSVP tracking with reminders",
-      "Scan phones at the door to check people in",
-      "Optional paid tickets and deposits",
+    label: "Collect",
+    services: [
+      {
+        icon: ClipboardList,
+        name: "Forms",
+        summary: "Build a form, publish it on its own link, and read the answers as a table, a chart or a spreadsheet.",
+        points: ["Export answers to a spreadsheet"],
+        href: "/dashboard/forms",
+      },
+      {
+        icon: ListTodo,
+        name: "To-do lists",
+        summary: "Share a list of your services. Clients tick what they need and send it straight to you.",
+        points: [
+          "List or visual layout",
+          "Prices optional",
+          "Requests arrive in your inbox",
+        ],
+        href: "/dashboard/todo",
+      },
+      {
+        icon: ListChecks,
+        name: "Checklists",
+        summary: "Personal to-do lists or shared team lists, with owners and due dates.",
+        points: [
+          "Repeating lists and sub-tasks",
+          "Event prep lists",
+          "Morning email of what is due",
+        ],
+        href: "/dashboard/checklists",
+      },
+      {
+        icon: BarChart3,
+        name: "Analytics",
+        summary: "Every scan of every card and code in one place.",
+        points: [
+          "Which links get used",
+          "Where the activity comes from",
+          "Scan counts over time",
+        ],
+        href: "/dashboard/analytics",
+      },
     ],
-    href: "/dashboard/events",
   },
 ];
 
 const STEPS = [
-  ["Add a company", "Its logo, colours and tagline. Every card underneath inherits them."],
-  ["Add the people", "Each one gets a page, a saveable contact and a permanent QR code."],
-  ["Share or print", "Send the link, put the QR on a card, or write it to an NFC tag."],
+  ["Make it", "Pick a tool, add your details and your brand. Ready in a few minutes."],
+  ["Share it", "Send the link, print the QR code, or put it on an NFC tag."],
+  ["See what comes back", "Scans, RSVPs, answers, views and requests arrive in your dashboard."],
 ];
 
 export default async function HomePage() {
@@ -76,7 +141,7 @@ export default async function HomePage() {
   return (
     <div className="landing flex-1">
       <header className="sticky top-0 z-40 border-b border-border/70 bg-background/80 backdrop-blur">
-        <div className="mx-auto flex h-14 max-w-6xl items-center justify-between px-6">
+        <div className="mx-auto flex h-14 max-w-6xl items-center justify-between px-4 sm:px-6">
           <Link href="/" aria-label={PRODUCT}>
             <Wordmark />
           </Link>
@@ -105,24 +170,25 @@ export default async function HomePage() {
           <div className="grid-backdrop absolute inset-0" aria-hidden="true" />
           <DotField />
 
-          <div className="relative mx-auto grid max-w-6xl items-center gap-14 px-6 py-20 sm:py-28 lg:grid-cols-[1.1fr_1fr]">
+          <div className="relative mx-auto grid max-w-6xl items-center gap-14 px-4 sm:px-6 py-20 sm:py-28 lg:grid-cols-[1.1fr_1fr]">
             <div>
-              <p className="rise nf-eyebrow">Cards, invites and everything after</p>
+              <p className="rise nf-eyebrow">Made in Nairobi</p>
               <h1
                 className="rise mt-5 font-display text-4xl font-medium leading-[1.05] tracking-tight sm:text-5xl lg:text-6xl"
                 style={{ animationDelay: "60ms" }}
               >
-                Shareable pages.
+                Hand it out.
                 <br />
-                <span className="text-brand">A QR code on the front.</span>
+                <span className="text-brand">See what comes back.</span>
               </h1>
               <p
                 className="rise mt-6 max-w-lg text-base leading-relaxed text-muted-foreground"
                 style={{ animationDelay: "120ms" }}
               >
-                {PRODUCT} is where your organisation keeps the things it hands
-                to people. Right now that means digital business cards and event
-                invitations. More is coming.
+                {PRODUCT} puts the things your organisation hands to people on
+                short links and QR codes: business cards, event invitations,
+                forms, files and service lists. When people scan, reply, RSVP or
+                pick what they need, it lands in one dashboard.
               </p>
 
               <div
@@ -148,6 +214,17 @@ export default async function HomePage() {
                   </>
                 )}
               </div>
+              <ul
+                className="rise mt-6 flex flex-wrap gap-x-5 gap-y-2 text-sm text-muted-foreground"
+                style={{ animationDelay: "220ms" }}
+              >
+                {["Printed codes never break", "Guests never need an account", "Works on any phone"].map((check) => (
+                  <li key={check} className="flex items-center gap-2">
+                    <Check className="size-4 shrink-0 text-brand" aria-hidden="true" />
+                    {check}
+                  </li>
+                ))}
+              </ul>
             </div>
 
             {/* The card lands last, so the sentence is read before the object. */}
@@ -157,65 +234,61 @@ export default async function HomePage() {
           </div>
         </section>
 
-        {/* Features */}
+        {/* Services */}
         <section className="border-b">
-          <div className="mx-auto max-w-6xl px-6 py-20 sm:py-24">
-            <p className="nf-eyebrow">Features</p>
-            <h2 className="mt-4 max-w-2xl font-display text-2xl font-medium tracking-tight sm:text-3xl">
-              Two of them today. The shape holds for the rest.
-            </h2>
+          <div className="mx-auto max-w-6xl px-4 py-20 sm:px-6 sm:py-24">
+            <div className="reveal">
+              <p className="nf-eyebrow">What&apos;s inside</p>
+              <h2 className="mt-4 max-w-2xl font-display text-2xl font-medium tracking-tight sm:text-3xl">
+                Seven tools. One account.
+              </h2>
+              <p className="mt-3 text-muted-foreground">Use one, or all of them.</p>
+            </div>
 
-            <div className="mt-12 grid gap-5 sm:grid-cols-2">
-              {FEATURES.map(({ icon: Icon, name, summary, points, href }) => (
-                <div key={name} className="nf-panel nf-panel-interactive flex flex-col p-7">
-                  <Icon className="size-5 text-brand" />
-                  <h3 className="mt-4 font-display text-lg font-medium">{name}</h3>
-                  <p className="mt-2 text-sm leading-relaxed text-muted-foreground">
-                    {summary}
-                  </p>
-
-                  <ul className="mt-5 space-y-2.5 text-sm text-muted-foreground">
-                    {points.map((point) => (
-                      <li key={point} className="flex gap-3">
-                        <span
-                          aria-hidden="true"
-                          className="mt-[0.4rem] size-1 shrink-0 rounded-full bg-brand"
-                        />
-                        {point}
-                      </li>
+            <div className="mt-12 space-y-10">
+              {SERVICE_GROUPS.map(({ label, services }) => (
+                <div key={label}>
+                  <h3 className="nf-eyebrow">{label}</h3>
+                  <div className="service-grid mt-4 grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
+                    {services.map(({ icon: Icon, name, summary, points, href }) => (
+                      <div key={name} className="reveal flex">
+                        <div className="service-card nf-panel nf-panel-interactive flex w-full flex-col p-6">
+                        <Icon className="size-5 shrink-0 text-brand" aria-hidden="true" />
+                        <h4 className="mt-4 font-display text-lg font-medium">{name}</h4>
+                        <p className="mt-2 text-sm leading-relaxed text-muted-foreground">{summary}</p>
+                        <ul className="mt-5 space-y-2.5 text-sm text-muted-foreground">
+                          {points.map((point) => (
+                            <li key={point} className="flex gap-3">
+                              <span aria-hidden="true" className="mt-[0.4rem] size-1 shrink-0 rounded-full bg-brand" />
+                              {point}
+                            </li>
+                          ))}
+                        </ul>
+                        <div className="mt-auto pt-7">
+                          <Button asChild variant="outline" size="sm">
+                            <Link href={signedIn ? href : "/login"}>
+                              {signedIn ? (
+                                <>Open <ArrowRight className="service-arrow size-3.5" /></>
+                              ) : (
+                                <><Lock className="size-3.5" /> Sign in to set up</>
+                              )}
+                            </Link>
+                          </Button>
+                        </div>
+                        </div>
+                      </div>
                     ))}
-                  </ul>
-
-                  {/* mt-auto, so both cards' buttons sit on the same line. */}
-                  <div className="mt-auto pt-7">
-                    <Button asChild variant="outline" size="sm">
-                      <Link href={signedIn ? href : "/login"}>
-                        {signedIn ? (
-                          <>
-                            Open <ArrowRight className="size-3.5" />
-                          </>
-                        ) : (
-                          <>
-                            <Lock className="size-3.5" /> Sign in to set up
-                          </>
-                        )}
-                      </Link>
-                    </Button>
                   </div>
                 </div>
               ))}
             </div>
-
-            <p className="mt-8 text-sm text-muted-foreground">
-              Anyone can read about a feature. Setting one up needs an account.
-            </p>
           </div>
         </section>
 
         {/* How it works */}
         <section className="border-b">
-          <div className="mx-auto max-w-6xl px-6 py-20 sm:py-24">
-            <p className="nf-eyebrow">How it works</p>
+          <div className="mx-auto max-w-6xl px-4 sm:px-6 py-20 sm:py-24">
+            <div className="reveal"><h2 className="nf-eyebrow">How it works</h2></div>
             <ol className="mt-10 grid gap-8 sm:grid-cols-3">
               {STEPS.map(([title, body], index) => (
                 <li key={title}>
@@ -236,9 +309,9 @@ export default async function HomePage() {
 
         {/* Close */}
         <section>
-          <div className="mx-auto max-w-6xl px-6 py-20 text-center sm:py-24">
-            <h2 className="font-display text-2xl font-medium tracking-tight sm:text-3xl">
-              Start with one feature. Add the rest when you need them.
+          <div className="mx-auto max-w-6xl px-4 sm:px-6 py-20 text-center sm:py-24">
+            <h2 className="reveal font-display text-2xl font-medium tracking-tight sm:text-3xl">
+              Start with one tool. Add the rest when you need them.
             </h2>
             <div className="mt-8 flex justify-center">
               <Button asChild size="lg">
@@ -253,9 +326,14 @@ export default async function HomePage() {
       </main>
 
       <footer className="border-t">
-        <div className="mx-auto flex max-w-6xl items-center justify-between px-6 py-8 text-sm text-muted-foreground">
+        <div className="mx-auto flex max-w-6xl items-center justify-between px-4 sm:px-6 py-8 text-sm text-muted-foreground">
           <Wordmark className="opacity-70" />
-          <span>Nairobi</span>
+          <div className="flex items-center gap-5">
+            <Link href={signedIn ? "/dashboard" : "/login"} className="hover:underline">
+              {signedIn ? "Dashboard" : "Sign in"}
+            </Link>
+            <span>Nairobi</span>
+          </div>
         </div>
       </footer>
     </div>
