@@ -43,16 +43,46 @@
 /* List */
 .te-card { margin: 0 0 24px; padding: 0; list-style: none; border: 1px solid var(--border); border-radius: 14px; background: var(--card); overflow: clip; }
 .te-card > li + li { border-top: 1px solid var(--border); }
-.te-row { scroll-margin-bottom: 140px; }
+.te-row { display: flex; align-items: center; scroll-margin-bottom: 140px; transition: background-color var(--te-fast) var(--te-ease); }
+.te-row:hover { background: color-mix(in srgb, var(--muted) 50%, transparent); }
 .te-row-new { animation: te-rise var(--te-slow) var(--te-ease) both; }
-.todo-editor-a .te-row-button { display: flex; align-items: center; gap: 12px; width: 100%; min-height: 48px; padding: 10px 14px; text-align: left; font-size: 15px; }
-.todo-editor-a .te-row-button:active:not(:disabled) { transform: none; background: var(--muted); }
-.te-row-button:hover { background: color-mix(in srgb, var(--muted) 60%, transparent); }
+.todo-editor-a .te-row-button { display: flex; align-items: center; gap: 12px; flex: 1; min-width: 0; min-height: 48px; padding: 10px 8px 10px 14px; text-align: left; font-size: 15px; background: none; }
+.todo-editor-a .te-row-button:active:not(:disabled) { transform: none; }
+.todo-editor-a .te-row-button:focus-visible { outline-offset: -2px; border-radius: 8px; }
 .te-row-button[data-off="true"] .te-name { color: var(--muted-foreground); }
 .te-name { flex: 1; min-width: 0; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; font-weight: 500; }
 .te-thumb { width: 28px; height: 28px; flex: none; border-radius: 8px; object-fit: cover; background: var(--muted); }
 .te-price { flex: none; font-size: 13px; font-weight: 600; font-variant-numeric: tabular-nums; color: var(--muted-foreground); white-space: nowrap; }
 .te-hidden-word { flex: none; font-size: 12px; color: var(--muted-foreground); }
+.todo-editor-a .te-row-delete {
+  display: grid;
+  place-items: center;
+  width: 32px;
+  height: 32px;
+  margin-right: 8px;
+  border-radius: 8px;
+  color: var(--muted-foreground);
+  background: transparent;
+  border: 0;
+  flex: none;
+  opacity: 0.6;
+  transition: opacity var(--te-fast) var(--te-ease), color var(--te-fast) var(--te-ease), background-color var(--te-fast) var(--te-ease);
+}
+.todo-editor-a .te-row:hover .te-row-delete,
+.todo-editor-a .te-row-delete:focus-visible {
+  opacity: 1;
+}
+.todo-editor-a .te-row-delete:focus-visible {
+  outline-offset: -2px;
+}
+.todo-editor-a .te-row-delete:hover {
+  opacity: 1;
+  color: var(--destructive);
+  background: var(--destructive-tint);
+}
+.todo-editor-a .te-row-delete:active:not(:disabled) {
+  transform: scale(.92);
+}
 .te-section-row { background: var(--background); }
 .todo-editor-a .te-section { display: block; width: 100%; min-height: 40px; padding: 10px 14px 8px; text-align: left; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; font-size: 12px; font-weight: 600; letter-spacing: .02em; color: var(--muted-foreground); }
 .todo-editor-a .te-section:active:not(:disabled) { transform: none; }

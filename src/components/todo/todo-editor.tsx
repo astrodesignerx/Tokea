@@ -353,12 +353,25 @@ export function TodoEditor({ id, initial, organisations, businessName = "NikoFor
 
   function renderRow(item: Item) {
     const price = priceText(item);
+    const itemName = item.name.trim() || "Untitled service";
     return <li key={keyOf(item.id)} className={"te-row" + (item.id === freshId ? " te-row-new" : "")} data-row={item.id}>
       <button type="button" className="te-row-button" data-off={!item.active} onClick={() => openRow(item.id)}>
-        <span className="te-name">{item.name.trim() || "Untitled service"}</span>
+        <span className="te-name">{itemName}</span>
         {item.image_url && <Image src={item.image_url} alt="" width={28} height={28} unoptimized className="te-thumb" />}
         {price && <span className="te-price">{price}</span>}
         {!item.active && <span className="te-hidden-word">Hidden</span>}
+      </button>
+      <button
+        type="button"
+        className="te-row-delete"
+        aria-label={`Delete ${itemName}`}
+        title={`Delete ${itemName}`}
+        onClick={(event) => {
+          event.stopPropagation();
+          removeItem(item.id);
+        }}
+      >
+        <X size={15} strokeWidth={2} />
       </button>
     </li>;
   }
