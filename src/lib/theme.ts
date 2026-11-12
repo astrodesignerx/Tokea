@@ -19,7 +19,8 @@ export const THEME_INIT_SCRIPT = `
   try {
     var stored = localStorage.getItem(${JSON.stringify(THEME_STORAGE_KEY)});
     var prefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
-    var dark = stored === "dark" || (stored !== "light" && prefersDark);
+    // No saved choice means dark, the site default. "system" follows the device.
+    var dark = stored === "system" ? prefersDark : stored !== "light";
     var root = document.documentElement;
     root.classList.toggle("dark", dark);
     root.style.colorScheme = dark ? "dark" : "light";
