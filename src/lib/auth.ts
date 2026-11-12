@@ -12,13 +12,13 @@ const adapter = PrismaAdapter(prisma);
   is already deleted is the result we wanted, so ignore that one error.
 */
 const deleteSession = adapter.deleteSession!;
-adapter.deleteSession = async (sessionToken) => {
+adapter.deleteSession = async (sessionToken): Promise<void> => {
   try {
-    return await deleteSession(sessionToken);
+    await deleteSession(sessionToken);
   } catch (e) {
     // P2025 is Prisma's "record not found" code.
     if ((e as { code?: unknown })?.code === "P2025") {
-      return null;
+      return;
     }
     throw e;
   }
