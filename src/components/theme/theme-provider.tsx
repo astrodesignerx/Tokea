@@ -43,9 +43,9 @@ function subscribePreference(onChange: () => void) {
 function getPreference(): Theme {
   try {
     const stored = localStorage.getItem(THEME_STORAGE_KEY);
-    return isTheme(stored) ? stored : "system";
+    return isTheme(stored) ? stored : "dark";
   } catch {
-    return "system";
+    return "dark";
   }
 }
 
@@ -61,8 +61,8 @@ function subscribeSystem(onChange: () => void) {
   return () => media.removeEventListener("change", onChange);
 }
 
-/** The server has no way to know either value; it renders the light default. */
-const serverPreference = (): Theme => "system";
+/** The server cannot read the saved choice, so it renders the dark default. */
+const serverPreference = (): Theme => "dark";
 const serverSystemDark = () => false;
 
 export function ThemeProvider({ children }: { children: React.ReactNode }) {
