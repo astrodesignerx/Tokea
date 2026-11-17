@@ -30,8 +30,11 @@ const PUBLIC_URL = () => {
   return u.replace(/\/$/, "");
 };
 
-const ALLOWED_TYPES = new Set(["image/jpeg", "image/png", "image/webp", "image/avif"]);
-const MAX_BYTES = 8 * 1024 * 1024;
+const COVER_ALLOWED_TYPES = new Set(["image/jpeg", "image/png", "image/webp", "image/avif"]);
+const COVER_MAX_BYTES = 8 * 1024 * 1024;
+
+const AVATAR_ALLOWED_TYPES = new Set(["image/jpeg", "image/png", "image/webp"]);
+const AVATAR_MAX_BYTES = 2 * 1024 * 1024;
 
 export type PresignResult = {
   uploadUrl: string;
@@ -40,19 +43,26 @@ export type PresignResult = {
   headers: Record<string, string>;
 };
 
-export async function presignCoverUpload(input: {
+async function presignUpload(input: {
+  prefix: string;
   contentType: string;
   contentLength: number;
+  allowedTypes: Set<string>;
+  maxBytes: number;
+  maxLabel: string;
 }): Promise<PresignResult> {
-  if (!ALLOWED_TYPES.has(input.contentType)) {
+  if (!input.allowedTypes.has(input.contentType)) {
     throw new Error(`Unsupported content type: ${input.contentType}`);
   }
-  if (input.contentLength > MAX_BYTES) {
-    throw new Error("File too large (max 8MB)");
+  if (!Number.isFinite(input.contentLength) || input.contentLength <= 0) {
+    throw new Error("Empty file");
+  }
+  if (input.contentLength > input.maxBytes) {
+    throw new Error(`File too large (max ${input.maxLabel})`);
   }
 
   const ext = input.contentType.split("/")[1] ?? "bin";
-  const key = `covers/${randomUUID()}.${ext}`;
+  const key = `${input.prefix}/${randomUUID()}.${ext}`;
   const client = getClient();
   const cmd = new PutObjectCommand({
     Bucket: BUCKET(),
@@ -68,4 +78,41 @@ export async function presignCoverUpload(input: {
     key,
     headers: { "Content-Type": input.contentType },
   };
+}
+
+export async function presignCoverUpload(input: {
+  contentType: string;
+  contentLength: number;
+}): Promise<PresignResult> {
+  return presignUpload({
+    prefix: "covers",
+    contentType: input.contentType,
+    contentLength: input.contentLength,
+    allowedTypes: COVER_ALLOWED_TYPES,
+    maxBytes: COVER_MAX_BYTES,
+    maxLabel: "8MB",
+  });
+}
+
+export async function presignAvatarUpload(input: {
+  contentType: string;
+  contentLength: number;
+}): Promise<PresignResult> {
+  return presignUpload({
+    prefix: "avatars",
+    contentType: input.contentType,
+    contentLength: input.contentLength,
+    allowedTypes: AVATAR_ALLOWED_TYPES,
+    maxBytes: AVATAR_MAX_BYTES,
+    maxLabel: "2MB",
+  });
+}
+
+export function isAvatarPublicUrl(url: string): boolean {
+  const raw = process.env.STORAGE_PUBLIC_URL;
+  if (!raw) return false;
+  const prefix = `${raw.replace(/\/$/, "")}/avatars/`;
+  if (!url.startsWith(prefix) || url.length <= prefix.length) return false;
+  const rest = url.slice(prefix.length);
+  return /^[a-zA-Z0-9._-]+$/.test(rest);
 }

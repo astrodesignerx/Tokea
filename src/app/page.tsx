@@ -6,6 +6,8 @@ import {
   FileText, IdCard, ListChecks, ListTodo, Lock, QrCode,
 } from "lucide-react";
 import { auth } from "@/lib/auth";
+import { prisma } from "@/lib/db";
+import { ProfileLink } from "@/components/profile/profile-link";
 import { Button } from "@/components/ui/button";
 import { Wordmark } from "@/components/marketing/wordmark";
 import { TiltCard } from "@/components/marketing/tilt-card";
@@ -125,7 +127,11 @@ const STEPS = [
 
 export default async function HomePage() {
   const session = await auth();
-  const signedIn = Boolean(session?.user);
+  const user = session?.user?.id ? await prisma.user.findUnique({
+    where: { id: session.user.id },
+    select: { name: true, email: true, image: true },
+  }) : null;
+  const signedIn = Boolean(user);
 
   // A real QR for the site itself, rendered on the card's reverse. Generated
   // here rather than shipped as a fixed asset so it follows the origin.
@@ -147,9 +153,12 @@ export default async function HomePage() {
           </Link>
           <div className="flex items-center gap-2">
             {signedIn ? (
-              <Button asChild size="sm">
-                <Link href="/dashboard">Dashboard</Link>
-              </Button>
+              <>
+                <Button asChild size="sm">
+                  <Link href="/dashboard">Dashboard</Link>
+                </Button>
+                {user && <ProfileLink user={user} />}
+              </>
             ) : (
               <>
                 <Button asChild size="sm" variant="ghost">

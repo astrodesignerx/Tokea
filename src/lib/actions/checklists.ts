@@ -30,6 +30,7 @@ export async function setTaskRemindersAction(form: FormData): Promise<ChecklistS
   if (enabled !== "true" && enabled !== "false") return failed("Choose whether to receive morning emails.");
   await prisma.user.update({ where: { id: user.id }, data: { task_reminders: enabled === "true" } });
   refresh();
+  revalidatePath("/dashboard/profile");
   return { error: null, savedAt: Date.now() };
 }
 
