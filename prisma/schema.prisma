@@ -15,6 +15,10 @@ model User {
   email         String    @unique
   name          String?
   image         String?
+  job_title     String?
+  phone         String?
+  bio           String?
+  default_organisation_id String?
   // Required by @auth/prisma-adapter: set when a magic link is confirmed.
   emailVerified DateTime?
   created_at    DateTime  @default(now())
@@ -28,6 +32,7 @@ model User {
   // Nairobi date of the last reminder email, so a re-run the same day sends nothing.
   task_reminder_sent_on DateTime? @db.Date
 
+  default_organisation     Organisation?       @relation("UserDefaultOrganisation", fields: [default_organisation_id], references: [id], onDelete: SetNull)
   accounts                 Account[]
   sessions                 Session[]
   events                   Event[]
@@ -43,6 +48,8 @@ model User {
   checklist_created_items  ChecklistItem[]     @relation("ChecklistItemCreatedBy")
   checklist_sent_invites   ChecklistInvite[]   @relation("ChecklistInviteSender")
   checklist_activity       ChecklistActivity[] @relation("ChecklistActivityActor")
+
+  @@index([default_organisation_id])
 }
 
 model Page {
@@ -289,6 +296,7 @@ model Organisation {
   updated_at DateTime @updatedAt
 
   owner User          @relation(fields: [owner_id], references: [id], onDelete: Cascade)
+  default_for_users User[] @relation("UserDefaultOrganisation")
   cards ContactCard[]
   forms Form[]
   todo_lists TodoList[]

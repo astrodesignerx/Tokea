@@ -1,40 +1,7 @@
 "use client";
 
-import { useActionState, useEffect } from "react";
-import { toast } from "sonner";
-import { updateProfileName, type ProfileState } from "@/lib/actions/profile";
+import { useActionState } from "react";
 import { setTaskRemindersAction, type ChecklistState } from "@/lib/actions/checklists";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-
-export function ProfileDetailsForm({ name, email }: { name: string | null; email: string }) {
-  const [state, action, pending] = useActionState(
-    async (_previous: ProfileState, form: FormData) => updateProfileName(form),
-    { error: null },
-  );
-
-  useEffect(() => {
-    if (state.savedAt) toast.success("Saved");
-  }, [state.savedAt]);
-
-  return (
-    <form action={action} className="space-y-5">
-      <div className="space-y-2">
-        <Label htmlFor="profile-name">Name</Label>
-        <Input id="profile-name" name="name" autoComplete="name" defaultValue={name ?? ""} maxLength={80}
-          aria-invalid={!!state.error} aria-describedby={state.error ? "profile-name-error" : undefined} />
-        {state.error && <p id="profile-name-error" role="alert" className="qr-fade text-sm text-destructive">{state.error}</p>}
-      </div>
-      <div className="space-y-2">
-        <Label htmlFor="profile-email">Email</Label>
-        <Input id="profile-email" type="email" autoComplete="email" value={email} readOnly aria-describedby="profile-email-help" />
-        <p id="profile-email-help" className="text-xs text-muted-foreground">Email is your sign-in and can&apos;t be changed here.</p>
-      </div>
-      <Button type="submit" disabled={pending}>{pending ? "Saving..." : "Save name"}</Button>
-    </form>
-  );
-}
 
 export function ProfileRemindersForm({ enabled }: { enabled: boolean }) {
   const [state, action, pending] = useActionState(
